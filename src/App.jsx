@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, RotateCcw, Eye, EyeOff } from 'lucide-react';
+import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, RotateCcw, Eye, EyeOff, Download, Upload } from 'lucide-react';
 
 const TASK_TYPES = {
   STANDARD: 'standard',
@@ -44,6 +44,7 @@ const JazzGuitarTracker = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   
   const timerRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   // Migration function to handle the new comping step
   const migrateStandardsData = (standardsData) => {
@@ -357,6 +358,72 @@ const JazzGuitarTracker = () => {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
+  };
+
+  const exportData = () => {
+    const exportObj = {
+      standards,
+      otherWork,
+      practiceHistory,
+      exportDate: new Date().toISOString(),
+      version: "2.1",
+      appName: "Jazz Guitar Practice Tracker"
+    };
+    
+    const dataStr = JSON.stringify(exportObj, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `jazz-guitar-practice-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const importData = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+	const importedData = JSON.parse(e.target.result);
+	
+	if (!importedData.appName || importedData.appName !== "Jazz Guitar Practice Tracker") {
+	  alert('This file does not appear to be a Jazz Guitar Practice Tracker backup.');
+	  return;
+	}
+
+	if (importedData.standards) {
+	  const migratedStandards = migrateStandardsData(importedData.standards);
+	  setStandards(migratedStandards);
+	}
+	
+	if (importedData.otherWork) {
+	  setOtherWork(importedData.otherWork);
+	}
+	
+	if (importedData.practiceHistory) {
+	  setPracticeHistory(importedData.practiceHistory);
+	}
+
+	alert(`Successfully imported data from ${new Date(importedData.exportDate).toLocaleDateString()}`);
+	
+      } catch (error) {
+	console.error('Import error:', error);
+	alert('Error importing file. Please make sure it\'s a valid Jazz Guitar Practice Tracker backup file.');
+      }
+    };
+    
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
+  const triggerImport = () => {
+    fileInputRef.current?.click();
   };
 
   const formatTime = (seconds) => {
@@ -694,6 +761,32 @@ const JazzGuitarTracker = () => {
                 </svg>
               )}
             </button>
+
+	    <button
+	      onClick={exportData}
+	      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
+	      title="Export your practice data"
+	    >
+	      <Download size={20} />
+	      Export Data
+	    </button>
+
+	    <button
+	      onClick={triggerImport}
+	      className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+	      title="Import practice data from backup"
+	    >
+	      <Upload size={20} />
+	      Import Data
+	    </button>
+
+	    <input
+	      ref={fileInputRef}
+	      type="file"
+	      accept=".json"
+	      onChange={importData}
+	      style={{ display: 'none' }}
+	    />
             
             <button
               onClick={() => setView('reports')}
