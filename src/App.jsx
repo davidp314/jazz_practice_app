@@ -769,7 +769,7 @@ const JazzGuitarTracker = () => {
 			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
 			    isDarkMode 
 			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
-			      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm'
+			      : 'bg-white text-slate-700 hover:bg-gray-100 border border-slate-200 shadow-sm'
 			  }`}
 			  title="Export your practice data"
 			>
@@ -782,7 +782,7 @@ const JazzGuitarTracker = () => {
 			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
 			    isDarkMode 
 			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
-			      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm'
+			      : 'bg-white text-slate-700 hover:bg-gray-100 border border-slate-200 shadow-sm'
 			  }`}
 			  title="Import practice data from backup"
 			>
@@ -795,7 +795,7 @@ const JazzGuitarTracker = () => {
 			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
 			    isDarkMode 
 			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
-			      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm'
+			      : 'bg-white text-slate-700 hover:bg-gray-100 border border-slate-200 shadow-sm'
 			  }`}
 			>
 			  <BarChart3 size={16} />
