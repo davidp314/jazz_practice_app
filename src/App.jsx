@@ -740,69 +740,89 @@ const JazzGuitarTracker = () => {
           <h1 className={`text-3xl font-bold transition-colors duration-300 ${
             isDarkMode ? 'text-white' : 'text-gray-800'
           }`}>Jazz Guitar Practice Tracker</h1>
-          <div className="flex gap-3 items-center">
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-                isDarkMode 
-                  ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              title="Toggle dark mode"
-            >
-              {isDarkMode ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clipRule="evenodd"/>
-                </svg>
-              )}
-            </button>
+	  <div className="flex gap-2 items-center">
+		      {/* Dark Mode Toggle - separate from main actions */}
+		      <button
+			onClick={toggleDarkMode}
+			className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 ${
+			  isDarkMode 
+			    ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
+			    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+			}`}
+			title="Toggle dark mode"
+		      >
+			{isDarkMode ? (
+			  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+			    <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
+			  </svg>
+			) : (
+			  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+			    <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clipRule="evenodd"/>
+			  </svg>
+			)}
+		      </button>
+		      
+		      {/* Main action buttons - grouped and consistent */}
+		      <div className="flex gap-1 ml-2">
+			<button
+			  onClick={exportData}
+			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+			    isDarkMode 
+			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
+			      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm'
+			  }`}
+			  title="Export your practice data"
+			>
+			  <Download size={16} />
+			  Export
+			</button>
 
-	    <button
-	      onClick={exportData}
-	      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
-	      title="Export your practice data"
-	    >
-	      <Download size={20} />
-	      Export Data
-	    </button>
+			<button
+			  onClick={triggerImport}
+			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+			    isDarkMode 
+			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
+			      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm'
+			  }`}
+			  title="Import practice data from backup"
+			>
+			  <Upload size={16} />
+			  Import
+			</button>
+			
+			<button
+			  onClick={() => setView('reports')}
+			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+			    isDarkMode 
+			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
+			      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-sm'
+			  }`}
+			>
+			  <BarChart3 size={16} />
+			  Reports
+			</button>
+			
+			<button
+			  onClick={startNewSession}
+			  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+			    isDarkMode 
+			      ? 'bg-green-600 text-white hover:bg-green-700' 
+			      : 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
+			  }`}
+			>
+			  <Play size={16} />
+			  Start Session
+			</button>
+		      </div>
 
-	    <button
-	      onClick={triggerImport}
-	      className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-	      title="Import practice data from backup"
-	    >
-	      <Upload size={20} />
-	      Import Data
-	    </button>
-
-	    <input
-	      ref={fileInputRef}
-	      type="file"
-	      accept=".json"
-	      onChange={importData}
-	      style={{ display: 'none' }}
-	    />
-            
-            <button
-              onClick={() => setView('reports')}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              <BarChart3 size={20} />
-              Reports
-            </button>
-            <button
-              onClick={startNewSession}
-              className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
-            >
-              <Play size={20} />
-              Start New Session
-            </button>
-          </div>
+		      <input
+			ref={fileInputRef}
+			type="file"
+			accept=".json"
+			onChange={importData}
+			style={{ display: 'none' }}
+		      />
+		    </div>
         </div>
 
         {/* Weekly Stats Summary */}
