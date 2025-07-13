@@ -1943,7 +1943,10 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
 
   const updateTaskTime = (taskId, newTime) => {
     setSessionTasks(sessionTasks.map(task =>
-      task.id === taskId ? { ...task, timeAllocated: parseInt(newTime) || 0 } : task
+      task.id === taskId ? { 
+        ...task, 
+        timeAllocated: newTime === '' ? '' : parseInt(newTime) || 0 
+      } : task
     ));
   };
 
