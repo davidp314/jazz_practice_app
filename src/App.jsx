@@ -341,22 +341,27 @@ const JazzGuitarTracker = () => {
         // Update session running time
         setSessionRunningTime(prev => prev + 1);
 
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            // When time reaches 0, don't auto-advance, just stop the timer
-            // User can choose to continue or move to next task
-            setIsTimerRunning(false);
-            return 0;
-          }
-          return prev - 1;
-        });
+        // Only update timeRemaining if the task hasn't reached its goal time
+        const taskElapsed = (taskTimeSpent[activeTask.id] || 0) + 1; // +1 because we just updated it
+        const taskAllocated = activeTask.timeAllocated * 60;
+        
+        if (taskElapsed < taskAllocated) {
+          setTimeRemaining(prev => {
+            if (prev <= 1) {
+              return 0;
+            }
+            return prev - 1;
+          });
+        }
+        // If task has reached or exceeded goal time, keep timeRemaining at 0
+        // but continue running the session timer
       }, 1000);
     } else {
       clearInterval(timerRef.current);
     }
 
     return () => clearInterval(timerRef.current);
-  }, [isTimerRunning, activeTask]);
+  }, [isTimerRunning, activeTask, taskTimeSpent]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -2533,6 +2538,16 @@ const PracticeSession = ({
       onPauseTimer();
     }
     onStartTimer(task);
+  };
+
+  const handleTaskDoubleClick = (task) => {
+    // Make task active if not already active
+    if (!activeTask || activeTask.id !== task.id) {
+      if (isTimerRunning) {
+        onPauseTimer();
+      }
+      onStartTimer(task);
+    }
     setEditingTaskNote(task.sessionNote || task.practiceNote || '');
     setShowNotePanel(true);
   };
@@ -2688,7 +2703,7 @@ const PracticeSession = ({
               ? 'bg-blue-900/30 text-blue-300 border-blue-700' 
               : 'bg-blue-50 text-gray-600 border-blue-200'
           }`}>
-            <strong>💡 Tip:</strong> Click on any task to make it current, or use arrow keys to navigate. The timer will control the selected task.
+            <strong>💡 Tip:</strong> Click on any task to make it current, double-click to open practice notes, or use arrow keys to navigate. The timer will control the selected task.
           </div>
           <div className="space-y-3">
             {session.tasks.map((task, index) => {
@@ -2702,9 +2717,12 @@ const PracticeSession = ({
                 <div 
                   key={task.id} 
                   onClick={() => handleTaskClick(task)}
+                  onDoubleClick={() => handleTaskDoubleClick(task)}
                   className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-all duration-300 ${
                     isActive 
-                      ? (isDarkMode ? 'bg-blue-900/50 border-blue-500 ring-2 ring-blue-400' : 'bg-blue-100 border-blue-400 ring-2 ring-blue-300')
+                      ? isOverTime
+                        ? (isDarkMode ? 'bg-orange-900/50 border-orange-500 ring-2 ring-orange-400' : 'bg-orange-100 border-orange-400 ring-2 ring-orange-300')
+                        : (isDarkMode ? 'bg-blue-900/50 border-blue-500 ring-2 ring-blue-400' : 'bg-blue-100 border-blue-400 ring-2 ring-blue-300')
                       : isOverTime
                         ? (isDarkMode ? 'bg-orange-900/50 border-orange-700 hover:bg-orange-900/70' : 'bg-orange-100 border-orange-300 hover:bg-orange-200')
                         : isCompleted 
@@ -2714,7 +2732,9 @@ const PracticeSession = ({
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors duration-300 ${
                     isActive
-                      ? (isDarkMode ? 'bg-blue-600 border-blue-500 text-white' : 'bg-blue-500 border-blue-400 text-white')
+                      ? isOverTime
+                        ? 'bg-orange-600 border-orange-500 text-white'
+                        : (isDarkMode ? 'bg-blue-600 border-blue-500 text-white' : 'bg-blue-500 border-blue-400 text-white')
                       : isOverTime
                         ? 'bg-orange-600 border-orange-500 text-white'
                         : isCompleted 
@@ -2736,7 +2756,9 @@ const PracticeSession = ({
                   <div className="flex-1">
                     <div className={`font-medium transition-colors duration-300 ${
                       isActive
-                        ? (isDarkMode ? 'text-blue-300' : 'text-blue-800')
+                        ? isOverTime
+                          ? (isDarkMode ? 'text-orange-300' : 'text-orange-800')
+                          : (isDarkMode ? 'text-blue-300' : 'text-blue-800')
                         : isOverTime
                           ? (isDarkMode ? 'text-orange-300' : 'text-orange-800')
                           : (isDarkMode ? 'text-white' : 'text-gray-800')
@@ -2750,7 +2772,9 @@ const PracticeSession = ({
                     </div>
                     <div className={`text-sm transition-colors duration-300 ${
                       isActive
-                        ? (isDarkMode ? 'text-blue-400' : 'text-blue-600')
+                        ? isOverTime
+                          ? (isDarkMode ? 'text-orange-400' : 'text-orange-600')
+                          : (isDarkMode ? 'text-blue-400' : 'text-blue-600')
                         : isOverTime
                           ? (isDarkMode ? 'text-orange-400' : 'text-orange-600')
                           : (isDarkMode ? 'text-gray-400' : 'text-gray-500')
@@ -2768,9 +2792,11 @@ const PracticeSession = ({
                   </div>
                   {isActive && (
                     <div className={`px-3 py-1 rounded text-xs font-medium ${
-                      isDarkMode ? 'bg-blue-700 text-blue-200' : 'bg-blue-200 text-blue-800'
+                      isOverTime
+                        ? (isDarkMode ? 'bg-orange-700 text-orange-200' : 'bg-orange-200 text-orange-800')
+                        : (isDarkMode ? 'bg-blue-700 text-blue-200' : 'bg-blue-200 text-blue-800')
                     }`}>
-                      Current
+                      {isOverTime ? 'Overtime' : 'Current'}
                     </div>
                   )}
                   {isOverTime && !isActive && (
