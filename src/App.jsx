@@ -42,6 +42,8 @@ const JazzGuitarTracker = () => {
   const [view, setView] = useState('overview');
   const [practiceHistory, setPracticeHistory] = useState([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showSessionSummary, setShowSessionSummary] = useState(false);
+  const [sessionSummaryData, setSessionSummaryData] = useState(null);
   
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -571,13 +573,54 @@ const JazzGuitarTracker = () => {
 
   const endSession = () => {
     if (currentSession) {
+      // Prepare data for summary modal
+      const summaryData = {
+        session: currentSession,
+        taskTimeSpent: { ...taskTimeSpent },
+        sessionElapsed: getSessionElapsedTime()
+      };
+      
+      setSessionSummaryData(summaryData);
+      setShowSessionSummary(true);
+      
+      // Note: Don't actually end the session yet - the modal will handle that
+    }
+  };
+
+  const completeSession = (stepCompletions, finalNotes) => {
+    if (currentSession && sessionSummaryData) {
+      // Update standards with completed steps
+      if (stepCompletions && Object.keys(stepCompletions).length > 0) {
+        setStandards(standards.map(standard => {
+          if (stepCompletions[standard.id]) {
+            const stepIndex = stepCompletions[standard.id];
+            const newSteps = [...standard.steps];
+            newSteps[stepIndex] = true;
+            const completed = newSteps.every(step => step);
+            return {
+              ...standard,
+              steps: newSteps,
+              completed,
+              lastWorkedOn: new Date()
+            };
+          }
+          return standard;
+        }));
+      }
+      
+      // Create completed session record
       const completedSession = {
         ...currentSession,
         completed: true,
         endTime: new Date(),
-        taskTimeSpent: { ...taskTimeSpent }
+        taskTimeSpent: sessionSummaryData.taskTimeSpent,
+        finalNotes: finalNotes || {},
+        stepCompletions: stepCompletions || {}
       };
+      
       setPracticeHistory([completedSession, ...practiceHistory]);
+      
+      // Reset session state
       setCurrentSession(null);
       setActiveTask(null);
       setIsTimerRunning(false);
@@ -585,6 +628,9 @@ const JazzGuitarTracker = () => {
       setSessionStartTime(null);
       setSessionRunningTime(0);
       setLastTimerStart(null);
+      setShowSessionSummary(false);
+      setSessionSummaryData(null);
+      
       if (timerRef.current) clearInterval(timerRef.current);
       setView('overview');
     }
@@ -692,24 +738,48 @@ const JazzGuitarTracker = () => {
   }
 
   if (view === 'session' && currentSession) {
-    return <PracticeSession 
-      session={currentSession}
-      activeTask={activeTask}
-      timeRemaining={timeRemaining}
-      isTimerRunning={isTimerRunning}
-      onStartTimer={startTimer}
-      onPauseTimer={pauseTimer}
-      onResumeTimer={resumeTimer}
-      onEndSession={endSession}
-      formatTime={formatTime}
-      isDarkMode={isDarkMode}
-      toggleDarkMode={toggleDarkMode}
-      getSessionElapsedTime={getSessionElapsedTime}
-      getTaskElapsedTime={getTaskElapsedTime}
-      getSessionProgress={getSessionProgress}
-      getRemainingTaskTime={getRemainingTaskTime}
-      taskTimeSpent={taskTimeSpent}
-    />;
+    return (
+      <>
+        <PracticeSession 
+          session={currentSession}
+          activeTask={activeTask}
+          timeRemaining={timeRemaining}
+          isTimerRunning={isTimerRunning}
+          onStartTimer={startTimer}
+          onPauseTimer={pauseTimer}
+          onResumeTimer={resumeTimer}
+          onEndSession={endSession}
+          onUpdateTask={(taskId, updates) => {
+            setCurrentSession(prev => ({
+              ...prev,
+              tasks: prev.tasks.map(task =>
+                task.id === taskId ? { ...task, ...updates } : task
+              )
+            }));
+          }}
+          formatTime={formatTime}
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+          getSessionElapsedTime={getSessionElapsedTime}
+          getTaskElapsedTime={getTaskElapsedTime}
+          getSessionProgress={getSessionProgress}
+          getRemainingTaskTime={getRemainingTaskTime}
+          taskTimeSpent={taskTimeSpent}
+        />
+        {/* Session Summary Modal */}
+        {showSessionSummary && (
+          <SessionSummaryModal
+            isOpen={showSessionSummary}
+            summaryData={sessionSummaryData}
+            onComplete={completeSession}
+            onCancel={() => setShowSessionSummary(false)}
+            standards={standards}
+            isDarkMode={isDarkMode}
+            formatTime={formatTime}
+          />
+        )}
+      </>
+    );
   }
 
   if (view === 'reports') {
@@ -1086,6 +1156,7 @@ const JazzGuitarTracker = () => {
           </>
         )}
       </div>
+
     </div>
   );
 };
@@ -1760,6 +1831,7 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
   const [selectedOtherWork, setSelectedOtherWork] = useState('');
   const [selectedRepertoire, setSelectedRepertoire] = useState('');
   const [dragIndex, setDragIndex] = useState(null);
+  const [expandedTasks, setExpandedTasks] = useState(new Set());
 
   const activeStandards = standards.filter(s => s.active);
   const activeOtherWork = otherWork.filter(w => w.active);
@@ -1795,7 +1867,10 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
         name: standard.name,
         type: TASK_TYPES.STANDARD,
         timeAllocated: 25,
-        standardId: standard.id
+        standardId: standard.id,
+        focusStep: null,        // NEW: Focus step selection
+        practiceNote: '',       // NEW: Practice note
+        sessionNote: ''         // NEW: Session note (updated during practice)
       };
       setSessionTasks([...sessionTasks, task]);
       setSelectedStandard('');
@@ -1810,7 +1885,9 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
         name: work.name,
         type: TASK_TYPES.OTHER_WORK,
         timeAllocated: 20,
-        otherWorkId: work.id
+        otherWorkId: work.id,
+        practiceNote: '',       // NEW: Practice note
+        sessionNote: ''         // NEW: Session note
       };
       setSessionTasks([...sessionTasks, task]);
       setSelectedOtherWork('');
@@ -1823,7 +1900,9 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
         id: Date.now().toString(),
         name: newTaskName.trim(),
         type: TASK_TYPES.ONE_OFF,
-        timeAllocated: newTaskTime
+        timeAllocated: newTaskTime,
+        practiceNote: '',       // NEW: Practice note
+        sessionNote: ''         // NEW: Session note
       };
       setSessionTasks([...sessionTasks, task]);
       setNewTaskName('');
@@ -1840,7 +1919,10 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
         name: `${repertoire.name} (Repertoire)`,
         type: TASK_TYPES.STANDARD,
         timeAllocated: time,
-        standardId: repertoire.id
+        standardId: repertoire.id,
+        focusStep: null,        // NEW: Focus step selection
+        practiceNote: '',       // NEW: Practice note
+        sessionNote: ''         // NEW: Session note
       };
       setSessionTasks([...sessionTasks, task]);
       
@@ -1917,6 +1999,37 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
 
   const handleDragEnd = () => {
     setDragIndex(null);
+  };
+
+  // Helper functions for enhanced task management
+  const toggleTaskExpanded = (taskId) => {
+    const newExpanded = new Set(expandedTasks);
+    if (newExpanded.has(taskId)) {
+      newExpanded.delete(taskId);
+    } else {
+      newExpanded.add(taskId);
+    }
+    setExpandedTasks(newExpanded);
+  };
+
+  const updateTaskField = (taskId, field, value) => {
+    setSessionTasks(sessionTasks.map(task =>
+      task.id === taskId ? { ...task, [field]: value } : task
+    ));
+  };
+
+  const getStepStatus = (standard, stepIndex) => {
+    if (!standard || !standard.steps) return '○';
+    if (standard.steps[stepIndex]) return '✅';
+    return '○';
+  };
+
+  const getStepLabel = (stepIndex) => {
+    const labels = [
+      'Staples', 'Shells', 'Scales', 'Arpeggios', 
+      '3rds', 'Comping', 'Improv', 'Video'
+    ];
+    return labels[stepIndex] || `Step ${stepIndex + 1}`;
   };
 
   return (
@@ -2132,87 +2245,200 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
                 <strong>💡 Tip:</strong> Drag and drop tasks to reorder them in your practice session
               </div>
               <div className="space-y-1">
-                {sessionTasks.map((task, index) => (
-                  <div key={task.id}>
-                    {/* Drop zone above each task */}
-                    <div
-                      onDragOver={handleDragOver}
-                      onDragEnter={handleDragEnter}
-                      onDrop={(e) => handleDropBetween(e, index)}
-                      className={`h-6 transition-all duration-200 flex items-center justify-center ${
-                        dragIndex !== null && dragIndex !== index 
-                          ? 'bg-blue-100 border-2 border-dashed border-blue-400 rounded' 
-                          : isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-50'
-                      }`}
-                    >
-                      {dragIndex !== null && dragIndex !== index && (
-                        <span className="text-xs text-blue-600 font-medium">Drop here</span>
-                      )}
-                    </div>
-                    
-                    {/* The actual task */}
-                    <div 
-                      draggable="true"
-                      onDragStart={(e) => handleDragStart(e, index)}
-                      onDragEnd={handleDragEnd}
-                      className={`flex items-center gap-4 p-3 rounded-lg cursor-move transition-all duration-200 ${
-                        dragIndex === index 
-                          ? 'bg-blue-100 border-2 border-blue-300 opacity-50' 
-                          : isDarkMode
-                            ? 'bg-gray-700 border border-gray-600 hover:bg-gray-600 hover:shadow-md'
-                            : 'bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:shadow-md'
-                      }`}
-                    >
-                      <div className={`cursor-move transition-colors duration-300 ${
-                        isDarkMode ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'
-                      }`}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="9" cy="12" r="1"/>
-                          <circle cx="9" cy="5" r="1"/>
-                          <circle cx="9" cy="19" r="1"/>
-                          <circle cx="15" cy="12" r="1"/>
-                          <circle cx="15" cy="5" r="1"/>
-                          <circle cx="15" cy="19" r="1"/>
-                        </svg>
-                      </div>
-                      <div className={`font-bold w-6 transition-colors duration-300 ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                      }`}>{index + 1}</div>
-                      <div className="flex-1">
-                        <div className={`font-medium transition-colors duration-300 ${
-                          isDarkMode ? 'text-white' : 'text-gray-800'
-                        }`}>{task.name}</div>
-                        <div className={`text-sm capitalize transition-colors duration-300 ${
-                          isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                        }`}>{task.type.replace('_', ' ')}</div>
-                      </div>
-                      <input
-                        type="number"
-                        value={task.timeAllocated}
-                        onChange={(e) => updateTaskTime(task.id, e.target.value)}
-                        className={`w-20 p-2 border rounded transition-colors duration-300 ${
-                          isDarkMode 
-                            ? 'bg-gray-600 border-gray-500 text-white' 
-                            : 'bg-white border-gray-300 text-gray-800'
-                        }`}
-                        min="1"
-                      />
-                      <span className={`text-sm transition-colors duration-300 ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                      }`}>min</span>
-                      <button
-                        onClick={() => removeTask(task.id)}
-                        className={`p-2 text-red-600 rounded transition-colors duration-200 ${
-                          isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-100'
+                {sessionTasks.map((task, index) => {
+                  const isExpanded = expandedTasks.has(task.id);
+                  const isStandard = task.type === TASK_TYPES.STANDARD;
+                  const standard = isStandard && task.standardId ? 
+                    standards.find(s => s.id === task.standardId) : null;
+                  
+                  return (
+                    <div key={task.id}>
+                      {/* Drop zone above each task - PRESERVE EXISTING */}
+                      <div
+                        onDragOver={handleDragOver}
+                        onDragEnter={handleDragEnter}
+                        onDrop={(e) => handleDropBetween(e, index)}
+                        className={`h-6 transition-all duration-200 flex items-center justify-center ${
+                          dragIndex !== null && dragIndex !== index 
+                            ? 'bg-blue-100 border-2 border-dashed border-blue-400 rounded' 
+                            : isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-50'
                         }`}
                       >
-                        <X size={16} />
-                      </button>
+                        {dragIndex !== null && dragIndex !== index && (
+                          <span className="text-xs text-blue-600 font-medium">Drop here</span>
+                        )}
+                      </div>
+                      
+                      {/* ENHANCED task card */}
+                      <div 
+                        draggable="true"
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className={`rounded-lg transition-all duration-200 ${
+                          dragIndex === index 
+                            ? 'bg-blue-100 border-2 border-blue-300 opacity-50' 
+                            : isDarkMode
+                              ? 'bg-gray-700 border border-gray-600 hover:bg-gray-600 hover:shadow-md'
+                              : 'bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:shadow-md'
+                        }`}
+                      >
+                        {/* Task header - NOW CLICKABLE to expand */}
+                        <div 
+                          onClick={() => toggleTaskExpanded(task.id)}
+                          className={`flex items-center gap-4 p-3 cursor-pointer ${
+                            isExpanded ? 'border-b border-gray-200' : ''
+                          }`}
+                        >
+                          {/* PRESERVE existing drag handle */}
+                          <div className={`cursor-move transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-500 hover:text-gray-400' : 'text-gray-400 hover:text-gray-600'
+                          }`}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <circle cx="9" cy="12" r="1"/>
+                              <circle cx="9" cy="5" r="1"/>
+                              <circle cx="9" cy="19" r="1"/>
+                              <circle cx="15" cy="12" r="1"/>
+                              <circle cx="15" cy="5" r="1"/>
+                              <circle cx="15" cy="19" r="1"/>
+                            </svg>
+                          </div>
+                          <div className={`font-bold w-6 transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                          }`}>{index + 1}</div>
+                          <div className="flex-1">
+                            <div className={`font-medium transition-colors duration-300 ${
+                              isDarkMode ? 'text-white' : 'text-gray-800'
+                            }`}>
+                              {task.name}
+                              {task.type === TASK_TYPES.STANDARD && task.focusStep !== null && (
+                                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                  Step {task.focusStep + 1}
+                                </span>
+                              )}
+                            </div>
+                            <div className={`text-sm capitalize transition-colors duration-300 ${
+                              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                            }`}>
+                              {task.type.replace('_', ' ')}
+                              {task.practiceNote && (
+                                <span className="ml-2 text-xs">📝</span>
+                              )}
+                            </div>
+                          </div>
+                          {/* PRESERVE existing time input and remove button */}
+                          <input
+                            type="number"
+                            value={task.timeAllocated}
+                            onChange={(e) => updateTaskTime(task.id, e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            className={`w-20 p-2 border rounded transition-colors duration-300 ${
+                              isDarkMode 
+                                ? 'bg-gray-600 border-gray-500 text-white' 
+                                : 'bg-white border-gray-300 text-gray-800'
+                            }`}
+                            min="1"
+                          />
+                          <span className={`text-sm transition-colors duration-300 ${
+                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                          }`}>min</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeTask(task.id);
+                            }}
+                            className={`p-2 text-red-600 rounded transition-colors duration-200 ${
+                              isDarkMode ? 'hover:bg-red-900/30' : 'hover:bg-red-100'
+                            }`}
+                          >
+                            <X size={16} />
+                          </button>
+                          {/* NEW: Expand indicator */}
+                          <div className={`transition-transform duration-200 ${
+                            isExpanded ? 'rotate-90' : ''
+                          }`}>
+                            ▶
+                          </div>
+                        </div>
+                        
+                        {/* NEW: Expanded content */}
+                        {isExpanded && (
+                          <div className={`p-4 transition-colors duration-300 ${
+                            isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
+                          }`}>
+                            {/* Step selection for jazz standards */}
+                            {isStandard && standard && (
+                              <div className="mb-4">
+                                <label className={`block text-sm font-medium mb-3 transition-colors duration-300 ${
+                                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                                }`}>
+                                  Focus Step (Optional) • Progress: {standard.steps.filter(Boolean).length}/8 completed
+                                </label>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                  {STANDARD_STEPS.map((_, stepIndex) => {
+                                    const stepStatus = getStepStatus(standard, stepIndex);
+                                    const isSelected = task.focusStep === stepIndex;
+                                    const isCompleted = stepStatus === '✅';
+                                    
+                                    return (
+                                      <div
+                                        key={stepIndex}
+                                        onClick={() => updateTaskField(task.id, 'focusStep', 
+                                          isSelected ? null : stepIndex)}
+                                        className={`flex items-center gap-2 p-2 border rounded-md cursor-pointer transition-all duration-200 text-sm ${
+                                          isSelected
+                                            ? 'border-blue-500 bg-blue-50 text-blue-800'
+                                            : isCompleted
+                                              ? 'border-green-200 bg-green-50 hover:border-green-300'
+                                              : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
+                                        } ${isDarkMode && !isSelected ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
+                                      >
+                                        <input
+                                          type="radio"
+                                          name={`focusStep-${task.id}`}
+                                          checked={isSelected}
+                                          onChange={() => {}}
+                                          className="pointer-events-none"
+                                        />
+                                        <span className="font-medium text-gray-600">
+                                          {stepIndex + 1}
+                                        </span>
+                                        <span className="flex-1 min-w-0">
+                                          {getStepLabel(stepIndex)}
+                                        </span>
+                                        <span>{stepStatus}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Practice note */}
+                            <div>
+                              <label className={`block text-sm font-medium mb-2 transition-colors duration-300 ${
+                                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                              }`}>
+                                Practice Note
+                              </label>
+                              <textarea
+                                value={task.practiceNote}
+                                onChange={(e) => updateTaskField(task.id, 'practiceNote', e.target.value)}
+                                placeholder="What will you focus on during this practice?"
+                                className={`w-full px-3 py-2 border rounded-md resize-none h-20 transition-colors duration-300 ${
+                                  isDarkMode 
+                                    ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                                    : 'bg-white border-gray-300 text-gray-800'
+                                }`}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 
-                {/* Drop zone at the end */}
+                {/* Drop zone at the end - PRESERVE EXISTING */}
                 <div
                   onDragOver={handleDragOver}
                   onDragEnter={handleDragEnter}
@@ -2255,6 +2481,7 @@ const PracticeSession = ({
   onPauseTimer, 
   onResumeTimer, 
   onEndSession,
+  onUpdateTask,
   formatTime,
   isDarkMode,
   toggleDarkMode,
@@ -2265,6 +2492,10 @@ const PracticeSession = ({
   taskTimeSpent
 }) => {
   const currentTaskIndex = activeTask ? session.tasks.findIndex(t => t.id === activeTask.id) : -1;
+
+  // DIFF 8: Add new state variables
+  const [showNotePanel, setShowNotePanel] = useState(false);
+  const [editingTaskNote, setEditingTaskNote] = useState('');
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -2292,6 +2523,31 @@ const PracticeSession = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentTaskIndex, session.tasks, onStartTimer, activeTask, isTimerRunning, onPauseTimer, onResumeTimer]);
+
+  // DIFF 9: Add helper functions
+  const handleTaskClick = (task) => {
+    if (isTimerRunning) {
+      onPauseTimer();
+    }
+    onStartTimer(task);
+    setEditingTaskNote(task.sessionNote || task.practiceNote || '');
+    setShowNotePanel(true);
+  };
+
+  const saveTaskNote = () => {
+    if (activeTask && onUpdateTask) {
+      onUpdateTask(activeTask.id, { sessionNote: editingTaskNote });
+      setShowNotePanel(false);
+    }
+  };
+
+  const getStepLabel = (stepIndex) => {
+    const labels = [
+      'Staples', 'Shells', 'Scales', 'Arpeggios', 
+      '3rds', 'Comping', 'Improv', 'Video'
+    ];
+    return labels[stepIndex] || `Step ${stepIndex + 1}`;
+  };
 
   return (
     <div className={`max-w-4xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
@@ -2437,13 +2693,14 @@ const PracticeSession = ({
               const taskAllocated = task.timeAllocated * 60;
               const isOverTime = taskElapsed > taskAllocated;
               const isCompleted = taskElapsed >= taskAllocated;
+              const isActive = activeTask && activeTask.id === task.id;
               
               return (
                 <div 
                   key={task.id} 
-                  onClick={() => onStartTimer(task)}
+                  onClick={() => handleTaskClick(task)}
                   className={`flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-all duration-300 ${
-                    activeTask && activeTask.id === task.id 
+                    isActive 
                       ? (isDarkMode ? 'bg-blue-900/50 border-blue-500 ring-2 ring-blue-400' : 'bg-blue-100 border-blue-400 ring-2 ring-blue-300')
                       : isOverTime
                         ? (isDarkMode ? 'bg-orange-900/50 border-orange-700 hover:bg-orange-900/70' : 'bg-orange-100 border-orange-300 hover:bg-orange-200')
@@ -2453,7 +2710,7 @@ const PracticeSession = ({
                   }`}
                 >
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-colors duration-300 ${
-                    activeTask && activeTask.id === task.id
+                    isActive
                       ? (isDarkMode ? 'bg-blue-600 border-blue-500 text-white' : 'bg-blue-500 border-blue-400 text-white')
                       : isOverTime
                         ? 'bg-orange-600 border-orange-500 text-white'
@@ -2465,7 +2722,7 @@ const PracticeSession = ({
                       <Clock size={16} className="text-white" />
                     ) : isCompleted ? (
                       <Check size={16} className="text-white" />
-                    ) : activeTask && activeTask.id === task.id ? (
+                    ) : isActive ? (
                       <Play size={16} className="text-white" />
                     ) : (
                       <span className={`text-sm font-bold transition-colors duration-300 ${
@@ -2475,14 +2732,21 @@ const PracticeSession = ({
                   </div>
                   <div className="flex-1">
                     <div className={`font-medium transition-colors duration-300 ${
-                      activeTask && activeTask.id === task.id
+                      isActive
                         ? (isDarkMode ? 'text-blue-300' : 'text-blue-800')
                         : isOverTime
                           ? (isDarkMode ? 'text-orange-300' : 'text-orange-800')
                           : (isDarkMode ? 'text-white' : 'text-gray-800')
-                    }`}>{task.name}</div>
+                    }`}>
+                      {task.name}
+                      {task.type === TASK_TYPES.STANDARD && task.focusStep !== null && (
+                        <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          Step {task.focusStep + 1}: {getStepLabel(task.focusStep)}
+                        </span>
+                      )}
+                    </div>
                     <div className={`text-sm transition-colors duration-300 ${
-                      activeTask && activeTask.id === task.id
+                      isActive
                         ? (isDarkMode ? 'text-blue-400' : 'text-blue-600')
                         : isOverTime
                           ? (isDarkMode ? 'text-orange-400' : 'text-orange-600')
@@ -2494,16 +2758,19 @@ const PracticeSession = ({
                           (+{formatTime(taskElapsed - taskAllocated)} over)
                         </span>
                       )}
+                      {(task.practiceNote || task.sessionNote) && (
+                        <span className="ml-2">📝</span>
+                      )}
                     </div>
                   </div>
-                  {activeTask && activeTask.id === task.id && (
+                  {isActive && (
                     <div className={`px-3 py-1 rounded text-xs font-medium ${
                       isDarkMode ? 'bg-blue-700 text-blue-200' : 'bg-blue-200 text-blue-800'
                     }`}>
                       Current
                     </div>
                   )}
-                  {isOverTime && activeTask?.id !== task.id && (
+                  {isOverTime && !isActive && (
                     <div className={`px-3 py-1 rounded text-xs font-medium ${
                       isDarkMode ? 'bg-orange-700 text-orange-200' : 'bg-orange-200 text-orange-800'
                     }`}>
@@ -2541,6 +2808,79 @@ const PracticeSession = ({
           </div>
         </div>
       </div>
+
+      {showNotePanel && (
+        <div className={`fixed bottom-6 right-6 w-80 rounded-lg shadow-lg p-4 border transition-all duration-300 transform ${
+          showNotePanel ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+        } ${isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'}`}>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className={`font-medium transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>
+              📝 Practice Note
+            </h3>
+            <button
+              onClick={() => setShowNotePanel(false)}
+              className={`text-xl leading-none transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              ×
+            </button>
+          </div>
+          
+          {activeTask && (
+            <>
+              <div className={`text-sm mb-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                {activeTask.name}
+                {activeTask.type === TASK_TYPES.STANDARD && activeTask.focusStep !== null && (
+                  <span className="ml-1">• Step {activeTask.focusStep + 1}</span>
+                )}
+              </div>
+              
+              {activeTask.practiceNote && activeTask.practiceNote !== editingTaskNote && (
+                <div className={`p-2 rounded mb-2 text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-50 text-gray-700'
+                }`}>
+                  <strong>Original note:</strong> {activeTask.practiceNote}
+                </div>
+              )}
+              
+              <textarea
+                value={editingTaskNote}
+                onChange={(e) => setEditingTaskNote(e.target.value)}
+                placeholder="Update your practice notes..."
+                className={`w-full p-2 border rounded resize-none h-24 text-sm transition-colors duration-300 ${
+                  isDarkMode 
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                    : 'bg-white border-gray-300 text-gray-800'
+                }`}
+              />
+              
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={saveTaskNote}
+                  className="flex-1 py-2 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Save Note
+                </button>
+                <button
+                  onClick={() => setShowNotePanel(false)}
+                  className={`px-4 py-2 rounded text-sm transition-colors duration-200 ${
+                    isDarkMode 
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -2702,6 +3042,226 @@ const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, togg
               ))}
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SessionSummaryModal = ({ 
+  isOpen, 
+  summaryData, 
+  onComplete, 
+  onCancel, 
+  standards,
+  isDarkMode,
+  formatTime 
+}) => {
+  const [stepCompletions, setStepCompletions] = useState({});
+  const [finalNotes, setFinalNotes] = useState({});
+
+  if (!isOpen || !summaryData) return null;
+
+  const { session, taskTimeSpent, sessionElapsed } = summaryData;
+  
+  // Get jazz standards from the session that had focus steps
+  const jazzStandardTasks = session.tasks.filter(task => 
+    task.type === TASK_TYPES.STANDARD && task.focusStep !== null
+  );
+
+  const handleStepCompletion = (standardId, stepIndex, completed) => {
+    setStepCompletions(prev => {
+      const updated = { ...prev };
+      if (completed) {
+        updated[standardId] = stepIndex;
+      } else {
+        delete updated[standardId];
+      }
+      return updated;
+    });
+  };
+
+  const handleFinalNote = (taskId, note) => {
+    setFinalNotes(prev => ({
+      ...prev,
+      [taskId]: note
+    }));
+  };
+
+  const getStepLabel = (stepIndex) => {
+    const labels = [
+      'Play through with staple chords',
+      'Learn shell chords', 
+      'Learn scales for each chord',
+      'Learn arpeggios for each chord',
+      'Target the 3rds',
+      'Comping practice',
+      'Practice improvisation',
+      'Post performance video'
+    ];
+    return labels[stepIndex] || `Step ${stepIndex + 1}`;
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className={`rounded-lg shadow-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto transition-colors duration-300 ${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      }`}>
+        <div className="text-center mb-6">
+          <h2 className={`text-2xl font-bold mb-2 transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>
+            🎯 Session Complete!
+          </h2>
+          <p className={`transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>
+            Great work today - {formatTime(sessionElapsed)} of focused practice
+          </p>
+        </div>
+
+        {/* Jazz Standards Progress */}
+        {jazzStandardTasks.length > 0 && (
+          <div className="mb-6">
+            <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>
+              Jazz Standards Progress
+            </h3>
+            
+            {jazzStandardTasks.map(task => {
+              const standard = standards.find(s => s.id === task.standardId);
+              const timeSpent = taskTimeSpent[task.id] || 0;
+              const finalNote = finalNotes[task.id] || '';
+              
+              if (!standard) return null;
+              
+              return (
+                <div key={task.id} className={`border rounded-lg p-4 mb-4 transition-colors duration-300 ${
+                  isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-gray-50'
+                }`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`font-medium transition-colors duration-300 ${
+                      isDarkMode ? 'text-white' : 'text-gray-800'
+                    }`}>
+                      🎵 {task.name}
+                    </span>
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                      ⏱️ {formatTime(timeSpent)}
+                    </span>
+                  </div>
+                  
+                  <div className={`text-sm mb-3 transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Step {task.focusStep + 1}: {getStepLabel(task.focusStep)}
+                  </div>
+                  
+                  {/* Show practice notes */}
+                  {(task.practiceNote || task.sessionNote) && (
+                    <div className={`p-3 rounded mb-3 text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'bg-gray-600 text-gray-300' : 'bg-white text-gray-700'
+                    }`}>
+                      {task.practiceNote && (
+                        <div>
+                          <strong>📝 Practice note:</strong> {task.practiceNote}
+                        </div>
+                      )}
+                      {task.sessionNote && task.sessionNote !== task.practiceNote && (
+                        <div className="mt-2">
+                          <strong>Session update:</strong> {task.sessionNote}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Step completion checkbox */}
+                  <div className={`flex items-start gap-3 p-3 rounded transition-colors duration-300 ${
+                    isDarkMode ? 'bg-green-900/30' : 'bg-green-50'
+                  }`}>
+                    <input
+                      type="checkbox"
+                      id={`complete-${task.id}`}
+                      checked={stepCompletions[standard.id] === task.focusStep}
+                      onChange={(e) => handleStepCompletion(
+                        standard.id, 
+                        task.focusStep, 
+                        e.target.checked
+                      )}
+                      className="mt-1 transform scale-110"
+                    />
+                    <label htmlFor={`complete-${task.id}`} className="flex-1">
+                      <div className={`font-medium transition-colors duration-300 ${
+                        isDarkMode ? 'text-green-300' : 'text-green-800'
+                      }`}>
+                        Mark Step {task.focusStep + 1} as completed?
+                      </div>
+                      <div className={`text-sm transition-colors duration-300 ${
+                        isDarkMode ? 'text-green-400' : 'text-green-700'
+                      }`}>
+                        Check this only when you're confident you've mastered this step
+                      </div>
+                    </label>
+                  </div>
+                  
+                  {/* Final session note */}
+                  <div className="mt-3">
+                    <label className={`block text-sm font-medium mb-2 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Final session note (optional)
+                    </label>
+                    <textarea
+                      value={finalNote}
+                      onChange={(e) => handleFinalNote(task.id, e.target.value)}
+                      placeholder="Any final thoughts about this practice session?"
+                      className={`w-full px-3 py-2 border rounded-md resize-none h-16 text-sm transition-colors duration-300 ${
+                        isDarkMode 
+                          ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                          : 'bg-white border-gray-300 text-gray-800'
+                      }`}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        
+        {/* Other tasks summary */}
+        {session.tasks.filter(task => task.type !== TASK_TYPES.STANDARD || task.focusStep === null).length > 0 && (
+          <div className={`border-t pt-4 mb-6 transition-colors duration-300 ${
+            isDarkMode ? 'border-gray-600' : 'border-gray-200'
+          }`}>
+            <div className={`text-sm text-center transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              Other tasks: {session.tasks
+                .filter(task => task.type !== TASK_TYPES.STANDARD || task.focusStep === null)
+                .map(task => `${task.name} (${formatTime(taskTimeSpent[task.id] || 0)})`)
+                .join(' • ')}
+            </div>
+          </div>
+        )}
+        
+        {/* Actions */}
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={() => onCancel()}
+            className={`px-6 py-2 rounded-lg font-medium transition-colors duration-200 ${
+              isDarkMode 
+                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onComplete(stepCompletions, finalNotes)}
+            className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+          >
+            Complete Session
+          </button>
         </div>
       </div>
     </div>
