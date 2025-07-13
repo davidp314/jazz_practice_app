@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jazz Guitar Practice Tracker - Complete Application Report</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1f2937;
+            --accent-color: #10b981;
+            --warning-color: #f59e0b;
+            --bg-color: #f9fafb;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+            --code-bg: #f3f4f6;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #111827;
+            --text-color: #f9fafb;
+            --border-color: #374151;
+            --code-bg: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 1rem;
+            color: white;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .toc {
+            background: var(--code-bg);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .toc h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .toc ol {
+            padding-left: 1.5rem;
+        }
+
+        .toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .toc a:hover {
+            color: var(--accent-color);
+        }
+
+        .section {
+            margin-bottom: 4rem;
+            background: var(--code-bg);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            margin: 2rem 0 1rem 0;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        h5 {
+            font-size: 1.1rem;
+            color: var(--warning-color);
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .feature-card {
+            background: var(--secondary-color);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+        }
+
+        pre {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            border: none;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(37, 99, 235, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .workflow-step {
+            background: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            display: inline-block;
+            margin: 0.25rem;
+            font-weight: 600;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .tech-item {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .schema-box {
+            background: var(--secondary-color);
+            color: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .schema-box {
+            background: #1f2937;
+            color: #e5e7eb;
+        }
+
+        .schema-box pre {
+            background: transparent;
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .schema-box code {
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-family: 'Monaco', 'Menlo', monospace;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tech-stack {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step-list {
+            counter-reset: step-counter;
+        }
+
+        .step-list li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--primary-color);
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌓</button>
+    <button class="back-to-top" onclick="scrollToTop()" title="Back to top">↑</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Jazz Guitar Practice Tracker</h1>
+            <p>Complete Application Report</p>
+        </div>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ol>
+                <li><a href="#general-introduction">General Introduction</a></li>
+                <li><a href="#user-tutorial">User Tutorial</a></li>
+                <li><a href="#technical-specification">Technical Specification</a></li>
+            </ol>
+        </div>
+
+        <div class="section" id="general-introduction">
+            <h2>General Introduction</h2>
+
+            <h3>Overview</h3>
+            <p>The Jazz Guitar Practice Tracker is a sophisticated web-based practice management system specifically designed for jazz guitarists who want to approach their learning systematically and track their progress over time. Unlike generic practice apps, this tool understands the unique challenges of jazz education and provides features that align with proven jazz pedagogy.</p>
+
+            <h3>Why Jazz Guitar Needs a Specialized Tool</h3>
+            <p>Learning jazz guitar involves simultaneously developing multiple skills:</p>
+            <ul>
+                <li><strong>Harmonic Knowledge</strong>: Understanding complex chord progressions and substitutions</li>
+                <li><strong>Technical Skills</strong>: Mastering fingerings, scales, arpeggios, and voice leading</li>
+                <li><strong>Improvisational Abilities</strong>: Creating melodic lines and developing jazz vocabulary</li>
+                <li><strong>Repertoire Management</strong>: Learning and maintaining dozens of standards</li>
+            </ul>
+            <p>This application addresses these challenges with a structured, step-by-step approach while maintaining the flexibility that creative practice requires.</p>
+
+            <h3>Key Features at a Glance</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎵</div>
+                    <h4>Systematic Standard Learning</h4>
+                    <ul>
+                        <li>8-step proven algorithm for mastering jazz standards</li>
+                        <li>Progress tracking with visual indicators</li>
+                        <li>Active/inactive status management for focus control</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏱️</div>
+                    <h4>Intelligent Practice Sessions</h4>
+                    <ul>
+                        <li>Drag-and-drop session planning</li>
+                        <li>Flexible timer system with task switching</li>
+                        <li>Overtime tracking for when you're "in the zone"</li>
+                        <li>Smart repertoire rotation suggestions</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h4>Comprehensive Analytics</h4>
+                    <ul>
+                        <li>Weekly and monthly practice statistics</li>
+                        <li>Detailed session history with time breakdowns</li>
+                        <li>Progress visualization across all standards</li>
+                        <li>Repertoire maintenance scheduling</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h4>Modern User Experience</h4>
+                    <ul>
+                        <li>Dark mode support for evening practice</li>
+                        <li>Responsive design for desktop and mobile</li>
+                        <li>Intuitive interface with keyboard shortcuts</li>
+                        <li>Data export/import for backup and portability</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Who Benefits from This Tool</h3>
+            <p><strong>Individual Students</strong>: Gain structure and measurable progress in their jazz journey, from beginners learning their first standards to advanced players managing large repertoires.</p>
+            <p><strong>Teachers</strong>: Monitor student progress, assign specific practice tasks, and use session data to guide lesson planning and discussion.</p>
+            <p><strong>Professional Musicians</strong>: Maintain performance-ready repertoires while continuing to expand their musical knowledge and skills.</p>
+        </div>
+
+        <div class="section" id="user-tutorial">
+            <h2>User Tutorial</h2>
+
+            <h3>Getting Started</h3>
+
+            <h4>Initial Setup</h4>
+            <ol class="step-list">
+                <li><strong>Launch the Application</strong>: Open the app in any modern web browser. No installation or account creation required.</li>
+                <li><strong>Choose Your Theme</strong>: Click the sun/moon icon in the top-right to toggle between light and dark modes.</li>
+                <li><strong>Add Your First Standards</strong>: 
+                    <ul>
+                        <li>Click "Add Standard" in the Jazz Standards section</li>
+                        <li>Enter the name of a jazz standard you're working on (e.g., "Autumn Leaves")</li>
+                        <li>The system will create a new standard with all 8 learning steps unchecked</li>
+                    </ul>
+                </li>
+                <li><strong>Add Other Practice Work</strong>:
+                    <ul>
+                        <li>Click "Add Other Work" to include technical exercises, etudes, or transcription work</li>
+                        <li>Enter a name and optional description</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h4>Understanding the 8-Step Learning Algorithm</h4>
+            <div class="highlight">
+                <p>Each jazz standard follows a proven learning progression:</p>
+                <ol>
+                    <li><strong>Play through with staple chords</strong> - Get familiar with the basic progression</li>
+                    <li><strong>Learn shell chords</strong> - Master essential voice leading</li>
+                    <li><strong>Learn scales for each chord</strong> - Understand harmonic choices</li>
+                    <li><strong>Learn arpeggios for each chord</strong> - Build melodic vocabulary</li>
+                    <li><strong>Target the 3rds</strong> - Develop smooth voice leading</li>
+                    <li><strong>Comping</strong> - Practice rhythm guitar and accompaniment</li>
+                    <li><strong>Practice improvisation</strong> - Apply your knowledge creatively</li>
+                    <li><strong>Post performance video</strong> - Document your achievement</li>
+                </ol>
+            </div>
+
+            <h3>Managing Your Practice Materials</h3>
+
+            <h4>Working with Standards</h4>
+            <ul>
+                <li><strong>Check off completed steps</strong> by clicking the checkboxes next to each step</li>
+                <li><strong>Toggle Active/Inactive status</strong> to focus on current priorities</li>
+                <li><strong>Mark as Completed</strong> when you've mastered all 8 steps</li>
+                <li><strong>Add notes</strong> to record insights, challenges, or performance dates</li>
+                <li><strong>Use filters</strong> to view Active, All, or Completed standards</li>
+            </ul>
+
+            <h4>Managing Other Work</h4>
+            <ul>
+                <li>Create entries for technical exercises, etudes, transcription work, or equipment practice</li>
+                <li>Use the same Active/Inactive and Completed toggles for organization</li>
+                <li>Add descriptions to remind yourself of specific goals or techniques</li>
+            </ul>
+
+            <h4>Editing Existing Items</h4>
+            <ul>
+                <li>Click "Edit Standard" or "Edit Other Work" buttons</li>
+                <li>Select the item you want to modify from the list</li>
+                <li>Update names, notes, completion status, or step progress</li>
+                <li>Save changes to update your records</li>
+            </ul>
+
+            <h3>Planning Practice Sessions</h3>
+
+            <h4>Session Setup Process</h4>
+            <ol class="step-list">
+                <li><strong>Start a New Session</strong>: Click "Start Session" from the overview page</li>
+                <li><strong>Add Standards to Practice</strong>:
+                    <ul>
+                        <li>Select from your active standards in the dropdown</li>
+                        <li>Each standard gets a default 25-minute allocation</li>
+                        <li>Expand tasks to select a specific focus step (optional)</li>
+                        <li>Add practice notes for your session goals</li>
+                    </ul>
+                </li>
+                <li><strong>Include Other Work</strong>:
+                    <ul>
+                        <li>Choose from your active other work items</li>
+                        <li>Default allocation is 20 minutes per item</li>
+                        <li>Add session-specific notes about your focus</li>
+                    </ul>
+                </li>
+                <li><strong>Add One-Off Tasks</strong>:
+                    <ul>
+                        <li>Create custom tasks for today's session only</li>
+                        <li>Examples: "Warm-up exercises", "Jam session prep", "Equipment setup"</li>
+                        <li>Set your own time allocation</li>
+                    </ul>
+                </li>
+                <li><strong>Repertoire Review</strong> (Recommended):
+                    <ul>
+                        <li>The app suggests completed standards that need review</li>
+                        <li>Follows the 20% rule (20% of total session time for maintenance)</li>
+                        <li>Suggests the least-recently-practiced completed standard</li>
+                        <li>You can override suggestions and select different repertoire pieces</li>
+                    </ul>
+                </li>
+                <li><strong>Organize Your Session</strong>:
+                    <ul>
+                        <li>Drag and drop tasks to reorder them</li>
+                        <li>Adjust time allocations as needed</li>
+                        <li>Expand individual tasks to add detailed practice notes</li>
+                        <li>Review total session time before starting</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>During Practice Sessions</h3>
+
+            <h4>Basic Timer Usage</h4>
+            <ol>
+                <li><strong>Start Your Session</strong>: Click "Start Practice Session" after setup</li>
+                <li><strong>Select Current Task</strong>: Click on any task to make it active</li>
+                <li><strong>Use Timer Controls</strong>: 
+                    <ul>
+                        <li>Click Play/Resume to start timing</li>
+                        <li>Click Pause to stop timing</li>
+                        <li>Use spacebar for quick play/pause toggle</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h4>Advanced Practice Features</h4>
+            <div class="highlight">
+                <h5>Smart Task Switching</h5>
+                <ul>
+                    <li>Click any task to switch focus instantly</li>
+                    <li>Timer pauses automatically when switching</li>
+                    <li>Previous task time is preserved in memory</li>
+                    <li>Resume any task exactly where you left off</li>
+                </ul>
+
+                <h5>Flexible Overtime</h5>
+                <ul>
+                    <li>Continue working beyond allocated time when inspired</li>
+                    <li>Overtime is tracked and displayed clearly</li>
+                    <li>Visual indicators show tasks that are over their target time</li>
+                    <li>Total session time includes all overtime</li>
+                </ul>
+
+                <h5>Keyboard Navigation</h5>
+                <ul>
+                    <li><strong>Arrow Keys</strong>: Switch between tasks (Up/Down or Left/Right)</li>
+                    <li><strong>Spacebar</strong>: Play/pause current task timer</li>
+                    <li><strong>Task Indicators</strong>: Visual feedback for current, completed, and overtime tasks</li>
+                </ul>
+            </div>
+
+            <h3>Tracking Progress and Analytics</h3>
+
+            <h4>Overview Dashboard</h4>
+            <p>The main screen provides at-a-glance information:</p>
+            <ul>
+                <li><strong>Weekly Statistics</strong>: Sessions completed, total time, average session length</li>
+                <li><strong>Active Task Count</strong>: Current standards and other work in progress</li>
+                <li><strong>Next Repertoire Suggestion</strong>: Which completed standard needs attention</li>
+                <li><strong>Quick Actions</strong>: Start session, view reports, manage tasks</li>
+            </ul>
+
+            <h4>Detailed Reports</h4>
+            <p>Click "Reports" to access comprehensive analytics including weekly statistics, monthly totals, and detailed session history with notes and reflections.</p>
+
+            <h3>Data Management</h3>
+
+            <h4>Backup and Restore</h4>
+            <ul>
+                <li><strong>Export Data</strong>: Click "Export" to download a complete backup file (JSON format)</li>
+                <li><strong>Import Data</strong>: Click "Import" to restore from a backup file</li>
+                <li><strong>Data Migration</strong>: Safely transfer between devices or browsers</li>
+                <li><strong>Version Compatibility</strong>: App handles data format updates automatically</li>
+            </ul>
+        </div>
+
+        <div class="section" id="technical-specification">
+            <h2>Technical Specification</h2>
+
+            <h3>Architecture Overview</h3>
+
+            <h4>Technology Stack</h4>
+            <div class="tech-stack">
+                <div class="tech-item">React 18+</div>
+                <div class="tech-item">Tailwind CSS</div>
+                <div class="tech-item">Lucide Icons</div>
+                <div class="tech-item">localStorage</div>
+                <div class="tech-item">ES6+ JavaScript</div>
+                <div class="tech-item">Hooks Pattern</div>
+            </div>
+
+            <h4>Core Dependencies</h4>
+            <pre><code>// Primary dependencies
+import React, { useState, useEffect, useRef } from 'react'
+import { Play, Pause, Plus, Clock, Check, X, BarChart3, 
+         FileText, RotateCcw, Eye, EyeOff, Download, Upload } from 'lucide-react'</code></pre>
+
+            <h3>Application Structure</h3>
+
+            <h4>Main Component Hierarchy</h4>
+            <pre><code>JazzGuitarTracker (Root)
+├── SessionSetup (Practice session planning)
+├── PracticeSession (Active session management)
+├── ReportsView (Analytics and history)
+├── SessionSummaryModal (Session completion)
+└── UI Components
+    ├── StandardCard / OtherWorkCard (Task display)
+    ├── AddStandardForm / AddOtherWorkForm (Creation)
+    ├── EditStandardForm / EditOtherWorkForm (Editing)
+    ├── FilterButtons (Task filtering)
+    └── SectionSummary (Collapsible summaries)</code></pre>
+
+            <h3>Data Models</h3>
+
+            <h4>Standard Object Schema</h4>
+            <div class="schema-box">
+                <pre><code>{
+  id: string,                    // Unique identifier
+  name: string,                  // Standard name (e.g., "Autumn Leaves")
+  type: 'standard',              // Object type identifier
+  steps: boolean[8],             // 8-step completion tracking
+  completed: boolean,            // Overall completion status
+  active: boolean,               // Currently working on this
+  notes: string,                 // User notes and observations
+  lastWorkedOn: Date            // Last practice date
+}</code></pre>
+            </div>
+
+            <h4>Other Work Object Schema</h4>
+            <div class="schema-box">
+                <pre><code>{
+  id: string,                    // Unique identifier
+  name: string,                  // Exercise/work name
+  type: 'other_work',           // Object type identifier
+  description: string,           // Detailed description
+  completed: boolean,            // Completion status
+  active: boolean,              // Currently working on this
+  lastWorkedOn: Date           // Last practice date
+}</code></pre>
+            </div>
+
+            <h4>Practice Session Schema</h4>
+            <div class="schema-box">
+                <pre><code>{
+  id: string,                    // Unique session identifier
+  date: Date,                    // Session start date/time
+  tasks: Task[],                 // Array of session tasks
+  totalTime: number,             // Planned total time (minutes)
+  completed: boolean,            // Session completion status
+  endTime: Date,                 // Actual end time
+  taskTimeSpent: {               // Actual time spent per task
+    [taskId]: seconds            // Task ID mapped to seconds
+  },
+  finalNotes: object,            // Final session notes per task
+  stepCompletions: object        // Completed steps during session
+}</code></pre>
+            </div>
+
+            <h3>Key Features Implementation</h3>
+
+            <h4>8-Step Learning Algorithm</h4>
+            <pre><code>const STANDARD_STEPS = [
+  'Play through with staple chords',
+  'Learn shell chords',
+  'Learn scales for each chord',
+  'Learn arpeggios for each chord',
+  'Target the 3rds',
+  'Comping',
+  'Practice improv',
+  'Post performance video'
+];</code></pre>
+
+            <h4>Timer System Architecture</h4>
+            <div class="highlight">
+                <p>The timer system implements several sophisticated features:</p>
+                <ul>
+                    <li><strong>Multi-Task Time Memory</strong>: Each task maintains independent elapsed time</li>
+                    <li><strong>Smart Task Switching</strong>: Preserves elapsed time when switching between tasks</li>
+                    <li><strong>Overtime Handling</strong>: Continues tracking beyond allocation gracefully</li>
+                </ul>
+            </div>
+
+            <pre><code>useEffect(() => {
+  if (isTimerRunning && activeTask) {
+    timerRef.current = setInterval(() => {
+      // Update task-specific time
+      setTaskTimeSpent(prev => ({
+        ...prev,
+        [activeTask.id]: (prev[activeTask.id] || 0) + 1
+      }));
+      
+      // Update session total
+      setSessionRunningTime(prev => prev + 1);
+    }, 1000);
+  }
+}, [isTimerRunning, activeTask, taskTimeSpent]);</code></pre>
+
+            <h4>Data Persistence System</h4>
+            <p>The application uses localStorage for client-side persistence with automatic saving and data migration handling:</p>
+
+            <pre><code>useEffect(() => {
+  localStorage.setItem('jazzStandards', JSON.stringify(standards));
+}, [standards]);
+
+const migrateStandardsData = (standardsData) => {
+  return standardsData.map(standard => {
+    if (standard.steps.length === 7) {
+      // Insert new "comping" step at index 5
+      const newSteps = [...standard.steps];
+      newSteps.splice(5, 0, false);
+      return { ...standard, steps: newSteps };
+    }
+    return standard;
+  });
+};</code></pre>
+
+            <h4>Repertoire Rotation Algorithm</h4>
+            <pre><code>const getRepertoireRotation = () => {
+  const activeCompletedStandards = standards.filter(s => s.completed && s.active);
+  
+  return activeCompletedStandards.sort((a, b) => {
+    const dateA = a.lastWorkedOn ? new Date(a.lastWorkedOn) : new Date(0);
+    const dateB = b.lastWorkedOn ? new Date(b.lastWorkedOn) : new Date(0);
+    return dateA - dateB; // Oldest first
+  })[0];
+};</code></pre>
+
+            <h3>UI/UX Implementation</h3>
+
+            <h4>Dark Mode System</h4>
+            <pre><code>const [isDarkMode, setIsDarkMode] = useState(false);
+
+// Consistent dark mode classes throughout components
+className={`transition-colors duration-300 ${
+  isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'
+}`}</code></pre>
+
+            <h4>Responsive Design Approach</h4>
+            <ul>
+                <li><strong>Mobile-First</strong>: Base styles designed for mobile, enhanced for desktop</li>
+                <li><strong>Flexbox/Grid</strong>: Modern CSS layout techniques for adaptability</li>
+                <li><strong>Touch-Friendly</strong>: Adequate touch targets and gesture support</li>
+                <li><strong>Progressive Enhancement</strong>: Core functionality works on all screen sizes</li>
+            </ul>
+
+            <h3>Performance Considerations</h3>
+
+            <h4>Optimization Strategies</h4>
+            <ul>
+                <li><strong>Minimal Re-renders</strong>: Careful use of useEffect dependencies</li>
+                <li><strong>Local State Management</strong>: Avoids prop drilling and unnecessary updates</li>
+                <li><strong>Efficient Data Structures</strong>: Objects for O(1) lookups where appropriate</li>
+                <li><strong>Lazy Loading</strong>: Components render only when needed</li>
+            </ul>
+
+            <h4>Memory Management</h4>
+            <ul>
+                <li><strong>Timer Cleanup</strong>: Proper cleanup of intervals on component unmount</li>
+                <li><strong>Event Listener Management</strong>: Add/remove listeners appropriately</li>
+                <li><strong>Storage Efficiency</strong>: JSON serialization minimizes storage footprint</li>
+            </ul>
+
+            <h3>Security and Privacy</h3>
+
+            <h4>Data Handling</h4>
+            <ul>
+                <li><strong>Local-Only Storage</strong>: No data transmitted to external servers</li>
+                <li><strong>No Authentication</strong>: No personal information collection</li>
+                <li><strong>Export Control</strong>: Users control their own data export/import
