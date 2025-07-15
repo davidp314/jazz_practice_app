@@ -748,6 +748,7 @@ const JazzGuitarTracker = () => {
     return <SessionSetup 
       standards={standards}
       otherWork={otherWork}
+      practiceHistory={practiceHistory}
       onCreateSession={createSession}
       onCancel={() => {
         setShowNewSession(false);
@@ -1847,7 +1848,7 @@ const EditOtherWorkForm = ({ work, onUpdate, onCancel, isDarkMode }) => {
   );
 };
 
-const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepertoireRotation, isDarkMode, toggleDarkMode }) => {
+const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, onCancel, getRepertoireRotation, isDarkMode, toggleDarkMode }) => {
   const [sessionTasks, setSessionTasks] = useState([]);
   const [newTaskName, setNewTaskName] = useState('');
   const [newTaskTime, setNewTaskTime] = useState(20);
@@ -1860,6 +1861,9 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
   const [standardTimeInput, setStandardTimeInput] = useState(25);
   const [showOtherWorkTimeInput, setShowOtherWorkTimeInput] = useState(false);
   const [otherWorkTimeInput, setOtherWorkTimeInput] = useState(20);
+  const [showRepertoireChoice, setShowRepertoireChoice] = useState(false);
+  const [lastSessionTemplate, setLastSessionTemplate] = useState(null);
+  const [repertoireChoices, setRepertoireChoices] = useState({});
 
   const activeStandards = standards.filter(s => s.active);
   const activeOtherWork = otherWork.filter(w => w.active);
@@ -2067,6 +2071,72 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
     return labels[stepIndex] || `Step ${stepIndex + 1}`;
   };
 
+  // Get the most recent completed session
+  const getLastSession = () => {
+    const completedSessions = practiceHistory.filter(session => session.completed);
+    return completedSessions.length > 0 ? completedSessions[0] : null;
+  };
+
+  // Handle "Use Last Session" button click
+  const handleUseLastSession = () => {
+    const lastSession = getLastSession();
+    if (!lastSession) {
+      alert('No completed sessions found to use as template.');
+      return;
+    }
+
+    // Check if the last session has any repertoire tasks
+    const repertoireTasks = lastSession.tasks.filter(task => 
+      task.name && task.name.includes('(Repertoire)')
+    );
+
+    if (repertoireTasks.length > 0) {
+      // Initialize choices for each repertoire task
+      const initialChoices = {};
+      repertoireTasks.forEach((task, index) => {
+        initialChoices[task.id] = 'keep';
+      });
+      setRepertoireChoices(initialChoices);
+      
+      // Show repertoire choice modal
+      setLastSessionTemplate(lastSession);
+      setShowRepertoireChoice(true);
+    } else {
+      // Apply template directly
+      applyLastSessionTemplate(lastSession);
+    }
+  };
+
+  // Apply the last session template with repertoire choices
+  const applyLastSessionTemplate = (session, repertoireChoices = {}) => {
+    const newTasks = session.tasks.filter(task => {
+      // Remove repertoire tasks that were marked for removal
+      if (task.name && task.name.includes('(Repertoire)')) {
+        const choice = repertoireChoices[task.id];
+        return choice !== 'remove';
+      }
+      return true;
+    }).map(task => {
+      const newTask = {
+        id: Date.now().toString() + Math.random(),
+        name: task.name,
+        type: task.type,
+        timeAllocated: task.timeAllocated,
+        practiceNote: task.practiceNote || '',
+        sessionNote: ''
+      };
+      // Copy other properties
+      if (task.standardId) newTask.standardId = task.standardId;
+      if (task.otherWorkId) newTask.otherWorkId = task.otherWorkId;
+      if (task.focusStep !== undefined) newTask.focusStep = task.focusStep;
+      return newTask;
+    });
+    setSessionTasks(newTasks);
+    setShowRepertoireChoice(false);
+    setLastSessionTemplate(null);
+    setRepertoireChoices({});
+  };
+
   return (
     <div className={`max-w-5xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
       isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
@@ -2075,9 +2145,12 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>
         <div className="flex justify-between items-center mb-6">
-          <h1 className={`text-2xl font-bold transition-colors duration-300 ${
-            isDarkMode ? 'text-white' : 'text-gray-800'
-          }`}>Setup Practice Session</h1>
+          <div className="flex items-center gap-4">
+            <h1 className={`text-2xl font-bold transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>Setup Practice Session</h1>
+            {/* Removed Use Last Session button from here */}
+          </div>
           <div className="flex gap-3 items-center">
             {/* Dark Mode Toggle */}
             <button
@@ -2115,11 +2188,13 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Add Standard */}
-          <div className={`p-4 rounded-lg transition-colors duration-300 ${
-            isDarkMode ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50'
+          <div className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-gray-800 border-blue-500 hover:border-blue-400' 
+              : 'bg-white border-blue-300 hover:border-blue-400'
           }`}>
             <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
-              isDarkMode ? 'text-blue-300' : 'text-gray-800'
+              isDarkMode ? 'text-blue-300' : 'text-blue-700'
             }`}>Add Standard</h3>
             <select
               value={selectedStandard}
@@ -2176,11 +2251,13 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
           </div>
 
           {/* Add Other Work */}
-          <div className={`p-4 rounded-lg transition-colors duration-300 ${
-            isDarkMode ? 'bg-purple-900/30 border border-purple-700' : 'bg-purple-50'
+          <div className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-gray-800 border-purple-500 hover:border-purple-400' 
+              : 'bg-white border-purple-300 hover:border-purple-400'
           }`}>
             <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
-              isDarkMode ? 'text-purple-300' : 'text-gray-800'
+              isDarkMode ? 'text-purple-300' : 'text-purple-700'
             }`}>Add Other Work</h3>
             <select
               value={selectedOtherWork}
@@ -2237,11 +2314,13 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
           </div>
 
           {/* Add One-Off */}
-          <div className={`p-4 rounded-lg transition-colors duration-300 ${
-            isDarkMode ? 'bg-green-900/30 border border-green-700' : 'bg-green-50'
+          <div className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-gray-800 border-green-500 hover:border-green-400' 
+              : 'bg-white border-green-300 hover:border-green-400'
           }`}>
             <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
-              isDarkMode ? 'text-green-300' : 'text-gray-800'
+              isDarkMode ? 'text-green-300' : 'text-green-700'
             }`}>Add One-Off Task</h3>
             <input
               type="text"
@@ -2277,11 +2356,13 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
           </div>
 
           {/* Add Repertoire */}
-          <div className={`p-4 rounded-lg transition-colors duration-300 ${
-            isDarkMode ? 'bg-orange-900/30 border border-orange-700' : 'bg-orange-50'
+          <div className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
+            isDarkMode 
+              ? 'bg-gray-800 border-orange-500 hover:border-orange-400' 
+              : 'bg-white border-orange-300 hover:border-orange-400'
           }`}>
             <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
-              isDarkMode ? 'text-orange-300' : 'text-gray-800'
+              isDarkMode ? 'text-orange-300' : 'text-orange-700'
             }`}>Add Repertoire Review</h3>
             <select
               value={selectedRepertoire}
@@ -2326,9 +2407,22 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
             isDarkMode ? 'text-white' : 'text-gray-800'
           }`}>Session Tasks ({totalTime} minutes total)</h3>
           {sessionTasks.length === 0 ? (
-            <p className={`text-center py-8 transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>No tasks added yet</p>
+            <div className="text-center py-8">
+              <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-500'} mb-4`}>No tasks added yet.</p>
+              {getLastSession() && (
+                <button
+                  onClick={handleUseLastSession}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors duration-200 ${
+                    isDarkMode
+                      ? 'border-blue-500 text-blue-300 hover:bg-blue-900/30'
+                      : 'border-blue-600 text-blue-700 hover:bg-blue-50'
+                  }`}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Use Last Session as Template
+                </button>
+              )}
+            </div>
           ) : (
             <>
               <div className={`mb-3 text-sm p-3 rounded-lg border transition-colors duration-300 ${
@@ -2562,6 +2656,144 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
           </button>
         </div>
       </div>
+
+      {/* Repertoire Choice Modal */}
+      {showRepertoireChoice && lastSessionTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`rounded-lg shadow-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto transition-colors duration-300 ${
+            isDarkMode ? 'bg-gray-800' : 'bg-white'
+          }`}>
+            <div className="text-center mb-6">
+              <h3 className={`text-lg font-bold mb-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-800'
+              }`}>
+                Last Session Template
+              </h3>
+              <p className={`text-sm transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                Your last session included repertoire tasks. How would you like to handle each one?
+              </p>
+            </div>
+
+            {(() => {
+              const repertoireTasks = lastSessionTemplate.tasks.filter(task => 
+                task.name && task.name.includes('(Repertoire)')
+              );
+              const repertoireList = getRepertoireList();
+              
+              return (
+                <div className="space-y-6">
+                  {repertoireTasks.map((task, index) => {
+                    const nextRepertoire = repertoireList[index] || repertoireList[0];
+                    const currentChoice = repertoireChoices[task.id] || 'keep';
+                    
+                    return (
+                      <div key={task.id} className={`p-4 rounded-lg border transition-colors duration-300 ${
+                        isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+                      }`}>
+                        <div className={`font-medium mb-3 transition-colors duration-300 ${
+                          isDarkMode ? 'text-white' : 'text-gray-800'
+                        }`}>
+                          Repertoire Task {index + 1}
+                        </div>
+                        <div className={`text-sm mb-3 transition-colors duration-300 ${
+                          isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
+                          {task.name} ({task.timeAllocated} min)
+                        </div>
+                        {nextRepertoire && (
+                          <div className={`text-sm mb-4 transition-colors duration-300 ${
+                            isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                          }`}>
+                            Next in rotation: {nextRepertoire.name}
+                          </div>
+                        )}
+
+                        <div className="space-y-3">
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`repertoireChoice-${task.id}`}
+                              value="keep"
+                              checked={currentChoice === 'keep'}
+                              onChange={(e) => setRepertoireChoices(prev => ({
+                                ...prev,
+                                [task.id]: e.target.value
+                              }))}
+                              className="text-blue-600"
+                            />
+                            <div>
+                              <div className={`font-medium transition-colors duration-300 ${
+                                isDarkMode ? 'text-white' : 'text-gray-800'
+                              }`}>
+                                Keep the same
+                              </div>
+                              <div className={`text-sm transition-colors duration-300 ${
+                                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                              }`}>
+                                Use {task.name} again
+                              </div>
+                            </div>
+                          </label>
+                          <label className="flex items-center gap-3 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`repertoireChoice-${task.id}`}
+                              value="remove"
+                              checked={currentChoice === 'remove'}
+                              onChange={(e) => setRepertoireChoices(prev => ({
+                                ...prev,
+                                [task.id]: e.target.value
+                              }))}
+                              className="text-red-600"
+                            />
+                            <div>
+                              <div className={`font-medium transition-colors duration-300 ${
+                                isDarkMode ? 'text-white' : 'text-gray-800'
+                              }`}>
+                                Remove from template
+                              </div>
+                              <div className={`text-sm transition-colors duration-300 ${
+                                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                              }`}>
+                                Don't include this repertoire task
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            <div className="flex gap-3 pt-6">
+              <button
+                onClick={() => {
+                  setShowRepertoireChoice(false);
+                  setLastSessionTemplate(null);
+                  setRepertoireChoices({});
+                }}
+                className={`flex-1 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                  isDarkMode 
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => applyLastSessionTemplate(lastSessionTemplate, repertoireChoices)}
+                className="flex-1 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+              >
+                Apply Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
