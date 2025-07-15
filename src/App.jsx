@@ -44,6 +44,7 @@ const JazzGuitarTracker = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showSessionSummary, setShowSessionSummary] = useState(false);
   const [sessionSummaryData, setSessionSummaryData] = useState(null);
+  const [sessionStarted, setSessionStarted] = useState(false);
   
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -328,7 +329,18 @@ const JazzGuitarTracker = () => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
 
-  // Timer logic
+  // Session timer logic - runs when task timer is running
+  useEffect(() => {
+    if (sessionStartTime && currentSession && isTimerRunning) {
+      const sessionTimerRef = setInterval(() => {
+        setSessionRunningTime(prev => prev + 1);
+      }, 1000);
+      
+      return () => clearInterval(sessionTimerRef);
+    }
+  }, [sessionStartTime, currentSession, isTimerRunning]);
+
+  // Task timer logic
   useEffect(() => {
     if (isTimerRunning && activeTask) {
       timerRef.current = setInterval(() => {
@@ -338,23 +350,12 @@ const JazzGuitarTracker = () => {
           [activeTask.id]: (prev[activeTask.id] || 0) + 1
         }));
 
-        // Update session running time
-        setSessionRunningTime(prev => prev + 1);
-
-        // Only update timeRemaining if the task hasn't reached its goal time
+        // Update timeRemaining to show countdown or overtime
         const taskElapsed = (taskTimeSpent[activeTask.id] || 0) + 1; // +1 because we just updated it
         const taskAllocated = activeTask.timeAllocated * 60;
+        const remaining = taskAllocated - taskElapsed;
         
-        if (taskElapsed < taskAllocated) {
-          setTimeRemaining(prev => {
-            if (prev <= 1) {
-              return 0;
-            }
-            return prev - 1;
-          });
-        }
-        // If task has reached or exceeded goal time, keep timeRemaining at 0
-        // but continue running the session timer
+        setTimeRemaining(remaining);
       }, 1000);
     } else {
       clearInterval(timerRef.current);
@@ -538,6 +539,7 @@ const JazzGuitarTracker = () => {
     setSessionStartTime(null);
     setSessionRunningTime(0);
     setLastTimerStart(null);
+    setSessionStarted(false);
     // Automatically set the first task as the current task
     if (tasks.length > 0) {
       setActiveTask(tasks[0]);
@@ -556,7 +558,7 @@ const JazzGuitarTracker = () => {
     if (!activeTask || activeTask.id !== task.id) {
       setActiveTask(task);
       const timeSpent = taskTimeSpent[task.id] || 0;
-      const remainingTime = Math.max(0, (task.timeAllocated * 60) - timeSpent);
+      const remainingTime = (task.timeAllocated * 60) - timeSpent;
       setTimeRemaining(remainingTime);
       setIsTimerRunning(false); // Don't auto-start when switching tasks
     }
@@ -572,6 +574,12 @@ const JazzGuitarTracker = () => {
   };
 
   const resumeTimer = () => {
+    // Set session start time if not already set (this starts the session timer)
+    if (!sessionStartTime) {
+      setSessionStartTime(new Date());
+      setSessionRunningTime(0);
+      setSessionStarted(true);
+    }
     setIsTimerRunning(true);
     setLastTimerStart(new Date());
   };
@@ -675,6 +683,15 @@ const JazzGuitarTracker = () => {
     return totalAllocated > 0 ? (totalSpentCapped / totalAllocated) * 100 : 0;
   };
 
+  const getCappedTotalTimeSpent = () => {
+    if (!currentSession) return 0;
+    return currentSession.tasks.reduce((sum, task) => {
+      const spent = taskTimeSpent[task.id] || 0;
+      const allocated = task.timeAllocated * 60;
+      return sum + Math.min(spent, allocated);
+    }, 0);
+  };
+
   const getRepertoireRotation = () => {
     const activeCompletedStandards = standards.filter(s => s.completed && s.active);
     if (activeCompletedStandards.length === 0) return null;
@@ -769,7 +786,9 @@ const JazzGuitarTracker = () => {
           getTaskElapsedTime={getTaskElapsedTime}
           getSessionProgress={getSessionProgress}
           getRemainingTaskTime={getRemainingTaskTime}
+          getCappedTotalTimeSpent={getCappedTotalTimeSpent}
           taskTimeSpent={taskTimeSpent}
+          sessionStarted={sessionStarted}
         />
         {/* Session Summary Modal */}
         {showSessionSummary && (
@@ -2497,7 +2516,9 @@ const PracticeSession = ({
   getTaskElapsedTime,
   getSessionProgress,
   getRemainingTaskTime,
-  taskTimeSpent
+  getCappedTotalTimeSpent,
+  taskTimeSpent,
+  sessionStarted
 }) => {
   const currentTaskIndex = activeTask ? session.tasks.findIndex(t => t.id === activeTask.id) : -1;
 
@@ -2508,6 +2529,11 @@ const PracticeSession = ({
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Don't handle keyboard shortcuts when note panel is open
+      if (showNotePanel) {
+        return;
+      }
+      
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
         const prevIndex = currentTaskIndex > 0 ? currentTaskIndex - 1 : session.tasks.length - 1;
@@ -2530,7 +2556,7 @@ const PracticeSession = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentTaskIndex, session.tasks, onStartTimer, activeTask, isTimerRunning, onPauseTimer, onResumeTimer]);
+  }, [currentTaskIndex, session.tasks, onStartTimer, activeTask, isTimerRunning, onPauseTimer, onResumeTimer, showNotePanel]);
 
   // DIFF 9: Add helper functions
   const handleTaskClick = (task) => {
@@ -2543,11 +2569,14 @@ const PracticeSession = ({
   const handleTaskDoubleClick = (task) => {
     // Make task active if not already active
     if (!activeTask || activeTask.id !== task.id) {
-      if (isTimerRunning) {
-        onPauseTimer();
-      }
       onStartTimer(task);
     }
+    
+    // Always pause the timer when opening the practice note box
+    if (isTimerRunning) {
+      onPauseTimer();
+    }
+    
     setEditingTaskNote(task.sessionNote || task.practiceNote || '');
     setShowNotePanel(true);
   };
@@ -2631,14 +2660,18 @@ const PracticeSession = ({
                 isDarkMode ? 'text-blue-300' : 'text-gray-800'
               }`}>{activeTask.name}</h2>
               
-              {/* Remaining Task Time - Centered main display */}
+              {/* Active Task Countdown - Centered main display */}
               <div className="mb-6">
                 <div className={`text-sm font-medium mb-2 transition-colors duration-300 ${
                   isDarkMode ? 'text-blue-400' : 'text-gray-600'
-                }`}>Remaining Task Time</div>
+                }`}>Active Task Countdown</div>
                 <div className={`text-4xl font-bold transition-colors duration-300 ${
-                  isDarkMode ? 'text-blue-300' : 'text-blue-600'
-                }`}>{formatTime(getRemainingTaskTime())}</div>
+                  timeRemaining < 0 
+                    ? (isDarkMode ? 'text-orange-400' : 'text-orange-600')
+                    : (isDarkMode ? 'text-blue-300' : 'text-blue-600')
+                }`}>
+                  {timeRemaining < 0 ? '-' : ''}{formatTime(Math.abs(timeRemaining))}
+                </div>
               </div>
 
               <div className="flex justify-center gap-4">
@@ -2648,7 +2681,7 @@ const PracticeSession = ({
                     className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
                     <Play size={20} />
-                    {getTaskElapsedTime(activeTask.id) === 0 ? 'Start' : 'Resume'}
+                    {sessionStarted ? 'Resume' : 'Start'}
                   </button>
                 ) : (
                   <button
@@ -2674,11 +2707,11 @@ const PracticeSession = ({
                 isDarkMode ? 'text-blue-300' : 'text-gray-800'
               }`}>Select a Task to Begin</h2>
               
-              {/* Remaining Task Time - Centered main display */}
+              {/* Active Task Countdown - Centered main display */}
               <div className="mb-6">
                 <div className={`text-sm font-medium mb-2 transition-colors duration-300 ${
                   isDarkMode ? 'text-blue-400' : 'text-gray-600'
-                }`}>Remaining Task Time</div>
+                }`}>Active Task Countdown</div>
                 <div className={`text-4xl font-bold transition-colors duration-300 ${
                   isDarkMode ? 'text-blue-300' : 'text-blue-600'
                 }`}>{formatTime(getRemainingTaskTime())}</div>
@@ -2820,20 +2853,64 @@ const PracticeSession = ({
             isDarkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
             <span>Time Progress</span>
-            <span>{formatTime(getSessionElapsedTime())} / {formatTime(session.totalTime * 60)}</span>
+            <span>{formatTime(getCappedTotalTimeSpent())} / {formatTime(session.totalTime * 60)}</span>
           </div>
-          <div className={`w-full rounded-full h-2 transition-colors duration-300 ${
+          
+          {/* Segmented Progress Bar */}
+          <div className={`w-full h-3 rounded-full transition-colors duration-300 ${
             isDarkMode ? 'bg-gray-600' : 'bg-gray-200'
-          }`}>
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${Math.min(getSessionProgress(), 100)}%` }}
-            ></div>
+          }`} style={{ position: 'relative' }}>
+            {session.tasks.map((task, index) => {
+              const taskElapsed = getTaskElapsedTime(task.id);
+              const taskAllocated = task.timeAllocated * 60;
+              const isActive = activeTask && activeTask.id === task.id;
+              const isCompleted = taskElapsed >= taskAllocated;
+              
+              // Calculate segment width and position
+              const totalAllocated = session.totalTime * 60;
+              const segmentWidth = (taskAllocated / totalAllocated) * 100;
+              const segmentLeft = session.tasks.slice(0, index).reduce((sum, t) => 
+                sum + ((t.timeAllocated * 60) / totalAllocated) * 100, 0
+              );
+              
+              // Calculate fill width for this segment
+              const fillWidth = Math.min((taskElapsed / taskAllocated) * 100, 100);
+              
+              return (
+                <div key={task.id} style={{ 
+                  position: 'absolute', 
+                  left: `${segmentLeft}%`, 
+                  width: `${segmentWidth}%`,
+                  height: '100%'
+                }}>
+                  {/* Segment fill */}
+                  <div 
+                    className={`h-full rounded-full transition-all duration-300 ${
+                      isActive 
+                        ? 'bg-blue-600' 
+                        : isCompleted 
+                          ? 'bg-blue-500' 
+                          : 'bg-blue-400'
+                    }`}
+                    style={{ width: `${fillWidth}%` }}
+                  />
+                  
+                  {/* Dividing line (except for first segment) */}
+                  {index > 0 && (
+                    <div 
+                      className="absolute left-0 top-0 w-0.5 h-full bg-blue-300"
+                      style={{ zIndex: 1 }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
+          
           <div className={`text-xs mt-1 transition-colors duration-300 ${
             isDarkMode ? 'text-gray-400' : 'text-gray-500'
           }`}>
-            Progress based on completed allocated time for each task
+            Each segment represents a task, filled as you practice
           </div>
         </div>
       </div>

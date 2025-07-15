@@ -1,0 +1,200 @@
+{
+  "standards": [
+    {
+      "id": "1752522985138",
+      "name": "It Could Happen To You",
+      "type": "standard",
+      "steps": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "completed": false,
+      "active": true,
+      "notes": "",
+      "lastWorkedOn": null
+    },
+    {
+      "id": "1752523037868",
+      "name": "Autumn Leaves",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "completed": true,
+      "active": true,
+      "notes": "",
+      "lastWorkedOn": "2025-07-14T19:59:20.469Z"
+    },
+    {
+      "id": "1752523044677",
+      "name": "Nardis",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "completed": true,
+      "active": true,
+      "notes": "",
+      "lastWorkedOn": "2025-07-14T19:59:54.240Z"
+    },
+    {
+      "id": "1752523057310",
+      "name": "Wave",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "completed": true,
+      "active": true,
+      "notes": "",
+      "lastWorkedOn": "2025-07-14T20:00:19.362Z"
+    },
+    {
+      "id": "1752523078808",
+      "name": "Someday My Prince Will Come",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "completed": true,
+      "active": true,
+      "notes": "",
+      "lastWorkedOn": "2025-07-14T20:00:42.181Z"
+    },
+    {
+      "id": "1752523097167",
+      "name": "Blue Monk",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "completed": true,
+      "active": true,
+      "notes": "",
+      "lastWorkedOn": "2025-07-14T20:01:52.272Z"
+    },
+    {
+      "id": "1752523118008",
+      "name": "Four on Six",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "completed": false,
+      "active": true,
+      "notes": "",
+      "lastWorkedOn": "2025-07-14T20:03:53.887Z"
+    }
+  ],
+  "otherWork": [],
+  "practiceHistory": [
+    {
+      "id": "1752523865499",
+      "date": "2025-07-14T20:11:05.499Z",
+      "tasks": [
+        {
+          "id": "1752523648525",
+          "name": "It Could Happen To You",
+          "type": "standard",
+          "timeAllocated": 16,
+          "standardId": "1752522985138",
+          "focusStep": 2,
+          "practiceNote": "review",
+          "sessionNote": ""
+        },
+        {
+          "id": "1752523653584",
+          "name": "It Could Happen To You",
+          "type": "standard",
+          "timeAllocated": 16,
+          "standardId": "1752522985138",
+          "focusStep": 3,
+          "practiceNote": "review",
+          "sessionNote": ""
+        },
+        {
+          "id": "1752523662412",
+          "name": "It Could Happen To You",
+          "type": "standard",
+          "timeAllocated": 20,
+          "standardId": "1752522985138",
+          "focusStep": 4,
+          "practiceNote": "new",
+          "sessionNote": ""
+        },
+        {
+          "id": "1752523862393",
+          "name": "Wave (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 10,
+          "standardId": "1752523057310",
+          "focusStep": null,
+          "practiceNote": "",
+          "sessionNote": ""
+        }
+      ],
+      "totalTime": 62,
+      "completed": true,
+      "endTime": "2025-07-14T21:51:33.832Z",
+      "taskTimeSpent": {
+        "1752523648525": 1042,
+        "1752523653584": 1049,
+        "1752523662412": 1317,
+        "1752523862393": 729
+      },
+      "finalNotes": {},
+      "stepCompletions": {}
+    }
+  ],
+  "exportDate": "2025-07-14T21:51:37.897Z",
+  "version": "2.1",
+  "appName": "Jazz Guitar Practice Tracker"
+}
