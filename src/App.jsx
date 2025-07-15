@@ -1918,8 +1918,10 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                         {/* Task header - NOW CLICKABLE to expand */}
                         <div 
                           onClick={() => toggleTaskExpanded(task.id)}
-                          className={`flex items-center gap-4 p-3 cursor-pointer ${
-                            isExpanded ? 'border-b border-gray-200' : ''
+                          className={`flex items-center gap-4 p-3 cursor-pointer rounded-t-lg transition-all duration-200 ${
+                            isExpanded 
+                              ? 'bg-blue-50 border-b border-blue-200' 
+                              : 'hover:bg-gray-50'
                           }`}
                         >
                           {/* PRESERVE existing drag handle */}
@@ -1985,11 +1987,16 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                           >
                             <X size={16} />
                           </button>
-                          {/* NEW: Expand indicator */}
-                          <div className={`transition-transform duration-200 ${
-                            isExpanded ? 'rotate-90' : ''
+                          {/* NEW: Enhanced expand indicator */}
+                          <div className={`flex items-center gap-1 text-sm transition-colors duration-200 ${
+                            isExpanded ? 'text-blue-600' : 'text-gray-500'
                           }`}>
-                            ▶
+                            <span>{isExpanded ? 'Hide' : 'Show'} details</span>
+                            <div className={`transition-transform duration-200 ${
+                              isExpanded ? 'rotate-180' : ''
+                            }`}>
+                              ▼
+                            </div>
                           </div>
                         </div>
                         
