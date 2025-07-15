@@ -1,22 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, RotateCcw, Eye, EyeOff, Download, Upload } from 'lucide-react';
-
-const TASK_TYPES = {
-  STANDARD: 'standard',
-  OTHER_WORK: 'other_work',
-  ONE_OFF: 'one_off'
-};
-
-const STANDARD_STEPS = [
-  'Play through with staple chords',
-  'Learn shell chords',
-  'Learn scales for each chord',
-  'Learn arpeggios for each chord',
-  'Target the 3rds',
-  'Comping',
-  'Practice improv',
-  'Post performance video'
-];
+import DarkModeToggle from "./components/DarkModeToggle";
+import FilterButtons from "./components/FilterButtons";
+import SectionSummary from "./components/SectionSummary";
+import AddStandardForm from "./components/AddStandardForm";
+import AddOtherWorkForm from "./components/AddOtherWorkForm";
+import EditStandardSelector from "./components/EditStandardSelector";
+import EditStandardForm from "./components/EditStandardForm";
+import EditOtherWorkSelector from "./components/EditOtherWorkSelector";
+import EditOtherWorkForm from "./components/EditOtherWorkForm";
+import { TASK_TYPES, STANDARD_STEPS } from "./constants";
 
 const JazzGuitarTracker = () => {
   // State management
@@ -837,25 +830,7 @@ const JazzGuitarTracker = () => {
           }`}>Jazz Guitar Practice Tracker</h1>
 	  <div className="flex gap-2 items-center">
 		      {/* Dark Mode Toggle - separate from main actions */}
-		      <button
-			onClick={toggleDarkMode}
-			className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 ${
-			  isDarkMode 
-			    ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-			    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-			}`}
-			title="Toggle dark mode"
-		      >
-			{isDarkMode ? (
-			  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-			    <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
-			  </svg>
-			) : (
-			  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-			    <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clipRule="evenodd"/>
-			  </svg>
-			)}
-		      </button>
+		      <DarkModeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} square />
 		      
 		      {/* Main action buttons - grouped and consistent */}
 		      <div className="flex gap-1 ml-2">
@@ -1185,121 +1160,9 @@ const JazzGuitarTracker = () => {
   );
 };
 
-const AddStandardForm = ({ onAdd, onCancel, isDarkMode }) => {
-  const [name, setName] = useState('');
 
-  const handleSubmit = () => {
-    if (name.trim()) {
-      onAdd(name.trim());
-      setName('');
-    }
-  };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSubmit();
-    }
-  };
 
-  return (
-    <div className={`p-4 rounded-lg mb-4 transition-colors duration-300 ${
-      isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
-    }`}>
-      <div className="flex gap-3">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Enter standard name..."
-          className={`flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300 ${
-            isDarkMode 
-              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
-              : 'bg-white border-gray-300 text-gray-800'
-          }`}
-          autoFocus
-        />
-        <button
-          onClick={handleSubmit}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        >
-          Add
-        </button>
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const AddOtherWorkForm = ({ onAdd, onCancel, isDarkMode }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-
-  const handleSubmit = () => {
-    if (name.trim()) {
-      onAdd(name.trim(), description.trim());
-      setName('');
-      setDescription('');
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-      handleSubmit();
-    }
-  };
-
-  return (
-    <div className={`p-4 rounded-lg mb-4 transition-colors duration-300 ${
-      isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
-    }`}>
-      <div className="space-y-3">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Enter name (e.g., 'Galbraith Etude #5')..."
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300 ${
-            isDarkMode 
-              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
-              : 'bg-white border-gray-300 text-gray-800'
-          }`}
-          autoFocus
-        />
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Description (optional)..."
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none transition-colors duration-300 ${
-            isDarkMode 
-              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
-              : 'bg-white border-gray-300 text-gray-800'
-          }`}
-        />
-        <div className="flex gap-3">
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-          >
-            Add
-          </button>
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const StandardCard = ({ standard, isDarkMode }) => {
   const completedSteps = standard.steps.filter(Boolean).length;
@@ -1439,414 +1302,13 @@ const OtherWorkCard = ({ item, isDarkMode }) => {
   );
 };
 
-const SectionSummary = ({ items, isDarkMode }) => {
-  const activeCount = items.filter(item => item.active).length;
-  const completedCount = items.filter(item => item.completed).length;
-  const inProgressCount = items.filter(item => !item.completed).length;
-  const totalCount = items.length;
 
-  return (
-    <div className="flex gap-4 text-sm">
-      <span className={`px-2 py-1 rounded transition-colors duration-300 ${
-        isDarkMode ? 'bg-blue-900/50 text-blue-300 border border-blue-700' : 'bg-blue-100 text-blue-800'
-      }`}>
-        {activeCount} active
-      </span>
-      <span className={`px-2 py-1 rounded transition-colors duration-300 ${
-        isDarkMode ? 'bg-green-900/50 text-green-300 border border-green-700' : 'bg-green-100 text-green-800'
-      }`}>
-        {completedCount} completed
-      </span>
-      <span className={`px-2 py-1 rounded transition-colors duration-300 ${
-        isDarkMode ? 'bg-yellow-900/50 text-yellow-300 border border-yellow-700' : 'bg-yellow-100 text-yellow-800'
-      }`}>
-        {inProgressCount} in progress
-      </span>
-      <span className={`px-2 py-1 rounded transition-colors duration-300 ${
-        isDarkMode ? 'bg-gray-700 text-gray-300 border border-gray-600' : 'bg-gray-100 text-gray-800'
-      }`}>
-        {totalCount} total
-      </span>
-    </div>
-  );
-};
 
-const FilterButtons = ({ currentFilter, onFilterChange, items, isDarkMode }) => {
-  const activeCount = items.filter(item => item.active).length;
-  const completedCount = items.filter(item => item.completed).length;
-  const totalCount = items.length;
 
-  const filters = [
-    { key: 'active', label: `Active (${activeCount})`, count: activeCount },
-    { key: 'all', label: `All (${totalCount})`, count: totalCount },
-    { key: 'completed', label: `Completed (${completedCount})`, count: completedCount }
-  ];
 
-  return (
-    <div className="flex gap-2">
-      {filters.map(filter => (
-        <button
-          key={filter.key}
-          onClick={() => onFilterChange(filter.key)}
-          className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-            currentFilter === filter.key
-              ? 'bg-blue-600 text-white'
-              : (isDarkMode 
-                  ? 'bg-gray-600 text-gray-300 hover:bg-gray-500' 
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300')
-          }`}
-        >
-          {filter.label}
-        </button>
-      ))}
-    </div>
-  );
-};
 
-const EditStandardSelector = ({ standards, onSelectStandard, onCancel, isDarkMode }) => {
-  return (
-    <div className={`p-4 rounded-lg mb-4 border transition-colors duration-300 ${
-      isDarkMode 
-        ? 'bg-orange-900/30 border-orange-700' 
-        : 'bg-orange-50 border-orange-200'
-    }`}>
-      <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
-        isDarkMode ? 'text-orange-300' : 'text-orange-800'
-      }`}>Select Standard to Edit</h3>
-      <div className="grid gap-2 mb-4 max-h-48 overflow-y-auto">
-        {standards.map(standard => (
-          <button
-            key={standard.id}
-            onClick={() => onSelectStandard(standard)}
-            className={`text-left p-3 rounded border transition-colors ${
-              isDarkMode 
-                ? 'bg-gray-700 border-gray-600 hover:bg-orange-900/50 text-white' 
-                : 'bg-white border-gray-300 hover:bg-orange-50 text-gray-800'
-            }`}
-          >
-            <div className="font-medium">{standard.name}</div>
-            <div className={`text-sm transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              {standard.completed ? 'Completed' : 'In Progress'} • {standard.active ? 'Active' : 'Inactive'}
-            </div>
-          </button>
-        ))}
-      </div>
-      <button
-        onClick={onCancel}
-        className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-      >
-        Cancel
-      </button>
-    </div>
-  );
-};
 
-const EditStandardForm = ({ standard, onUpdate, onCancel, isDarkMode }) => {
-  const [name, setName] = useState(standard.name);
-  const [notes, setNotes] = useState(standard.notes || '');
-  const [steps, setSteps] = useState([...standard.steps]);
-  const [completed, setCompleted] = useState(standard.completed);
-  const [active, setActive] = useState(standard.active);
 
-  // Update form state when standard prop changes
-  useEffect(() => {
-    setName(standard.name);
-    setNotes(standard.notes || '');
-    setSteps([...standard.steps]);
-    setCompleted(standard.completed);
-    setActive(standard.active);
-  }, [standard]);
-
-  const handleStepToggle = (index) => {
-    const newSteps = [...steps];
-    newSteps[index] = !newSteps[index];
-    setSteps(newSteps);
-    
-    // Auto-update completed status based on all steps
-    const allCompleted = newSteps.every(step => step);
-    setCompleted(allCompleted);
-  };
-
-  const handleSubmit = () => {
-    if (name.trim()) {
-      onUpdate(standard.id, {
-        name: name.trim(),
-        notes: notes.trim(),
-        steps,
-        completed,
-        active
-      });
-    }
-  };
-
-  return (
-    <div className={`p-4 rounded-lg mb-4 border transition-colors duration-300 ${
-      isDarkMode 
-        ? 'bg-orange-900/30 border-orange-700' 
-        : 'bg-orange-50 border-orange-200'
-    }`}>
-      <h3 className={`font-semibold mb-4 transition-colors duration-300 ${
-        isDarkMode ? 'text-orange-300' : 'text-orange-800'
-      }`}>Edit Standard: {standard.name}</h3>
-      
-      <div className="space-y-4">
-        <div>
-          <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-          }`}>Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-300 ${
-              isDarkMode 
-                ? 'bg-gray-600 border-gray-500 text-white' 
-                : 'bg-white border-gray-300 text-gray-800'
-            }`}
-          />
-        </div>
-
-        <div>
-          <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-          }`}>Notes</label>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add any notes about this standard..."
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 h-20 resize-none transition-colors duration-300 ${
-              isDarkMode 
-                ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
-                : 'bg-white border-gray-300 text-gray-800'
-            }`}
-          />
-        </div>
-
-        <div>
-          <label className={`block text-sm font-medium mb-2 transition-colors duration-300 ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-          }`}>Learning Steps</label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {STANDARD_STEPS.map((step, index) => (
-              <label key={index} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={steps[index]}
-                  onChange={() => handleStepToggle(index)}
-                  className="rounded"
-                />
-                <span className={`text-sm transition-colors duration-300 ${
-                  steps[index] 
-                    ? (isDarkMode ? 'line-through text-gray-500' : 'line-through text-gray-500')
-                    : (isDarkMode ? 'text-gray-300' : 'text-gray-800')
-                }`}>
-                  {step}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={completed}
-              onChange={(e) => setCompleted(e.target.checked)}
-              className="rounded"
-            />
-            <span className={`text-sm font-medium transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-800'
-            }`}>Completed</span>
-          </label>
-          
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={(e) => setActive(e.target.checked)}
-              className="rounded"
-            />
-            <span className={`text-sm font-medium transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-800'
-            }`}>Active</span>
-          </label>
-        </div>
-
-        <div className="flex gap-3 pt-2">
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-          >
-            Save Changes
-          </button>
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const EditOtherWorkSelector = ({ otherWork, onSelectWork, onCancel, isDarkMode }) => {
-  return (
-    <div className={`p-4 rounded-lg mb-4 border transition-colors duration-300 ${
-      isDarkMode 
-        ? 'bg-orange-900/30 border-orange-700' 
-        : 'bg-orange-50 border-orange-200'
-    }`}>
-      <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
-        isDarkMode ? 'text-orange-300' : 'text-orange-800'
-      }`}>Select Other Work to Edit</h3>
-      <div className="grid gap-2 mb-4 max-h-48 overflow-y-auto">
-        {otherWork.map(work => (
-          <button
-            key={work.id}
-            onClick={() => onSelectWork(work)}
-            className={`text-left p-3 rounded border transition-colors ${
-              isDarkMode 
-                ? 'bg-gray-700 border-gray-600 hover:bg-orange-900/50 text-white' 
-                : 'bg-white border-gray-300 hover:bg-orange-50 text-gray-800'
-            }`}
-          >
-            <div className="font-medium">{work.name}</div>
-            <div className={`text-sm transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              {work.completed ? 'Completed' : 'In Progress'} • {work.active ? 'Active' : 'Inactive'}
-              {work.description && ` • ${work.description.substring(0, 50)}${work.description.length > 50 ? '...' : ''}`}
-            </div>
-          </button>
-        ))}
-      </div>
-      <button
-        onClick={onCancel}
-        className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-      >
-        Cancel
-      </button>
-    </div>
-  );
-};
-
-const EditOtherWorkForm = ({ work, onUpdate, onCancel, isDarkMode }) => {
-  const [name, setName] = useState(work.name);
-  const [description, setDescription] = useState(work.description || '');
-  const [completed, setCompleted] = useState(work.completed);
-  const [active, setActive] = useState(work.active);
-
-  // Update form state when work prop changes
-  useEffect(() => {
-    setName(work.name);
-    setDescription(work.description || '');
-    setCompleted(work.completed);
-    setActive(work.active);
-  }, [work]);
-
-  const handleSubmit = () => {
-    if (name.trim()) {
-      onUpdate(work.id, {
-        name: name.trim(),
-        description: description.trim(),
-        completed,
-        active
-      });
-    }
-  };
-
-  return (
-    <div className={`p-4 rounded-lg mb-4 border transition-colors duration-300 ${
-      isDarkMode 
-        ? 'bg-orange-900/30 border-orange-700' 
-        : 'bg-orange-50 border-orange-200'
-    }`}>
-      <h3 className={`font-semibold mb-4 transition-colors duration-300 ${
-        isDarkMode ? 'text-orange-300' : 'text-orange-800'
-      }`}>Edit Other Work: {work.name}</h3>
-      
-      <div className="space-y-4">
-        <div>
-          <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-          }`}>Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors duration-300 ${
-              isDarkMode 
-                ? 'bg-gray-600 border-gray-500 text-white' 
-                : 'bg-white border-gray-300 text-gray-800'
-            }`}
-          />
-        </div>
-
-        <div>
-          <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${
-            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-          }`}>Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Add any notes about this work..."
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 h-20 resize-none transition-colors duration-300 ${
-              isDarkMode 
-                ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
-                : 'bg-white border-gray-300 text-gray-800'
-            }`}
-          />
-        </div>
-
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={completed}
-              onChange={(e) => setCompleted(e.target.checked)}
-              className="rounded"
-            />
-            <span className={`text-sm font-medium transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-800'
-            }`}>Completed</span>
-          </label>
-          
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={(e) => setActive(e.target.checked)}
-              className="rounded"
-            />
-            <span className={`text-sm font-medium transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-300' : 'text-gray-800'
-            }`}>Active</span>
-          </label>
-        </div>
-
-        <div className="flex gap-3 pt-2">
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-          >
-            Save Changes
-          </button>
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, onCancel, getRepertoireRotation, isDarkMode, toggleDarkMode }) => {
   const [sessionTasks, setSessionTasks] = useState([]);
@@ -2068,7 +1530,8 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
       'Staples', 'Shells', 'Scales', 'Arpeggios', 
       '3rds', 'Comping', 'Improv', 'Video'
     ];
-    return labels[stepIndex] || `Step ${stepIndex + 1}`;
+    const safeStepIndex = stepIndex || 0;
+    return labels[safeStepIndex] || `Step ${safeStepIndex + 1}`;
   };
 
   // Get the most recent completed session
@@ -2153,25 +1616,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
           </div>
           <div className="flex gap-3 items-center">
             {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-                isDarkMode 
-                  ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              title="Toggle dark mode"
-            >
-              {isDarkMode ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clipRule="evenodd"/>
-                </svg>
-              )}
-            </button>
+            <DarkModeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} square />
             
             <button
               onClick={onCancel}
@@ -2430,7 +1875,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                   ? 'bg-blue-900/30 text-blue-300 border-blue-700' 
                   : 'bg-blue-50 text-gray-600 border-blue-200'
               }`}>
-                <strong>💡 Tip:</strong> Drag and drop tasks to reorder them in your practice session
+                <strong>💡 Tip:</strong> Drag tasks to reorder • Click any task to add practice notes
               </div>
               <div className="space-y-1">
                 {sessionTasks.map((task, index) => {
@@ -2498,9 +1943,9 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                               isDarkMode ? 'text-white' : 'text-gray-800'
                             }`}>
                               {task.name}
-                              {task.type === TASK_TYPES.STANDARD && task.focusStep !== null && (
+                              {task.type === TASK_TYPES.STANDARD && task.focusStep !== null && task.focusStep !== undefined && (
                                 <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                  Step {task.focusStep + 1}
+                                  Step {(task.focusStep || 0) + 1}
                                 </span>
                               )}
                             </div>
@@ -2892,7 +2337,8 @@ const PracticeSession = ({
       'Staples', 'Shells', 'Scales', 'Arpeggios', 
       '3rds', 'Comping', 'Improv', 'Video'
     ];
-    return labels[stepIndex] || `Step ${stepIndex + 1}`;
+    const safeStepIndex = stepIndex || 0;
+    return labels[safeStepIndex] || `Step ${safeStepIndex + 1}`;
   };
 
   return (
@@ -2908,25 +2354,7 @@ const PracticeSession = ({
           }`}>Practice Session</h1>
           <div className="flex gap-3 items-center">
             {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-                isDarkMode 
-                  ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              title="Toggle dark mode"
-            >
-              {isDarkMode ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clipRule="evenodd"/>
-                </svg>
-              )}
-            </button>
+            <DarkModeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} square />
             
             <button
               onClick={onEndSession}
@@ -3098,7 +2526,7 @@ const PracticeSession = ({
                       {task.name}
                       {task.type === TASK_TYPES.STANDARD && task.focusStep !== null && (
                         <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                          Step {task.focusStep + 1}: {getStepLabel(task.focusStep)}
+                          Step {(task.focusStep || 0) + 1}: {getStepLabel(task.focusStep || 0)}
                         </span>
                       )}
                     </div>
@@ -3241,7 +2669,7 @@ const PracticeSession = ({
               }`}>
                 {activeTask.name}
                 {activeTask.type === TASK_TYPES.STANDARD && activeTask.focusStep !== null && (
-                  <span className="ml-1">• Step {activeTask.focusStep + 1}</span>
+                                              <span className="ml-1">• Step {(activeTask.focusStep || 0) + 1}</span>
                 )}
               </div>
               
@@ -3315,25 +2743,7 @@ const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, togg
           }`}>Practice Reports</h1>
           <div className="flex gap-3 items-center">
             {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-                isDarkMode 
-                  ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              title="Toggle dark mode"
-            >
-              {isDarkMode ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"/>
-                </svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clipRule="evenodd"/>
-                </svg>
-              )}
-            </button>
+            <DarkModeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} square />
             
             <button
               onClick={onBack}
@@ -3509,7 +2919,8 @@ const SessionSummaryModal = ({
       'Practice improvisation',
       'Post performance video'
     ];
-    return labels[stepIndex] || `Step ${stepIndex + 1}`;
+    const safeStepIndex = stepIndex || 0;
+    return labels[safeStepIndex] || `Step ${safeStepIndex + 1}`;
   };
 
   return (
@@ -3564,7 +2975,7 @@ const SessionSummaryModal = ({
                   <div className={`text-sm mb-3 transition-colors duration-300 ${
                     isDarkMode ? 'text-gray-400' : 'text-gray-600'
                   }`}>
-                    Step {task.focusStep + 1}: {getStepLabel(task.focusStep)}
+                                            Step {(task.focusStep || 0) + 1}: {getStepLabel(task.focusStep || 0)}
                   </div>
                   
                   {/* Show practice notes */}
@@ -3604,7 +3015,7 @@ const SessionSummaryModal = ({
                       <div className={`font-medium transition-colors duration-300 ${
                         isDarkMode ? 'text-green-300' : 'text-green-800'
                       }`}>
-                        Mark Step {task.focusStep + 1} as completed?
+                        Mark Step {(task.focusStep || 0) + 1} as completed?
                       </div>
                       <div className={`text-sm transition-colors duration-300 ${
                         isDarkMode ? 'text-green-400' : 'text-green-700'
