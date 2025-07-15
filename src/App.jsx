@@ -997,25 +997,26 @@ const JazzGuitarTracker = () => {
               <SectionSummary items={standards} isDarkMode={isDarkMode} />
             )}
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setEditingStandard(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200"
-            >
-              <FileText size={20} />
-              Edit Standard
-            </button>
-            <button
-              onClick={() => {
-                setStandardsExpanded(true);
-                setShowAddStandard(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              <Plus size={20} />
-              Add Standard
-            </button>
-          </div>
+          {standardsExpanded && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => setEditingStandard(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200"
+              >
+                <FileText size={20} />
+                Edit Standard
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddStandard(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                <Plus size={20} />
+                Add Standard
+              </button>
+            </div>
+          )}
         </div>
 
         {standardsExpanded && (
@@ -1066,8 +1067,6 @@ const JazzGuitarTracker = () => {
                   <StandardCard 
                     key={standard.id}
                     standard={standard}
-                    onUpdateStep={updateStandardStep}
-                    onToggleStatus={toggleStandardStatus}
                     isDarkMode={isDarkMode}
                   />
                 ))
@@ -1102,25 +1101,26 @@ const JazzGuitarTracker = () => {
               <SectionSummary items={otherWork} isDarkMode={isDarkMode} />
             )}
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setEditingOtherWork(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200"
-            >
-              <FileText size={20} />
-              Edit Other Work
-            </button>
-            <button
-              onClick={() => {
-                setOtherWorkExpanded(true);
-                setShowAddOtherWork(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-            >
-              <Plus size={20} />
-              Add Other Work
-            </button>
-          </div>
+          {otherWorkExpanded && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => setEditingOtherWork(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200"
+              >
+                <FileText size={20} />
+                Edit Other Work
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddOtherWork(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                <Plus size={20} />
+                Add Other Work
+              </button>
+            </div>
+          )}
         </div>
 
         {otherWorkExpanded && (
@@ -1171,7 +1171,6 @@ const JazzGuitarTracker = () => {
                   <OtherWorkCard 
                     key={item.id}
                     item={item}
-                    onToggleStatus={toggleOtherWorkStatus}
                     isDarkMode={isDarkMode}
                   />
                 ))
@@ -1301,7 +1300,7 @@ const AddOtherWorkForm = ({ onAdd, onCancel, isDarkMode }) => {
   );
 };
 
-const StandardCard = ({ standard, onUpdateStep, onToggleStatus, isDarkMode }) => {
+const StandardCard = ({ standard, isDarkMode }) => {
   const completedSteps = standard.steps.filter(Boolean).length;
   const progressPercent = (completedSteps / STANDARD_STEPS.length) * 100;
 
@@ -1320,29 +1319,21 @@ const StandardCard = ({ standard, onUpdateStep, onToggleStatus, isDarkMode }) =>
               isDarkMode ? 'text-white' : 'text-gray-800'
             }`}>{standard.name}</h3>
             <div className="flex gap-2">
-              <button
-                onClick={() => onToggleStatus(standard.id, 'completed')}
-                className={`px-2 py-1 text-xs rounded ${
-                  standard.completed 
-                    ? 'bg-green-600 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-                }`}
-                title="Toggle completion status"
-              >
+              <span className={`px-2 py-1 text-xs rounded ${
+                standard.completed 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
                 {standard.completed ? 'Completed' : 'Uncompleted'}
-              </button>
-              <button
-                onClick={() => onToggleStatus(standard.id, 'active')}
-                className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${
-                  standard.active 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-                }`}
-                title="Toggle active status"
-              >
+              </span>
+              <span className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${
+                standard.active 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
                 {standard.active ? <Eye size={12} /> : <EyeOff size={12} />}
                 {standard.active ? 'Active' : 'Inactive'}
-              </button>
+              </span>
             </div>
           </div>
           {standard.notes && (
@@ -1375,11 +1366,11 @@ const StandardCard = ({ standard, onUpdateStep, onToggleStatus, isDarkMode }) =>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {STANDARD_STEPS.map((step, index) => (
-          <label key={index} className="flex items-center gap-2 cursor-pointer">
+          <div key={index} className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={standard.steps[index]}
-              onChange={() => onUpdateStep(standard.id, index)}
+              disabled
               className="rounded"
             />
             <span className={`text-sm transition-colors duration-300 ${
@@ -1389,14 +1380,14 @@ const StandardCard = ({ standard, onUpdateStep, onToggleStatus, isDarkMode }) =>
             }`}>
               {step}
             </span>
-          </label>
+          </div>
         ))}
       </div>
     </div>
   );
 };
 
-const OtherWorkCard = ({ item, onToggleStatus, isDarkMode }) => {
+const OtherWorkCard = ({ item, isDarkMode }) => {
   return (
     <div className={`border rounded-lg p-4 transition-colors duration-300 ${
       !item.active ? 'opacity-60' : ''
@@ -1412,29 +1403,21 @@ const OtherWorkCard = ({ item, onToggleStatus, isDarkMode }) => {
               isDarkMode ? 'text-white' : 'text-gray-800'
             }`}>{item.name}</h3>
             <div className="flex gap-2">
-              <button
-                onClick={() => onToggleStatus(item.id, 'completed')}
-                className={`px-2 py-1 text-xs rounded ${
-                  item.completed 
-                    ? 'bg-green-600 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-                }`}
-                title="Toggle completion status"
-              >
+              <span className={`px-2 py-1 text-xs rounded ${
+                item.completed 
+                  ? 'bg-green-600 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
                 {item.completed ? 'Completed' : 'Uncompleted'}
-              </button>
-              <button
-                onClick={() => onToggleStatus(item.id, 'active')}
-                className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${
-                  item.active 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-200 text-gray-600'
-                }`}
-                title="Toggle active status"
-              >
+              </span>
+              <span className={`px-2 py-1 text-xs rounded flex items-center gap-1 ${
+                item.active 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-600'
+              }`}>
                 {item.active ? <Eye size={12} /> : <EyeOff size={12} />}
                 {item.active ? 'Active' : 'Inactive'}
-              </button>
+              </span>
             </div>
           </div>
           {item.description && (
@@ -1565,6 +1548,15 @@ const EditStandardForm = ({ standard, onUpdate, onCancel, isDarkMode }) => {
   const [steps, setSteps] = useState([...standard.steps]);
   const [completed, setCompleted] = useState(standard.completed);
   const [active, setActive] = useState(standard.active);
+
+  // Update form state when standard prop changes
+  useEffect(() => {
+    setName(standard.name);
+    setNotes(standard.notes || '');
+    setSteps([...standard.steps]);
+    setCompleted(standard.completed);
+    setActive(standard.active);
+  }, [standard]);
 
   const handleStepToggle = (index) => {
     const newSteps = [...steps];
@@ -1748,6 +1740,14 @@ const EditOtherWorkForm = ({ work, onUpdate, onCancel, isDarkMode }) => {
   const [completed, setCompleted] = useState(work.completed);
   const [active, setActive] = useState(work.active);
 
+  // Update form state when work prop changes
+  useEffect(() => {
+    setName(work.name);
+    setDescription(work.description || '');
+    setCompleted(work.completed);
+    setActive(work.active);
+  }, [work]);
+
   const handleSubmit = () => {
     if (name.trim()) {
       onUpdate(work.id, {
@@ -1856,6 +1856,10 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
   const [selectedRepertoire, setSelectedRepertoire] = useState('');
   const [dragIndex, setDragIndex] = useState(null);
   const [expandedTasks, setExpandedTasks] = useState(new Set());
+  const [showStandardTimeInput, setShowStandardTimeInput] = useState(false);
+  const [standardTimeInput, setStandardTimeInput] = useState(25);
+  const [showOtherWorkTimeInput, setShowOtherWorkTimeInput] = useState(false);
+  const [otherWorkTimeInput, setOtherWorkTimeInput] = useState(20);
 
   const activeStandards = standards.filter(s => s.active);
   const activeOtherWork = otherWork.filter(w => w.active);
@@ -1890,7 +1894,7 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
         id: Date.now().toString(),
         name: standard.name,
         type: TASK_TYPES.STANDARD,
-        timeAllocated: 25,
+        timeAllocated: standardTimeInput,
         standardId: standard.id,
         focusStep: null,        // NEW: Focus step selection
         practiceNote: '',       // NEW: Practice note
@@ -1898,6 +1902,8 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
       };
       setSessionTasks([...sessionTasks, task]);
       setSelectedStandard('');
+      setShowStandardTimeInput(false);
+      setStandardTimeInput(25); // Reset to default
     }
   };
 
@@ -1908,13 +1914,15 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
         id: Date.now().toString(),
         name: work.name,
         type: TASK_TYPES.OTHER_WORK,
-        timeAllocated: 20,
+        timeAllocated: otherWorkTimeInput,
         otherWorkId: work.id,
         practiceNote: '',       // NEW: Practice note
         sessionNote: ''         // NEW: Session note
       };
       setSessionTasks([...sessionTasks, task]);
       setSelectedOtherWork('');
+      setShowOtherWorkTimeInput(false);
+      setOtherWorkTimeInput(20); // Reset to default
     }
   };
 
@@ -2115,7 +2123,14 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
             }`}>Add Standard</h3>
             <select
               value={selectedStandard}
-              onChange={(e) => setSelectedStandard(e.target.value)}
+              onChange={(e) => {
+                setSelectedStandard(e.target.value);
+                if (e.target.value) {
+                  setShowStandardTimeInput(true);
+                } else {
+                  setShowStandardTimeInput(false);
+                }
+              }}
               className={`w-full p-2 border rounded mb-3 text-sm transition-colors duration-300 ${
                 isDarkMode 
                   ? 'bg-gray-700 border-gray-600 text-white' 
@@ -2129,6 +2144,28 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
                 </option>
               ))}
             </select>
+            {showStandardTimeInput && (
+              <div className="mb-3">
+                <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Time allocation (minutes)
+                </label>
+                <input
+                  type="number"
+                  value={standardTimeInput}
+                  onChange={(e) => setStandardTimeInput(parseInt(e.target.value) || 25)}
+                  onFocus={(e) => e.target.select()}
+                  className={`w-full p-2 border rounded text-sm transition-colors duration-300 ${
+                    isDarkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'bg-white border-gray-300 text-gray-800'
+                  }`}
+                  min="1"
+                  max="120"
+                />
+              </div>
+            )}
             <button
               onClick={addStandardTask}
               disabled={!selectedStandard}
@@ -2147,7 +2184,14 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
             }`}>Add Other Work</h3>
             <select
               value={selectedOtherWork}
-              onChange={(e) => setSelectedOtherWork(e.target.value)}
+              onChange={(e) => {
+                setSelectedOtherWork(e.target.value);
+                if (e.target.value) {
+                  setShowOtherWorkTimeInput(true);
+                } else {
+                  setShowOtherWorkTimeInput(false);
+                }
+              }}
               className={`w-full p-2 border rounded mb-3 text-sm transition-colors duration-300 ${
                 isDarkMode 
                   ? 'bg-gray-700 border-gray-600 text-white' 
@@ -2161,6 +2205,28 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
                 </option>
               ))}
             </select>
+            {showOtherWorkTimeInput && (
+              <div className="mb-3">
+                <label className={`block text-sm font-medium mb-1 transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Time allocation (minutes)
+                </label>
+                <input
+                  type="number"
+                  value={otherWorkTimeInput}
+                  onChange={(e) => setOtherWorkTimeInput(parseInt(e.target.value) || 20)}
+                  onFocus={(e) => e.target.select()}
+                  className={`w-full p-2 border rounded text-sm transition-colors duration-300 ${
+                    isDarkMode 
+                      ? 'bg-gray-700 border-gray-600 text-white' 
+                      : 'bg-white border-gray-300 text-gray-800'
+                  }`}
+                  min="1"
+                  max="120"
+                />
+              </div>
+            )}
             <button
               onClick={addOtherWorkTask}
               disabled={!selectedOtherWork}
@@ -2192,6 +2258,7 @@ const SessionSetup = ({ standards, otherWork, onCreateSession, onCancel, getRepe
               type="number"
               value={newTaskTime}
               onChange={(e) => setNewTaskTime(parseInt(e.target.value) || 0)}
+              onFocus={(e) => e.target.select()}
               placeholder="Minutes..."
               className={`w-full p-2 border rounded mb-3 text-sm transition-colors duration-300 ${
                 isDarkMode 
@@ -3175,6 +3242,11 @@ const SessionSummaryModal = ({
     task.type === TASK_TYPES.STANDARD && task.focusStep !== null
   );
 
+  // Get all other tasks (non-standards or standards without focus steps)
+  const otherTasks = session.tasks.filter(task => 
+    task.type !== TASK_TYPES.STANDARD || task.focusStep === null
+  );
+
   const handleStepCompletion = (standardId, stepIndex, completed) => {
     setStepCompletions(prev => {
       const updated = { ...prev };
@@ -3334,19 +3406,73 @@ const SessionSummaryModal = ({
           </div>
         )}
         
-        {/* Other tasks summary */}
-        {session.tasks.filter(task => task.type !== TASK_TYPES.STANDARD || task.focusStep === null).length > 0 && (
-          <div className={`border-t pt-4 mb-6 transition-colors duration-300 ${
-            isDarkMode ? 'border-gray-600' : 'border-gray-200'
-          }`}>
-            <div className={`text-sm text-center transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+        {/* All Other Tasks */}
+        {otherTasks.length > 0 && (
+          <div className="mb-6">
+            <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
             }`}>
-              Other tasks: {session.tasks
-                .filter(task => task.type !== TASK_TYPES.STANDARD || task.focusStep === null)
-                .map(task => `${task.name} (${formatTime(taskTimeSpent[task.id] || 0)})`)
-                .join(' • ')}
-            </div>
+              Other Tasks
+            </h3>
+            
+            {otherTasks.map(task => {
+              const timeSpent = taskTimeSpent[task.id] || 0;
+              const finalNote = finalNotes[task.id] || '';
+              
+              return (
+                <div key={task.id} className={`border rounded-lg p-4 mb-4 transition-colors duration-300 ${
+                  isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-200 bg-gray-50'
+                }`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`font-medium transition-colors duration-300 ${
+                      isDarkMode ? 'text-white' : 'text-gray-800'
+                    }`}>
+                      {task.type === TASK_TYPES.STANDARD ? '🎵' : '📚'} {task.name}
+                    </span>
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                      ⏱️ {formatTime(timeSpent)}
+                    </span>
+                  </div>
+                  
+                  {/* Show practice notes */}
+                  {(task.practiceNote || task.sessionNote) && (
+                    <div className={`p-3 rounded mb-3 text-sm transition-colors duration-300 ${
+                      isDarkMode ? 'bg-gray-600 text-gray-300' : 'bg-white text-gray-700'
+                    }`}>
+                      {task.practiceNote && (
+                        <div>
+                          <strong>📝 Practice note:</strong> {task.practiceNote}
+                        </div>
+                      )}
+                      {task.sessionNote && task.sessionNote !== task.practiceNote && (
+                        <div className="mt-2">
+                          <strong>Session update:</strong> {task.sessionNote}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Final session note */}
+                  <div className="mt-3">
+                    <label className={`block text-sm font-medium mb-2 transition-colors duration-300 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Final session note (optional)
+                    </label>
+                    <textarea
+                      value={finalNote}
+                      onChange={(e) => handleFinalNote(task.id, e.target.value)}
+                      placeholder="Any final thoughts about this practice session?"
+                      className={`w-full px-3 py-2 border rounded-md resize-none h-16 text-sm transition-colors duration-300 ${
+                        isDarkMode 
+                          ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                          : 'bg-white border-gray-300 text-gray-800'
+                      }`}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
         
