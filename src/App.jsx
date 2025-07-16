@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, RotateCcw, Eye, EyeOff, Download, Upload } from 'lucide-react';
+import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, ChevronDown, ChevronUp, Eye, EyeOff, Download, Upload } from 'lucide-react';
 import DarkModeToggle from "./components/DarkModeToggle";
 import FilterButtons from "./components/FilterButtons";
 import SectionSummary from "./components/SectionSummary";
@@ -443,6 +443,21 @@ const JazzGuitarTracker = () => {
 
     return () => clearInterval(timerRef.current);
   }, [isTimerRunning, activeTask, taskTimeSpent]);
+
+  // Add useEffect to control body background for dark mode
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.style.backgroundColor = '#111827'; // gray-900
+      document.body.style.color = '#ffffff';
+    } else {
+      document.body.style.backgroundColor = '#f9fafb'; // gray-50
+      document.body.style.color = '#111827';
+    }
+    return () => {
+      document.body.style.backgroundColor = '';
+      document.body.style.color = '';
+    };
+  }, [isDarkMode]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -1145,9 +1160,7 @@ const JazzGuitarTracker = () => {
   const filteredOtherWork = getFilteredOtherWork();
 
   return (
-    <div className={`max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    <div className="max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300">
       <div className={`rounded-lg shadow-lg p-6 mb-6 transition-colors duration-300 ${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>
@@ -1299,11 +1312,17 @@ const JazzGuitarTracker = () => {
                 isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              <RotateCcw 
-                size={20} 
-                className={`transition-transform duration-200 ${standardsExpanded ? 'rotate-90' : ''}`}
-                style={{ transform: standardsExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
-              />
+              {standardsExpanded ? (
+                <ChevronDown 
+                  size={20} 
+                  className="transition-transform duration-200"
+                />
+              ) : (
+                <ChevronUp 
+                  size={20} 
+                  className="transition-transform duration-200"
+                />
+              )}
               <h2 className={`text-2xl font-bold transition-colors duration-300 ${
                 isDarkMode ? 'text-white' : 'text-gray-800'
               }`}>Jazz Standards</h2>
@@ -1403,11 +1422,17 @@ const JazzGuitarTracker = () => {
                 isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              <RotateCcw 
-                size={20} 
-                className={`transition-transform duration-200 ${otherWorkExpanded ? 'rotate-90' : ''}`}
-                style={{ transform: otherWorkExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
-              />
+              {otherWorkExpanded ? (
+                <ChevronDown 
+                  size={20} 
+                  className="transition-transform duration-200"
+                />
+              ) : (
+                <ChevronUp 
+                  size={20} 
+                  className="transition-transform duration-200"
+                />
+              )}
               <h2 className={`text-2xl font-bold transition-colors duration-300 ${
                 isDarkMode ? 'text-white' : 'text-gray-800'
               }`}>Other Work</h2>
@@ -1940,9 +1965,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
   };
 
   return (
-    <div className={`max-w-5xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    <div className="max-w-5xl mx-auto p-6 min-h-screen transition-colors duration-300">
       <div className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>
@@ -1974,7 +1997,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
           {/* Add Standard */}
           <div className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
             isDarkMode 
-              ? 'bg-gray-800 border-blue-500 hover:border-blue-400' 
+              ? 'bg-gray-800 border-blue-500 hover:border-blue-300' 
               : 'bg-white border-blue-300 hover:border-blue-400'
           }`}>
             <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
@@ -2028,7 +2051,11 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
             <button
               onClick={addStandardTask}
               disabled={!selectedStandard}
-              className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 text-sm transition-colors duration-200"
+              className={`w-full py-2 rounded text-sm transition-colors duration-200 ${
+                isDarkMode
+                  ? 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-600 disabled:text-gray-400'
+                  : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500'
+              }`}
             >
               Add Standard
             </button>
@@ -2037,7 +2064,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
           {/* Add Other Work */}
           <div className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
             isDarkMode 
-              ? 'bg-gray-800 border-purple-500 hover:border-purple-400' 
+              ? 'bg-gray-800 border-purple-500 hover:border-purple-300' 
               : 'bg-white border-purple-300 hover:border-purple-400'
           }`}>
             <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
@@ -2091,7 +2118,11 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
             <button
               onClick={addOtherWorkTask}
               disabled={!selectedOtherWork}
-              className="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-300 text-sm transition-colors duration-200"
+              className={`w-full py-2 rounded text-sm transition-colors duration-200 ${
+                isDarkMode
+                  ? 'bg-purple-600 text-white hover:bg-purple-700 disabled:bg-gray-600 disabled:text-gray-400'
+                  : 'bg-purple-600 text-white hover:bg-purple-700 disabled:bg-gray-300 disabled:text-gray-500'
+              }`}
             >
               Add Other Work
             </button>
@@ -2100,7 +2131,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
           {/* Add One-Off */}
           <div className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
             isDarkMode 
-              ? 'bg-gray-800 border-green-500 hover:border-green-400' 
+              ? 'bg-gray-800 border-green-500 hover:border-green-300' 
               : 'bg-white border-green-300 hover:border-green-400'
           }`}>
             <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
@@ -2133,7 +2164,11 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
             <button
               onClick={addCustomTask}
               disabled={!newTaskName.trim()}
-              className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300 text-sm transition-colors duration-200"
+              className={`w-full py-2 rounded text-sm transition-colors duration-200 ${
+                isDarkMode
+                  ? 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-600 disabled:text-gray-400'
+                  : 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-300 disabled:text-gray-500'
+              }`}
             >
               Add Task
             </button>
@@ -2142,7 +2177,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
           {/* Add Repertoire */}
           <div className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
             isDarkMode 
-              ? 'bg-gray-800 border-orange-500 hover:border-orange-400' 
+              ? 'bg-gray-800 border-orange-500 hover:border-orange-300' 
               : 'bg-white border-orange-300 hover:border-orange-400'
           }`}>
             <h3 className={`font-semibold mb-3 transition-colors duration-300 ${
@@ -2178,7 +2213,11 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
             <button
               onClick={addRepertoireTask}
               disabled={!selectedRepertoire || repertoireList.length === 0}
-              className="w-full py-2 bg-orange-600 text-white rounded hover:bg-orange-700 disabled:bg-gray-300 text-sm transition-colors duration-200"
+              className={`w-full py-2 rounded text-sm transition-colors duration-200 ${
+                isDarkMode
+                  ? 'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-600 disabled:text-gray-400'
+                  : 'bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-300 disabled:text-gray-500'
+              }`}
             >
               Add Repertoire
             </button>
@@ -2250,7 +2289,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                           dragIndex === index 
                             ? 'bg-blue-100 border-2 border-blue-300 opacity-50' 
                             : isDarkMode
-                              ? 'bg-gray-700 border border-gray-600 hover:bg-gray-600 hover:shadow-md'
+                              ? 'bg-gray-700 border border-gray-600 hover:bg-gray-500 hover:shadow-md'
                               : 'bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:shadow-md'
                         }`}
                       >
@@ -2259,8 +2298,8 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                           onClick={() => toggleTaskExpanded(task.id)}
                           className={`flex items-center gap-4 p-3 cursor-pointer rounded-t-lg transition-all duration-200 ${
                             isExpanded 
-                              ? 'bg-blue-50 border-b border-blue-200' 
-                              : 'hover:bg-gray-50'
+                              ? (isDarkMode ? 'bg-blue-900/30 border-b border-blue-700' : 'bg-blue-50 border-b border-blue-200')
+                              : (isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-50')
                           }`}
                         >
                           {/* PRESERVE existing drag handle */}
@@ -2331,11 +2370,10 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                             isExpanded ? 'text-blue-600' : 'text-gray-500'
                           }`}>
                             <span>{isExpanded ? 'Hide' : 'Show'} details</span>
-                            <div className={`transition-transform duration-200 ${
-                              isExpanded ? 'rotate-180' : ''
-                            }`}>
-                              ▼
-                            </div>
+                            <ChevronDown 
+                              size={20} 
+                              className="transition-transform duration-200"
+                            />
                           </div>
                         </div>
                         
@@ -2693,9 +2731,7 @@ const PracticeSession = ({
   };
 
   return (
-    <div className={`max-w-4xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    <div className="max-w-4xl mx-auto p-6 min-h-screen transition-colors duration-300">
       <div className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>
@@ -2776,7 +2812,9 @@ const PracticeSession = ({
               <div className={`text-center mt-3 text-sm transition-colors duration-300 ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-500'
               }`}>
-                💡 Press <kbd className="px-2 py-1 bg-gray-200 rounded text-xs">Space</kbd> to toggle timer
+                💡 Press <kbd className={`px-2 py-1 rounded text-xs transition-colors duration-300 ${
+                  isDarkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-800'
+                }`}>Space</kbd> to toggle timer
               </div>
             </>
           ) : (
@@ -2876,7 +2914,9 @@ const PracticeSession = ({
                     }`}>
                       {task.name}
                       {task.type === TASK_TYPES.STANDARD && task.focusStep !== null && (
-                        <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        <span className={`ml-2 text-xs px-2 py-1 rounded transition-colors duration-300 ${
+                          isDarkMode ? 'bg-blue-900/50 text-blue-300 border border-blue-700' : 'bg-blue-100 text-blue-800'
+                        }`}>
                           Step {(task.focusStep || 0) + 1}: {getStepLabel(task.focusStep || 0)}
                         </span>
                       )}
@@ -3082,9 +3122,7 @@ const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, togg
   const monthlyTotal = last30Days.reduce((sum, session) => sum + session.totalTime, 0);
 
   return (
-    <div className={`max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    <div className="max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300">
       <div className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>
@@ -3549,9 +3587,7 @@ const TeacherSessionsView = ({
   };
 
   return (
-    <div className={`max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    <div className="max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300">
       <div className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>
