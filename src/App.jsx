@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, RotateCcw, Eye, EyeOff, Download, Upload } from 'lucide-react';
+import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, ChevronDown, Eye, EyeOff, Download, Upload } from 'lucide-react';
 import DarkModeToggle from "./components/DarkModeToggle";
 import FilterButtons from "./components/FilterButtons";
 import SectionSummary from "./components/SectionSummary";
@@ -960,10 +960,9 @@ const JazzGuitarTracker = () => {
                 isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              <RotateCcw 
+              <ChevronDown 
                 size={20} 
-                className={`transition-transform duration-200 ${standardsExpanded ? 'rotate-90' : ''}`}
-                style={{ transform: standardsExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                className={`transition-transform duration-200 ${standardsExpanded ? 'rotate-180' : ''}`}
               />
               <h2 className={`text-2xl font-bold transition-colors duration-300 ${
                 isDarkMode ? 'text-white' : 'text-gray-800'
@@ -1064,10 +1063,9 @@ const JazzGuitarTracker = () => {
                 isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              <RotateCcw 
+              <ChevronDown 
                 size={20} 
-                className={`transition-transform duration-200 ${otherWorkExpanded ? 'rotate-90' : ''}`}
-                style={{ transform: otherWorkExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                className={`transition-transform duration-200 ${otherWorkExpanded ? 'rotate-180' : ''}`}
               />
               <h2 className={`text-2xl font-bold transition-colors duration-300 ${
                 isDarkMode ? 'text-white' : 'text-gray-800'
