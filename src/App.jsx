@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, ChevronDown, Eye, EyeOff, Download, Upload } from 'lucide-react';
+import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, RotateCcw, Eye, EyeOff, Download, Upload } from 'lucide-react';
 import DarkModeToggle from "./components/DarkModeToggle";
 import FilterButtons from "./components/FilterButtons";
 import SectionSummary from "./components/SectionSummary";
@@ -9,7 +9,7 @@ import EditStandardSelector from "./components/EditStandardSelector";
 import EditStandardForm from "./components/EditStandardForm";
 import EditOtherWorkSelector from "./components/EditOtherWorkSelector";
 import EditOtherWorkForm from "./components/EditOtherWorkForm";
-import { TASK_TYPES, STANDARD_STEPS } from "./constants";
+import { TASK_TYPES, STANDARD_STEPS, SESSION_STATUS, TEACHER_SESSION_TYPES, SERIES_STATUS, DEPENDENCY_STATUS } from "./constants";
 
 const JazzGuitarTracker = () => {
   // State management
@@ -39,8 +39,15 @@ const JazzGuitarTracker = () => {
   const [sessionSummaryData, setSessionSummaryData] = useState(null);
   const [sessionStarted, setSessionStarted] = useState(false);
   
+  // Teacher sessions state management
+  const [teacherSessions, setTeacherSessions] = useState([]);
+  const [showTeacherSessions, setShowTeacherSessions] = useState(false);
+  const [selectedTeacherSession, setSelectedTeacherSession] = useState(null);
+  const [isImporting, setIsImporting] = useState(false);
+  
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);
+  const teacherSessionFileInputRef = useRef(null); // NEW: for teacher session import
 
   // Migration function to handle the new comping step
   const migrateStandardsData = (standardsData) => {
@@ -61,6 +68,7 @@ const JazzGuitarTracker = () => {
     const savedOtherWork = localStorage.getItem('otherWork');
     const savedHistory = localStorage.getItem('practiceHistory');
     const savedDarkMode = localStorage.getItem('darkMode');
+    const savedTeacherSessions = localStorage.getItem('teacherSessions');
     
     // Load dark mode preference
     if (savedDarkMode !== null) {
@@ -303,6 +311,81 @@ const JazzGuitarTracker = () => {
       ];
       setPracticeHistory(sampleHistory);
     }
+    
+    // Load teacher sessions
+    if (savedTeacherSessions && JSON.parse(savedTeacherSessions).length > 0) {
+      setTeacherSessions(JSON.parse(savedTeacherSessions));
+    } else {
+      // Initialize with some sample teacher sessions
+      const sampleTeacherSessions = [
+        {
+          id: 'ts_1',
+          title: 'Week 3: Autumn Leaves Focus',
+          teacherName: 'Ed Bickner',
+          assignedDate: '2025-01-15',
+          dueDate: '2025-01-22',
+          status: SESSION_STATUS.PENDING,
+          type: TEACHER_SESSION_TYPES.ASSIGNED,
+          description: 'Focus on the bridge section with shell voicings',
+          tasks: [
+            {
+              id: 'task_1',
+              name: 'Autumn Leaves - Bridge Section',
+              type: TASK_TYPES.STANDARD,
+              timeAllocated: 30,
+              standardId: '1',
+              focusStep: 1, // Shell chords
+              teacherNotes: 'Practice the bridge with shell voicings, focus on voice leading',
+              practiceNote: '',
+              sessionNote: ''
+            },
+            {
+              id: 'task_2', 
+              name: 'ii-V-I Progressions in Bb',
+              type: TASK_TYPES.OTHER_WORK,
+              timeAllocated: 20,
+              teacherNotes: 'Work on smooth transitions between chords',
+              practiceNote: '',
+              sessionNote: ''
+            }
+          ],
+          totalTime: 50,
+          completed: false,
+          completionDate: null,
+          teacherFeedback: '',
+          studentNotes: ''
+        },
+        {
+          id: 'ts_2',
+          title: 'Week 4: Stella By Starlight',
+          teacherName: 'Ed Bickner',
+          assignedDate: '2025-01-08',
+          dueDate: '2025-01-15',
+          status: SESSION_STATUS.COMPLETED,
+          type: TEACHER_SESSION_TYPES.ASSIGNED,
+          description: 'Complex harmony study with arpeggio practice',
+          tasks: [
+            {
+              id: 'task_3',
+              name: 'Stella By Starlight - Arpeggios',
+              type: TASK_TYPES.STANDARD,
+              timeAllocated: 35,
+              standardId: '5',
+              focusStep: 3, // Arpeggios
+              teacherNotes: 'Focus on the bridge arpeggios, practice slowly',
+              practiceNote: 'Worked on bridge section, need more practice on arpeggios',
+              sessionNote: 'Made good progress on bridge, arpeggios still challenging'
+            }
+          ],
+          totalTime: 35,
+          completed: true,
+          completionDate: '2025-01-12T10:30:00.000Z',
+          teacherFeedback: 'Great work on the bridge section!',
+          studentNotes: 'Arpeggios are getting better but need more work'
+        }
+      ];
+      setTeacherSessions(sampleTeacherSessions);
+    }
   }, []);
 
   // Save data to localStorage whenever it changes
@@ -321,6 +404,10 @@ const JazzGuitarTracker = () => {
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('teacherSessions', JSON.stringify(teacherSessions));
+  }, [teacherSessions]);
 
   // Session timer logic - runs when task timer is running
   useEffect(() => {
@@ -425,6 +512,141 @@ const JazzGuitarTracker = () => {
 
   const triggerImport = () => {
     fileInputRef.current?.click();
+  };
+
+  // Teacher session import/export functions
+  const exportTeacherSession = (session) => {
+    const exportData = {
+      version: "1.0",
+      type: "teacher_session",
+      session: {
+        ...session,
+        id: undefined, // Remove internal ID
+        status: SESSION_STATUS.PENDING, // Reset status
+        completed: false,
+        completionDate: null,
+        studentNotes: ''
+      },
+      exportDate: new Date().toISOString(),
+      teacherName: session.teacherName
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `teacher-session-${session.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const importTeacherSession = (event) => {
+    const file = event.target.files[0];
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    // Set loading state
+    setIsImporting(true);
+    const loadingMessage = `Importing ${file.name}...`;
+    console.log(loadingMessage);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      console.log('File read successfully, parsing JSON...');
+      try {
+        const importedData = JSON.parse(e.target.result);
+        console.log('Parsed data:', importedData);
+        
+        // Check if this is a single session or multiple sessions
+        if (importedData.type === 'teacher_session') {
+          // Single session import (optimized)
+          const session = {
+            ...importedData.session,
+            id: `ts_${Date.now()}`,
+            assignedDate: new Date().toISOString(),
+            status: SESSION_STATUS.PENDING
+          };
+
+          setTeacherSessions(prev => [session, ...prev]);
+          alert(`Successfully imported "${session.title}" from ${importedData.teacherName}`);
+          setIsImporting(false);
+          
+        } else if (importedData.type === 'teacher_session_series') {
+          // Multiple sessions import (optimized)
+          const sessions = importedData.sessions || [];
+          
+          if (sessions.length === 0) {
+            alert('No sessions found in the imported file.');
+            setIsImporting(false);
+            return;
+          }
+
+          // Generate unique timestamp for this import
+          const importTimestamp = Date.now();
+          
+          // Optimized processing - batch the operations
+          const processedSessions = sessions.map((session, index) => {
+            const sessionId = `ts_${importTimestamp}_${index}`;
+            
+            // Simplified prerequisite mapping
+            const prerequisites = session.prerequisites ? 
+              session.prerequisites.map(prereq => {
+                const prereqIndex = sessions.findIndex(s => 
+                  s.title.includes(prereq.replace('ts_', '').replace('week', 'Week '))
+                );
+                return prereqIndex >= 0 ? `ts_${importTimestamp}_${prereqIndex}` : prereq;
+              }) : [];
+            
+            return {
+              ...session,
+              id: sessionId,
+              assignedDate: new Date().toISOString(),
+              status: SESSION_STATUS.PENDING,
+              completed: false,
+              completionDate: null,
+              studentNotes: '',
+              prerequisites
+            };
+          });
+
+          // Batch update the state
+          setTeacherSessions(prev => [...processedSessions, ...prev]);
+          
+          const seriesName = importedData.seriesName || 'Series';
+          alert(`Successfully imported ${sessions.length} sessions from "${seriesName}" by ${importedData.teacherName || 'your teacher'}`);
+          setIsImporting(false);
+          
+        } else {
+          alert('This file does not appear to be a valid teacher session file.');
+          setIsImporting(false);
+          return;
+        }
+        
+      } catch (error) {
+        console.error('Import error:', error);
+        alert('Error importing teacher session file. Please check the file format.');
+        setIsImporting(false);
+      }
+    };
+    
+    // Add error handling for file reading
+    reader.onerror = () => {
+      alert('Error reading the file. Please try again.');
+      setIsImporting(false);
+    };
+    
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
+  const triggerTeacherSessionImport = () => {
+    teacherSessionFileInputRef.current?.click(); // Use the new ref
   };
 
   const formatTime = (seconds) => {
@@ -533,6 +755,8 @@ const JazzGuitarTracker = () => {
     setSessionRunningTime(0);
     setLastTimerStart(null);
     setSessionStarted(false);
+    // Set view to session to show the practice session
+    setView('session');
     // Automatically set the first task as the current task
     if (tasks.length > 0) {
       setActiveTask(tasks[0]);
@@ -737,6 +961,76 @@ const JazzGuitarTracker = () => {
     }
   };
 
+  // Teacher session utility functions
+  const getTeacherSessionStats = () => {
+    const completedSessions = teacherSessions.filter(s => s.completed);
+    const overdueSessions = teacherSessions.filter(s => 
+      s.status === SESSION_STATUS.PENDING && 
+      new Date(s.dueDate) < new Date()
+    );
+    
+    return {
+      total: teacherSessions.length,
+      completed: completedSessions.length,
+      overdue: overdueSessions.length,
+      completionRate: teacherSessions.length > 0 
+        ? Math.round((completedSessions.length / teacherSessions.length) * 100)
+        : 0
+    };
+  };
+
+  // Helper functions for series and dependencies
+  const getSessionDependencyStatus = (session) => {
+    if (!session.prerequisites || session.prerequisites.length === 0) {
+      return DEPENDENCY_STATUS.AVAILABLE;
+    }
+    
+    const completedSessions = teacherSessions.filter(s => s.completed);
+    const completedIds = completedSessions.map(s => s.id);
+    
+    const unmetPrerequisites = session.prerequisites.filter(prereq => 
+      !completedIds.includes(prereq)
+    );
+    
+    if (unmetPrerequisites.length > 0) {
+      return DEPENDENCY_STATUS.LOCKED;
+    }
+    
+    return DEPENDENCY_STATUS.AVAILABLE;
+  };
+
+  const getSeriesProgress = (seriesId) => {
+    const seriesSessions = teacherSessions.filter(s => s.seriesId === seriesId);
+    if (seriesSessions.length === 0) return SERIES_STATUS.NOT_STARTED;
+    
+    const completedSessions = seriesSessions.filter(s => s.completed);
+    if (completedSessions.length === seriesSessions.length) {
+      return SERIES_STATUS.COMPLETED;
+    }
+    
+    return SERIES_STATUS.IN_PROGRESS;
+  };
+
+  const getSeriesSessions = (seriesId) => {
+    return teacherSessions
+      .filter(s => s.seriesId === seriesId)
+      .sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
+  };
+
+  const getAvailableSessions = () => {
+    return teacherSessions.filter(session => {
+      const dependencyStatus = getSessionDependencyStatus(session);
+      return dependencyStatus === DEPENDENCY_STATUS.AVAILABLE && !session.completed;
+    });
+  };
+
+  const getLockedSessions = () => {
+    return teacherSessions.filter(session => {
+      const dependencyStatus = getSessionDependencyStatus(session);
+      return dependencyStatus === DEPENDENCY_STATUS.LOCKED && !session.completed;
+    });
+  };
+
   if (view === 'session' && showNewSession) {
     return <SessionSetup 
       standards={standards}
@@ -810,6 +1104,39 @@ const JazzGuitarTracker = () => {
     />;
   }
 
+  if (showTeacherSessions) {
+    return <TeacherSessionsView 
+      teacherSessions={teacherSessions}
+      onBack={() => setShowTeacherSessions(false)}
+      onSelectSession={(session) => {
+        // Convert teacher session tasks to practice session format
+        const practiceTasks = session.tasks.map(task => ({
+          ...task,
+          id: Date.now().toString() + Math.random(), // Generate new IDs
+          practiceNote: task.practiceNote || '',
+          sessionNote: task.sessionNote || ''
+        }));
+        
+        // Create and start the session directly
+        createSession(practiceTasks);
+        setShowTeacherSessions(false);
+      }}
+      onExportSession={exportTeacherSession}
+      onImportSession={importTeacherSession}
+      setIsImporting={setIsImporting}
+      isImporting={isImporting}
+      triggerImport={triggerTeacherSessionImport}
+      isDarkMode={isDarkMode}
+      toggleDarkMode={toggleDarkMode}
+      getTeacherSessionStats={getTeacherSessionStats}
+      getSessionDependencyStatus={getSessionDependencyStatus}
+      getSeriesProgress={getSeriesProgress}
+      getSeriesSessions={getSeriesSessions}
+      getAvailableSessions={getAvailableSessions}
+      getLockedSessions={getLockedSessions}
+    />;
+  }
+
   const weeklyStats = getWeeklyStats();
   const nextRepertoire = getRepertoireRotation();
   const activeStandards = standards.filter(s => s.active);
@@ -870,6 +1197,18 @@ const JazzGuitarTracker = () => {
 			>
 			  <BarChart3 size={16} />
 			  Reports
+			</button>
+			
+			<button
+			  onClick={() => setShowTeacherSessions(true)}
+			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+			    isDarkMode 
+			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
+			      : 'bg-white text-slate-700 hover:bg-gray-100 border border-slate-200 shadow-sm'
+			  }`}
+			>
+			  <FileText size={16} />
+			  Teacher Sessions
 			</button>
 			
 			<button
@@ -960,9 +1299,10 @@ const JazzGuitarTracker = () => {
                 isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              <ChevronDown 
+              <RotateCcw 
                 size={20} 
-                className={`transition-transform duration-200 ${standardsExpanded ? 'rotate-180' : ''}`}
+                className={`transition-transform duration-200 ${standardsExpanded ? 'rotate-90' : ''}`}
+                style={{ transform: standardsExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
               />
               <h2 className={`text-2xl font-bold transition-colors duration-300 ${
                 isDarkMode ? 'text-white' : 'text-gray-800'
@@ -1063,9 +1403,10 @@ const JazzGuitarTracker = () => {
                 isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-800'
               }`}
             >
-              <ChevronDown 
+              <RotateCcw 
                 size={20} 
-                className={`transition-transform duration-200 ${otherWorkExpanded ? 'rotate-180' : ''}`}
+                className={`transition-transform duration-200 ${otherWorkExpanded ? 'rotate-90' : ''}`}
+                style={{ transform: otherWorkExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
               />
               <h2 className={`text-2xl font-bold transition-colors duration-300 ${
                 isDarkMode ? 'text-white' : 'text-gray-800'
@@ -3148,6 +3489,586 @@ const SessionSummaryModal = ({
             Complete Session
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const TeacherSessionsView = ({ 
+  teacherSessions, 
+  onBack, 
+  onSelectSession, 
+  onExportSession, 
+  onImportSession, 
+  setIsImporting,
+  isImporting,
+  triggerImport,
+  isDarkMode, 
+  toggleDarkMode,
+  getTeacherSessionStats,
+  getSessionDependencyStatus,
+  getSeriesProgress,
+  getSeriesSessions,
+  getAvailableSessions,
+  getLockedSessions
+}) => {
+  // Local ref for teacher session file input
+  const localTeacherSessionFileInputRef = useRef(null);
+  
+  const stats = getTeacherSessionStats();
+  const availableSessions = getAvailableSessions();
+  const lockedSessions = getLockedSessions();
+  const completedSessions = teacherSessions.filter(s => s.completed);
+  const overdueSessions = teacherSessions.filter(s => 
+    s.status === SESSION_STATUS.PENDING && 
+    new Date(s.dueDate) < new Date()
+  );
+
+  // Group sessions by series
+  const seriesGroups = {};
+  teacherSessions.forEach(session => {
+    if (session.seriesId) {
+      if (!seriesGroups[session.seriesId]) {
+        seriesGroups[session.seriesId] = [];
+      }
+      seriesGroups[session.seriesId].push(session);
+    }
+  });
+
+  // Sort series by the first session's assigned date
+  const sortedSeries = Object.keys(seriesGroups).sort((a, b) => {
+    const aFirstSession = seriesGroups[a][0];
+    const bFirstSession = seriesGroups[b][0];
+    return new Date(aFirstSession.assignedDate) - new Date(bFirstSession.assignedDate);
+  });
+
+  // Local trigger function that uses the local ref
+  const localTriggerImport = () => {
+    console.log('Triggering file input...');
+    localTeacherSessionFileInputRef.current?.click();
+  };
+
+  return (
+    <div className={`max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
+      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
+    }`}>
+      <div className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
+        isDarkMode ? 'bg-gray-800' : 'bg-white'
+      }`}>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className={`text-2xl font-bold transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>Teacher Sessions</h1>
+          <div className="flex gap-3 items-center">
+            {/* Dark Mode Toggle */}
+            <DarkModeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} square />
+            
+            <button
+              onClick={onBack}
+              className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+                isDarkMode 
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                  : 'bg-gray-500 text-white hover:bg-gray-600'
+              }`}
+            >
+              Back to Overview
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className={`p-4 rounded-lg transition-colors duration-300 ${
+            isDarkMode ? 'bg-blue-900/50 border border-blue-700' : 'bg-blue-50'
+          }`}>
+            <h3 className={`font-semibold transition-colors duration-300 ${
+              isDarkMode ? 'text-blue-300' : 'text-blue-800'
+            }`}>Total Assignments</h3>
+            <p className={`text-2xl font-bold transition-colors duration-300 ${
+              isDarkMode ? 'text-blue-400' : 'text-blue-600'
+            }`}>{stats.total}</p>
+          </div>
+          <div className={`p-4 rounded-lg transition-colors duration-300 ${
+            isDarkMode ? 'bg-green-900/50 border border-green-700' : 'bg-green-50'
+          }`}>
+            <h3 className={`font-semibold transition-colors duration-300 ${
+              isDarkMode ? 'text-green-300' : 'text-green-800'
+            }`}>Completed</h3>
+            <p className={`text-2xl font-bold transition-colors duration-300 ${
+              isDarkMode ? 'text-green-400' : 'text-green-600'
+            }`}>{stats.completed}</p>
+            <p className={`text-sm transition-colors duration-300 ${
+              isDarkMode ? 'text-green-400' : 'text-green-600'
+            }`}>{stats.completionRate}% completion rate</p>
+          </div>
+          <div className={`p-4 rounded-lg transition-colors duration-300 ${
+            isDarkMode ? 'bg-orange-900/50 border border-orange-700' : 'bg-orange-50'
+          }`}>
+            <h3 className={`font-semibold transition-colors duration-300 ${
+              isDarkMode ? 'text-orange-300' : 'text-orange-800'
+            }`}>Available</h3>
+            <p className={`text-2xl font-bold transition-colors duration-300 ${
+              isDarkMode ? 'text-orange-400' : 'text-orange-600'
+            }`}>{availableSessions.length}</p>
+          </div>
+          <div className={`p-4 rounded-lg transition-colors duration-300 ${
+            isDarkMode ? 'bg-red-900/50 border border-red-700' : 'bg-red-50'
+          }`}>
+            <h3 className={`font-semibold transition-colors duration-300 ${
+              isDarkMode ? 'text-red-300' : 'text-red-800'
+            }`}>Overdue</h3>
+            <p className={`text-2xl font-bold transition-colors duration-300 ${
+              isDarkMode ? 'text-red-400' : 'text-red-600'
+            }`}>{stats.overdue}</p>
+          </div>
+        </div>
+
+        {/* Import/Export Section */}
+        <div className={`p-4 rounded-lg mb-6 transition-colors duration-300 ${
+          isDarkMode ? 'bg-gray-700 border border-gray-600' : 'bg-gray-50 border border-gray-200'
+        }`}>
+          <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>Import Teacher Sessions</h3>
+          <div className="space-y-3">
+            <div className="flex gap-3 items-center">
+              <button
+                onClick={localTriggerImport}
+                disabled={isImporting}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200 ${
+                  isImporting
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : isDarkMode 
+                      ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {isImporting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Upload size={16} />
+                    Import Sessions
+                  </>
+                )}
+              </button>
+              <p className={`text-sm transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                Import single sessions or complete series from your teacher
+              </p>
+            </div>
+            <div className={`text-sm p-3 rounded transition-colors duration-300 ${
+              isDarkMode 
+                ? 'bg-blue-900/30 text-blue-300 border border-blue-700' 
+                : 'bg-blue-50 text-blue-700 border border-blue-200'
+            }`}>
+              <strong>💡 Tip:</strong> Teachers can now send you a single file containing multiple lessons that will automatically appear in the correct order with proper dependencies.
+            </div>
+          </div>
+        </div>
+
+        {/* All Assignments */}
+        <div className="mb-8">
+          <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>
+            📚 All Assignments ({teacherSessions.length})
+          </h3>
+          {teacherSessions.length === 0 ? (
+            <div className={`text-center py-8 transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}>
+              <p>No assignments yet</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Group all sessions by series */}
+              {(() => {
+                // Group all sessions by series
+                const seriesGroups = {};
+                teacherSessions.forEach(session => {
+                  if (session.seriesId) {
+                    if (!seriesGroups[session.seriesId]) {
+                      seriesGroups[session.seriesId] = [];
+                    }
+                    seriesGroups[session.seriesId].push(session);
+                  } else {
+                    // Standalone sessions
+                    if (!seriesGroups['standalone']) {
+                      seriesGroups['standalone'] = [];
+                    }
+                    seriesGroups['standalone'].push(session);
+                  }
+                });
+
+                return Object.entries(seriesGroups).map(([seriesId, sessions]) => {
+                  if (seriesId === 'standalone') {
+                    // Show standalone sessions individually
+                    return (
+                      <div key="standalone" className="space-y-4">
+                        {sessions.map(session => (
+                          <TeacherSessionCard 
+                            key={session.id}
+                            session={session}
+                            onSelect={() => onSelectSession(session)}
+                            onExport={() => onExportSession(session)}
+                            isDarkMode={isDarkMode}
+                            dependencyStatus={getSessionDependencyStatus(session)}
+                          />
+                        ))}
+                      </div>
+                    );
+                  } else {
+                    // Show series as a grouped package with all sessions
+                    const sortedSessions = sessions.sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
+                    const seriesName = sortedSessions[0]?.title?.split(':')[0] || 'Series';
+                    const teacherName = sortedSessions[0]?.teacherName || 'Teacher';
+                    const completedCount = sortedSessions.filter(s => s.completed).length;
+                    const totalCount = sortedSessions.length;
+                    
+                    return (
+                      <div key={seriesId} className={`p-4 rounded-lg border-2 transition-colors duration-300 ${
+                        isDarkMode ? 'bg-gray-800 border-blue-600' : 'bg-blue-50 border-blue-300'
+                      }`}>
+                        {/* Series Header */}
+                        <div className="flex justify-between items-center mb-4">
+                          <div>
+                            <h4 className={`text-lg font-bold transition-colors duration-300 ${
+                              isDarkMode ? 'text-blue-300' : 'text-blue-800'
+                            }`}>
+                              📦 {seriesName} Package
+                            </h4>
+                            <p className={`text-sm transition-colors duration-300 ${
+                              isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                            }`}>
+                              {teacherName} • {totalCount} sessions • {sessions.reduce((sum, s) => sum + s.totalTime, 0)} minutes total
+                              {completedCount > 0 && ` • ${completedCount}/${totalCount} completed`}
+                            </p>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            isDarkMode ? 'bg-blue-700 text-blue-200' : 'bg-blue-200 text-blue-800'
+                          }`}>
+                            Series
+                          </div>
+                        </div>
+                        
+                        {/* Individual Sessions */}
+                        <div className="space-y-3">
+                          {sortedSessions.map(session => {
+                            const isLocked = getSessionDependencyStatus(session) === DEPENDENCY_STATUS.LOCKED;
+                            const isCompleted = session.completed;
+                            
+                            return (
+                              <div key={session.id} className={`p-3 rounded-lg border transition-colors duration-300 ${
+                                isCompleted
+                                  ? (isDarkMode ? 'bg-green-900/30 border-green-600' : 'bg-green-50 border-green-300')
+                                  : isLocked
+                                    ? (isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300')
+                                    : (isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200')
+                              }`}>
+                                <div className="flex justify-between items-center">
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                                        isCompleted
+                                          ? 'bg-green-600 text-white'
+                                          : isLocked
+                                            ? 'bg-gray-400 text-white'
+                                            : (isDarkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                                      }`}>
+                                        {session.seriesOrder || '?'}
+                                      </div>
+                                      <div>
+                                        <h5 className={`font-medium transition-colors duration-300 ${
+                                          isCompleted
+                                            ? (isDarkMode ? 'text-green-300' : 'text-green-800')
+                                            : isLocked
+                                              ? (isDarkMode ? 'text-gray-400' : 'text-gray-600')
+                                              : (isDarkMode ? 'text-white' : 'text-gray-800')
+                                        }`}>
+                                          {session.title}
+                                          {isLocked && <span className="ml-2 text-orange-600">🔒</span>}
+                                          {isCompleted && <span className="ml-2 text-green-600">✅</span>}
+                                        </h5>
+                                        <p className={`text-sm transition-colors duration-300 ${
+                                          isCompleted
+                                            ? (isDarkMode ? 'text-green-400' : 'text-green-600')
+                                            : isLocked
+                                              ? (isDarkMode ? 'text-gray-500' : 'text-gray-500')
+                                              : (isDarkMode ? 'text-gray-400' : 'text-gray-600')
+                                        }`}>
+                                          {session.totalTime} minutes • {session.tasks.length} tasks
+                                          {isLocked && ' • Locked'}
+                                          {isCompleted && ' • Completed'}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => onSelectSession(session)}
+                                      disabled={isLocked}
+                                      className={`px-3 py-1 rounded text-sm font-medium transition-colors duration-200 ${
+                                        isLocked
+                                          ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                          : isDarkMode 
+                                            ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                                      }`}
+                                    >
+                                      {isCompleted ? 'Review' : isLocked ? 'Locked' : 'Start Session'}
+                                    </button>
+                                    <button
+                                      onClick={() => onExportSession(session)}
+                                      className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${
+                                        isDarkMode 
+                                          ? 'bg-gray-600 text-white hover:bg-gray-700' 
+                                          : 'bg-gray-600 text-white hover:bg-gray-700'
+                                      }`}
+                                    >
+                                      Export
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  }
+                });
+              })()}
+            </div>
+          )}
+        </div>
+
+
+
+        {/* Series Progress */}
+        {sortedSeries.length > 0 && (
+          <div className="mb-8">
+            <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-800'
+            }`}>
+              📊 Series Progress
+            </h3>
+            <div className="space-y-6">
+              {sortedSeries.map(seriesId => {
+                const seriesSessions = getSeriesSessions(seriesId);
+                const seriesProgress = getSeriesProgress(seriesId);
+                const completedCount = seriesSessions.filter(s => s.completed).length;
+                const totalCount = seriesSessions.length;
+                
+                return (
+                  <div key={seriesId} className={`p-4 rounded-lg border transition-colors duration-300 ${
+                    isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
+                  }`}>
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className={`font-semibold transition-colors duration-300 ${
+                        isDarkMode ? 'text-white' : 'text-gray-800'
+                      }`}>
+                        {seriesSessions[0]?.title?.split(':')[0] || 'Series'} Progression
+                      </h4>
+                      <span className={`px-2 py-1 text-xs rounded ${
+                        seriesProgress === SERIES_STATUS.COMPLETED 
+                          ? 'bg-green-600 text-white'
+                          : seriesProgress === SERIES_STATUS.IN_PROGRESS
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-600 text-white'
+                      }`}>
+                        {completedCount}/{totalCount} completed
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {seriesSessions.map(session => (
+                        <div key={session.id} className={`flex items-center gap-3 p-2 rounded transition-colors duration-300 ${
+                          session.completed
+                            ? (isDarkMode ? 'bg-green-900/30' : 'bg-green-50')
+                            : getSessionDependencyStatus(session) === DEPENDENCY_STATUS.LOCKED
+                              ? (isDarkMode ? 'bg-gray-600' : 'bg-gray-100')
+                              : (isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50')
+                        }`}>
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                            session.completed
+                              ? 'bg-green-600 text-white'
+                              : getSessionDependencyStatus(session) === DEPENDENCY_STATUS.LOCKED
+                                ? 'bg-gray-400 text-white'
+                                : 'bg-blue-600 text-white'
+                          }`}>
+                            {session.seriesOrder || '?'}
+                          </div>
+                          <div className="flex-1">
+                            <div className={`font-medium transition-colors duration-300 ${
+                              isDarkMode ? 'text-white' : 'text-gray-800'
+                            }`}>
+                              {session.title}
+                            </div>
+                            <div className={`text-sm transition-colors duration-300 ${
+                              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
+                              {session.completed ? 'Completed' : 
+                               getSessionDependencyStatus(session) === DEPENDENCY_STATUS.LOCKED ? 'Locked' : 'Available'}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Completed Assignments */}
+        <div>
+          <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>
+            ✅ Completed Assignments ({completedSessions.length})
+          </h3>
+          {completedSessions.length === 0 ? (
+            <div className={`text-center py-8 transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-500'
+            }`}>
+              <p>No completed assignments yet</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {completedSessions.map(session => (
+                <TeacherSessionCard 
+                  key={session.id}
+                  session={session}
+                  onSelect={() => onSelectSession(session)}
+                  onExport={() => onExportSession(session)}
+                  isDarkMode={isDarkMode}
+                  completed
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {/* Teacher Session File Input - moved here so it's available when TeacherSessionsView is rendered */}
+      <input
+        ref={localTeacherSessionFileInputRef}
+        type="file"
+        accept=".json"
+        onChange={(event) => {
+          console.log('File input onChange triggered');
+          onImportSession(event);
+        }}
+        style={{ display: 'none' }}
+      />
+    </div>
+  );
+};
+
+const TeacherSessionCard = ({ session, onSelect, onExport, isDarkMode, completed = false, dependencyStatus, locked = false }) => {
+  const daysUntilDue = Math.ceil((new Date(session.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+  const isOverdue = daysUntilDue < 0;
+  const isLocked = locked || dependencyStatus === DEPENDENCY_STATUS.LOCKED;
+  
+  return (
+    <div className={`p-4 rounded-lg border transition-all duration-300 ${
+      completed
+        ? (isDarkMode ? 'bg-green-900/30 border-green-700' : 'bg-green-50 border-green-200')
+        : isLocked
+          ? (isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300')
+          : isOverdue
+            ? (isDarkMode ? 'bg-red-900/30 border-red-700' : 'bg-red-50 border-red-200')
+            : (isDarkMode ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : 'bg-white border-gray-200 hover:bg-gray-50')
+    }`}>
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex-1">
+          <h4 className={`font-semibold transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>
+            {session.title}
+          </h4>
+          <div className={`text-sm mb-2 transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>
+            <div>👨‍🏫 {session.teacherName}</div>
+            <div>📅 Due: {new Date(session.dueDate).toLocaleDateString()}</div>
+            <div>⏱️ {session.totalTime} minutes • {session.tasks.length} tasks</div>
+            {session.seriesOrder && (
+              <div className="text-blue-600 font-medium">
+                Week {session.seriesOrder} of series
+              </div>
+            )}
+            {!completed && !isLocked && (
+              <div className={`font-medium ${
+                isOverdue ? 'text-red-600' : 'text-blue-600'
+              }`}>
+                {isOverdue ? `${Math.abs(daysUntilDue)} days overdue` : `${daysUntilDue} days remaining`}
+              </div>
+            )}
+            {isLocked && (
+              <div className="text-orange-600 font-medium">
+                🔒 Requires previous sessions
+              </div>
+            )}
+            {completed && session.completionDate && (
+              <div className="text-green-600 font-medium">
+                Completed: {new Date(session.completionDate).toLocaleDateString()}
+              </div>
+            )}
+          </div>
+          {session.description && (
+            <p className={`text-sm italic transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              "{session.description}"
+            </p>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <span className={`px-2 py-1 text-xs rounded ${
+            completed
+              ? 'bg-green-600 text-white'
+              : isOverdue
+                ? 'bg-red-600 text-white'
+                : 'bg-blue-600 text-white'
+          }`}>
+            {completed ? 'Completed' : isOverdue ? 'Overdue' : 'Pending'}
+          </span>
+        </div>
+      </div>
+      
+      <div className="flex gap-2">
+        <button
+          onClick={onSelect}
+          disabled={isLocked}
+          className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors duration-200 ${
+            isLocked
+              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+              : isDarkMode 
+                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          <Play size={16} />
+          {completed ? 'Review Session' : isLocked ? 'Locked' : 'Start Session'}
+        </button>
+        <button
+          onClick={onExport}
+          className={`flex items-center gap-2 px-3 py-2 rounded text-sm transition-colors duration-200 ${
+            isDarkMode 
+              ? 'bg-gray-600 text-white hover:bg-gray-700' 
+              : 'bg-gray-600 text-white hover:bg-gray-700'
+          }`}
+        >
+          <Download size={16} />
+          Export
+        </button>
       </div>
     </div>
   );

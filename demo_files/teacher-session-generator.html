@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jazz Guitar Teacher Session Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input[type="text"], 
+        input[type="date"], 
+        textarea, 
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, 
+        input[type="date"]:focus, 
+        textarea:focus, 
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .session-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .session-card h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-session {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .task-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .task-card h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .remove-task {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .actions .btn {
+            margin: 0 10px;
+        }
+
+        .preview {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .help-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .series-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .series-info h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .series-info ul {
+            margin-left: 20px;
+        }
+
+        .series-info li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎸 Jazz Guitar Teacher Session Generator</h1>
+            <p>Create multi-session practice packages for your students</p>
+        </div>
+
+        <div class="series-info">
+            <h3>📋 How to Use This Generator</h3>
+            <ul>
+                <li><strong>Series Details:</strong> Enter the overall series information (name, teacher, description)</li>
+                <li><strong>Add Sessions:</strong> Create individual practice sessions with tasks and time allocations</li>
+                <li><strong>Dependencies:</strong> Later sessions will automatically be locked until previous ones are completed</li>
+                <li><strong>Generate JSON:</strong> Download the file and send it to your student</li>
+            </ul>
+        </div>
+
+        <form id="sessionGenerator">
+            <!-- Series Information -->
+            <div class="form-section">
+                <h2>📦 Series Information</h2>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="seriesName">Series Name *</label>
+                        <input type="text" id="seriesName" required placeholder="e.g., Comping Progression Series">
+                    </div>
+                    <div class="form-group">
+                        <label for="teacherName">Teacher Name *</label>
+                        <input type="text" id="teacherName" required placeholder="e.g., Marc-Andre Seguin">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="seriesDescription">Series Description</label>
+                    <textarea id="seriesDescription" rows="3" placeholder="Brief description of what this series covers..."></textarea>
+                </div>
+            </div>
+
+            <!-- Sessions -->
+            <div class="form-section">
+                <h2>📚 Practice Sessions</h2>
+                <div id="sessionsContainer">
+                    <!-- Sessions will be added here -->
+                </div>
+                <button type="button" class="btn btn-success" onclick="addSession()">➕ Add Session</button>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <button type="button" class="btn btn-primary" onclick="generateJSON()">🔧 Generate JSON</button>
+                <button type="button" class="btn btn-warning" onclick="loadTemplate()">📋 Load Template</button>
+                <button type="button" class="btn btn-danger" onclick="clearForm()">🗑️ Clear Form</button>
+            </div>
+
+            <!-- Preview -->
+            <div id="previewContainer" class="hidden">
+                <div class="form-section">
+                    <h2>📄 Generated JSON Preview</h2>
+                    <div id="jsonPreview" class="preview"></div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button type="button" class="btn btn-success" onclick="downloadJSON()">💾 Download JSON File</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let sessionCounter = 0;
+        let taskCounter = 0;
+
+        // Initialize with first session
+        document.addEventListener('DOMContentLoaded', function() {
+            addSession();
+        });
+
+        function addSession() {
+            sessionCounter++;
+            const sessionsContainer = document.getElementById('sessionsContainer');
+            
+            const sessionDiv = document.createElement('div');
+            sessionDiv.className = 'session-card';
+            sessionDiv.id = `session-${sessionCounter}`;
+            
+            sessionDiv.innerHTML = `
+                <h3>
+                    Session ${sessionCounter}
+                    <button type="button" class="remove-session" onclick="removeSession(${sessionCounter})">Remove</button>
+                </h3>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label for="session-title-${sessionCounter}">Session Title *</label>
+                        <input type="text" id="session-title-${sessionCounter}" required placeholder="e.g., Week 1: Basic Shell Voicings">
+                    </div>
+                    <div class="form-group">
+                        <label for="session-due-${sessionCounter}">Due Date *</label>
+                        <input type="date" id="session-due-${sessionCounter}" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="session-description-${sessionCounter}">Session Description</label>
+                    <textarea id="session-description-${sessionCounter}" rows="2" placeholder="What will the student learn in this session?"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tasks</label>
+                    <div id="tasks-${sessionCounter}">
+                        <!-- Tasks will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="addTask(${sessionCounter})" style="margin-top: 10px;">➕ Add Task</button>
+                </div>
+            `;
+            
+            sessionsContainer.appendChild(sessionDiv);
+            addTask(sessionCounter);
+        }
+
+        function removeSession(sessionNum) {
+            const sessionDiv = document.getElementById(`session-${sessionNum}`);
+            sessionDiv.remove();
+        }
+
+        function addTask(sessionNum) {
+            taskCounter++;
+            const tasksContainer = document.getElementById(`tasks-${sessionNum}`);
+            
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'task-card';
+            taskDiv.id = `task-${taskCounter}`;
+            
+            taskDiv.innerHTML = `
+                <h4>
+                    Task ${taskCounter}
+                    <button type="button" class="remove-task" onclick="removeTask(${taskCounter})">Remove</button>
+                </h4>
+                
+                <div class="row">
+                    <div class="form-group">
+                        <label for="task-name-${taskCounter}">Task Name *</label>
+                        <input type="text" id="task-name-${taskCounter}" required placeholder="e.g., Shell Voicings Practice">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-time-${taskCounter}">Time (minutes) *</label>
+                        <input type="number" id="task-time-${taskCounter}" required min="1" max="120" value="20">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-type-${taskCounter}">Task Type *</label>
+                    <select id="task-type-${taskCounter}" required onchange="toggleStandardFields(${taskCounter})">
+                        <option value="other_work">Other Work (Technique, Exercises)</option>
+                        <option value="standard">Jazz Standard</option>
+                        <option value="one_off">One-Off Task</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="task-notes-${taskCounter}">Teacher Notes</label>
+                    <textarea id="task-notes-${taskCounter}" rows="3" placeholder="Specific instructions for this task..."></textarea>
+                </div>
+                
+                <div id="standard-fields-${taskCounter}" class="hidden">
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="task-standard-id-${taskCounter}">Standard ID</label>
+                            <input type="text" id="task-standard-id-${taskCounter}" placeholder="e.g., 1 (for Autumn Leaves)">
+                        </div>
+                        <div class="form-group">
+                            <label for="task-focus-step-${taskCounter}">Focus Step (0-7)</label>
+                            <input type="number" id="task-focus-step-${taskCounter}" min="0" max="7" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            tasksContainer.appendChild(taskDiv);
+        }
+
+        function removeTask(taskNum) {
+            const taskDiv = document.getElementById(`task-${taskNum}`);
+            taskDiv.remove();
+        }
+
+        function toggleStandardFields(taskNum) {
+            const taskType = document.getElementById(`task-type-${taskNum}`).value;
+            const standardFields = document.getElementById(`standard-fields-${taskNum}`);
+            
+            if (taskType === 'standard') {
+                standardFields.classList.remove('hidden');
+            } else {
+                standardFields.classList.add('hidden');
+            }
+        }
+
+        function generateJSON() {
+            const seriesName = document.getElementById('seriesName').value;
+            const teacherName = document.getElementById('teacherName').value;
+            const seriesDescription = document.getElementById('seriesDescription').value;
+            
+            if (!seriesName || !teacherName) {
+                alert('Please fill in the required Series Name and Teacher Name fields.');
+                return;
+            }
+
+            const sessions = [];
+            const sessionCards = document.querySelectorAll('.session-card');
+            
+            sessionCards.forEach((sessionCard, index) => {
+                const sessionNum = sessionCard.id.split('-')[1];
+                const title = document.getElementById(`session-title-${sessionNum}`).value;
+                const dueDate = document.getElementById(`session-due-${sessionNum}`).value;
+                const description = document.getElementById(`session-description-${sessionNum}`).value;
+                
+                if (!title || !dueDate) {
+                    alert(`Please fill in all required fields for Session ${index + 1}.`);
+                    return;
+                }
+
+                const tasks = [];
+                const taskCards = sessionCard.querySelectorAll('.task-card');
+                
+                taskCards.forEach(taskCard => {
+                    const taskNum = taskCard.id.split('-')[1];
+                    const taskName = document.getElementById(`task-name-${taskNum}`).value;
+                    const taskTime = document.getElementById(`task-time-${taskNum}`).value;
+                    const taskType = document.getElementById(`task-type-${taskNum}`).value;
+                    const taskNotes = document.getElementById(`task-notes-${taskNum}`).value;
+                    
+                    if (!taskName || !taskTime) {
+                        alert(`Please fill in all required fields for tasks in Session ${index + 1}.`);
+                        return;
+                    }
+
+                    const task = {
+                        id: `task_${taskNum}`,
+                        name: taskName,
+                        type: taskType,
+                        timeAllocated: parseInt(taskTime),
+                        teacherNotes: taskNotes,
+                        practiceNote: "",
+                        sessionNote: ""
+                    };
+
+                    if (taskType === 'standard') {
+                        const standardId = document.getElementById(`task-standard-id-${taskNum}`).value;
+                        const focusStep = document.getElementById(`task-focus-step-${taskNum}`).value;
+                        if (standardId) task.standardId = standardId;
+                        if (focusStep) task.focusStep = parseInt(focusStep);
+                    }
+
+                    tasks.push(task);
+                });
+
+                const session = {
+                    title: title,
+                    teacherName: teacherName,
+                    assignedDate: new Date().toISOString().split('T')[0],
+                    dueDate: dueDate,
+                    status: "pending",
+                    type: "assigned",
+                    description: description,
+                    seriesId: seriesName.toLowerCase().replace(/\s+/g, '_'),
+                    seriesOrder: index + 1,
+                    prerequisites: index > 0 ? [`ts_${seriesName.toLowerCase().replace(/\s+/g, '_')}_week${index}`] : [],
+                    tasks: tasks,
+                    totalTime: tasks.reduce((sum, task) => sum + task.timeAllocated, 0),
+                    completed: false,
+                    completionDate: null,
+                    teacherFeedback: "",
+                    studentNotes: ""
+                };
+
+                sessions.push(session);
+            });
+
+            const jsonData = {
+                version: "1.0",
+                type: "teacher_session_series",
+                seriesName: seriesName,
+                teacherName: teacherName,
+                description: seriesDescription,
+                exportDate: new Date().toISOString(),
+                sessions: sessions
+            };
+
+            // Show preview
+            document.getElementById('jsonPreview').textContent = JSON.stringify(jsonData, null, 2);
+            document.getElementById('previewContainer').classList.remove('hidden');
+            
+            // Store for download
+            window.generatedJSON = jsonData;
+        }
+
+        function downloadJSON() {
+            if (!window.generatedJSON) {
+                alert('Please generate the JSON first.');
+                return;
+            }
+
+            const dataStr = JSON.stringify(window.generatedJSON, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${window.generatedJSON.seriesName.toLowerCase().replace(/\s+/g, '-')}-teacher-session.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadTemplate() {
+            // Load the comping progression template
+            document.getElementById('seriesName').value = 'Comping Progression Series';
+            document.getElementById('teacherName').value = 'Marc-Andre Seguin';
+            document.getElementById('seriesDescription').value = 'Four-week progression focusing on jazz comping skills';
+            
+            // Clear existing sessions and add template sessions
+            document.getElementById('sessionsContainer').innerHTML = '';
+            sessionCounter = 0;
+            taskCounter = 0;
+            
+            // Add 4 sessions with template data
+            const templateData = [
+                {
+                    title: 'Week 1: Basic Shell Voicings',
+                    description: 'Learn and practice basic shell voicings (3rds and 7ths) in all keys.',
+                    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    tasks: [
+                        { name: 'Shell Voicings Practice', time: 20, type: 'other_work', notes: 'Focus on clean shell voicings (3rds and 7ths) in all keys. Practice ii-V-I progressions in C, F, Bb, Eb. Use metronome at 80 BPM.' },
+                        { name: 'Autumn Leaves - Shell Voicings', time: 15, type: 'standard', notes: 'Apply shell voicings to Autumn Leaves. Focus on smooth voice leading between chords.', standardId: '1', focusStep: 1 }
+                    ]
+                },
+                {
+                    title: 'Week 2: Drop 2 Voicings',
+                    description: 'Learn drop 2 voicings for major 7th, minor 7th, and dominant 7th chords.',
+                    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    tasks: [
+                        { name: 'Drop 2 Voicings Practice', time: 25, type: 'other_work', notes: 'Learn drop 2 voicings for major 7th, minor 7th, and dominant 7th chords. Practice in all 12 keys. Focus on smooth voice leading between chords.' },
+                        { name: 'Autumn Leaves - Drop 2 Voicings', time: 20, type: 'standard', notes: 'Apply drop 2 voicings to Autumn Leaves. Compare with shell voicings from last week.', standardId: '1', focusStep: 1 }
+                    ]
+                },
+                {
+                    title: 'Week 3: Rhythmic Patterns',
+                    description: 'Work on jazz comping rhythms: Charleston pattern, dotted quarter notes, syncopated patterns.',
+                    dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    tasks: [
+                        { name: 'Rhythmic Patterns Practice', time: 30, type: 'other_work', notes: 'Work on jazz comping rhythms: Charleston pattern, dotted quarter notes, syncopated patterns. Practice with backing tracks.' },
+                        { name: 'All The Things You Are - Rhythm Practice', time: 25, type: 'standard', notes: 'Apply rhythmic patterns to All The Things You Are. Focus on groove and feel.', standardId: '2', focusStep: 5 }
+                    ]
+                },
+                {
+                    title: 'Week 4: Advanced Voice Leading',
+                    description: 'Practice chromatic voice leading, passing chords, and reharmonization techniques.',
+                    dueDate: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    tasks: [
+                        { name: 'Advanced Voice Leading Practice', time: 35, type: 'other_work', notes: 'Practice chromatic voice leading, passing chords, and reharmonization techniques.' },
+                        { name: 'Stella By Starlight - Advanced Voicings', time: 30, type: 'standard', notes: 'Apply advanced voicings to Stella By Starlight. Record a complete performance.', standardId: '5', focusStep: 1 }
+                    ]
+                }
+            ];
+
+            templateData.forEach((sessionData, index) => {
+                addSession();
+                const sessionNum = sessionCounter;
+                
+                document.getElementById(`session-title-${sessionNum}`).value = sessionData.title;
+                document.getElementById(`session-description-${sessionNum}`).value = sessionData.description;
+                document.getElementById(`session-due-${sessionNum}`).value = sessionData.dueDate;
+                
+                // Remove the default task and add template tasks
+                const tasksContainer = document.getElementById(`tasks-${sessionNum}`);
+                tasksContainer.innerHTML = '';
+                
+                sessionData.tasks.forEach(taskData => {
+                    addTask(sessionNum);
+                    const taskNum = taskCounter;
+                    
+                    document.getElementById(`task-name-${taskNum}`).value = taskData.name;
+                    document.getElementById(`task-time-${taskNum}`).value = taskData.time;
+                    document.getElementById(`task-type-${taskNum}`).value = taskData.type;
+                    document.getElementById(`task-notes-${taskNum}`).value = taskData.notes;
+                    
+                    if (taskData.type === 'standard') {
+                        if (taskData.standardId) document.getElementById(`task-standard-id-${taskNum}`).value = taskData.standardId;
+                        if (taskData.focusStep) document.getElementById(`task-focus-step-${taskNum}`).value = taskData.focusStep;
+                        toggleStandardFields(taskNum);
+                    }
+                });
+            });
+        }
+
+        function clearForm() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                document.getElementById('sessionGenerator').reset();
+                document.getElementById('sessionsContainer').innerHTML = '';
+                document.getElementById('previewContainer').classList.add('hidden');
+                sessionCounter = 0;
+                taskCounter = 0;
+                addSession();
+            }
+        }
+    </script>
+</body>
+</html> 
