@@ -2036,7 +2036,17 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                 <input
                   type="number"
                   value={standardTimeInput}
-                  onChange={(e) => setStandardTimeInput(parseInt(e.target.value) || 25)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      setStandardTimeInput('');
+                    } else {
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue)) {
+                        setStandardTimeInput(numValue);
+                      }
+                    }
+                  }}
                   onFocus={(e) => e.target.select()}
                   className={`w-full p-2 border rounded text-sm transition-colors duration-300 ${
                     isDarkMode 
@@ -2103,7 +2113,17 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
                 <input
                   type="number"
                   value={otherWorkTimeInput}
-                  onChange={(e) => setOtherWorkTimeInput(parseInt(e.target.value) || 20)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      setOtherWorkTimeInput('');
+                    } else {
+                      const numValue = parseInt(value);
+                      if (!isNaN(numValue)) {
+                        setOtherWorkTimeInput(numValue);
+                      }
+                    }
+                  }}
                   onFocus={(e) => e.target.select()}
                   className={`w-full p-2 border rounded text-sm transition-colors duration-300 ${
                     isDarkMode 
@@ -2151,7 +2171,17 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
             <input
               type="number"
               value={newTaskTime}
-              onChange={(e) => setNewTaskTime(parseInt(e.target.value) || 0)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '') {
+                  setNewTaskTime('');
+                } else {
+                  const numValue = parseInt(value);
+                  if (!isNaN(numValue)) {
+                    setNewTaskTime(numValue);
+                  }
+                }
+              }}
               onFocus={(e) => e.target.select()}
               placeholder="Minutes..."
               className={`w-full p-2 border rounded mb-3 text-sm transition-colors duration-300 ${
