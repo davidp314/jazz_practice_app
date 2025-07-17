@@ -7,7 +7,7 @@
   "exportDate": "2025-01-15T10:00:00.000Z",
   "sessions": [
     {
-      "title": "Week 1: Basic Shell Voicings",
+      "title": "Session 1: Basic Shell Voicings",
       "teacherName": "Marc-Andre Seguin",
       "assignedDate": "2025-01-15",
       "dueDate": "2025-01-22",
@@ -46,7 +46,7 @@
       "studentNotes": ""
     },
     {
-      "title": "Week 2: Drop 2 Voicings",
+      "title": "Session 2: Drop 2 Voicings",
       "teacherName": "Marc-Andre Seguin",
       "assignedDate": "2025-01-22",
       "dueDate": "2025-01-29",
@@ -85,7 +85,7 @@
       "studentNotes": ""
     },
     {
-      "title": "Week 3: Rhythmic Patterns",
+      "title": "Session 3: Rhythmic Patterns",
       "teacherName": "Marc-Andre Seguin",
       "assignedDate": "2025-01-29",
       "dueDate": "2025-02-05",
@@ -124,7 +124,7 @@
       "studentNotes": ""
     },
     {
-      "title": "Week 4: Advanced Voice Leading",
+      "title": "Session 4: Advanced Voice Leading",
       "teacherName": "Marc-Andre Seguin",
       "assignedDate": "2025-02-05",
       "dueDate": "2025-02-12",

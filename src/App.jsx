@@ -334,75 +334,8 @@ const JazzGuitarTracker = () => {
     if (savedTeacherSessions && JSON.parse(savedTeacherSessions).length > 0) {
       setTeacherSessions(JSON.parse(savedTeacherSessions));
     } else {
-      // Initialize with some sample teacher sessions
-      const sampleTeacherSessions = [
-        {
-          id: 'ts_1',
-          title: 'Week 3: Autumn Leaves Focus',
-          teacherName: 'Ed Bickner',
-          assignedDate: '2025-01-15',
-          dueDate: '2025-01-22',
-          status: SESSION_STATUS.PENDING,
-          type: TEACHER_SESSION_TYPES.ASSIGNED,
-          description: 'Focus on the bridge section with shell voicings',
-          tasks: [
-            {
-              id: 'task_1',
-              name: 'Autumn Leaves - Bridge Section',
-              type: TASK_TYPES.STANDARD,
-              timeAllocated: 30,
-              standardId: '1',
-              focusStep: 1, // Shell chords
-              teacherNotes: 'Practice the bridge with shell voicings, focus on voice leading',
-              practiceNote: '',
-              sessionNote: ''
-            },
-            {
-              id: 'task_2', 
-              name: 'ii-V-I Progressions in Bb',
-              type: TASK_TYPES.OTHER_WORK,
-              timeAllocated: 20,
-              teacherNotes: 'Work on smooth transitions between chords',
-              practiceNote: '',
-              sessionNote: ''
-            }
-          ],
-          totalTime: 50,
-          completed: false,
-          completionDate: null,
-          teacherFeedback: '',
-          studentNotes: ''
-        },
-        {
-          id: 'ts_2',
-          title: 'Week 4: Stella By Starlight',
-          teacherName: 'Ed Bickner',
-          assignedDate: '2025-01-08',
-          dueDate: '2025-01-15',
-          status: SESSION_STATUS.COMPLETED,
-          type: TEACHER_SESSION_TYPES.ASSIGNED,
-          description: 'Complex harmony study with arpeggio practice',
-          tasks: [
-            {
-              id: 'task_3',
-              name: 'Stella By Starlight - Arpeggios',
-              type: TASK_TYPES.STANDARD,
-              timeAllocated: 35,
-              standardId: '5',
-              focusStep: 3, // Arpeggios
-              teacherNotes: 'Focus on the bridge arpeggios, practice slowly',
-              practiceNote: 'Worked on bridge section, need more practice on arpeggios',
-              sessionNote: 'Made good progress on bridge, arpeggios still challenging'
-            }
-          ],
-          totalTime: 35,
-          completed: true,
-          completionDate: '2025-01-12T10:30:00.000Z',
-          teacherFeedback: 'Great work on the bridge section!',
-          studentNotes: 'Arpeggios are getting better but need more work'
-        }
-      ];
-      setTeacherSessions(sampleTeacherSessions);
+      // Initialize with empty teacher sessions for demo
+      setTeacherSessions([]);
     }
   }, []);
 
