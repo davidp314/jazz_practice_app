@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Problematic Import Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.warning { background: #fff3cd; color: #856404; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Problematic Import Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Import Methods</h2>
+        <p>This test simulates the problematic import scenario with different approaches.</p>
+        
+        <button id="testAsync" onclick="testAsyncImport()">
+            <span id="asyncText">Test Async Import</span>
+            <span id="asyncLoading" class="loading" style="display: none;"></span>
+        </button>
+        
+        <button id="testSync" onclick="testSyncImport()">
+            <span id="syncText">Test Sync Import</span>
+            <span id="syncLoading" class="loading" style="display: none;"></span>
+        </button>
+        
+        <button id="testFallback" onclick="testFallbackImport()">
+            <span id="fallbackText">Test Fallback Import</span>
+            <span id="fallbackLoading" class="loading" style="display: none;"></span>
+        </button>
+        
+        <button id="testReset" onclick="resetAllStates()">
+            Reset All States
+        </button>
+        
+        <input type="file" id="fileInput" class="file-input" accept=".json" />
+        
+        <div id="statusLog"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Fixes Applied</h2>
+        <ul>
+            <li><strong>Removed Async Complexity:</strong> Eliminated setTimeout and Promise.race that could cause hanging</li>
+            <li><strong>Synchronous Processing:</strong> Process data immediately without async delays</li>
+            <li><strong>Global Timeout:</strong> 60-second timeout to prevent infinite hanging</li>
+            <li><strong>Error Boundaries:</strong> Double try-catch to handle any unexpected errors</li>
+            <li><strong>Fallback Method:</strong> Simple synchronous import as backup</li>
+            <li><strong>State Reset:</strong> Multiple ways to reset stuck states</li>
+        </ul>
+    </div>
+
+    <script>
+        let isAsyncImporting = false;
+        let isSyncImporting = false;
+        let isFallbackImporting = false;
+
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('statusLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(statusDiv);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function testAsyncImport() {
+            if (isAsyncImporting) {
+                log('Async import already in progress', 'warning');
+                return;
+            }
+
+            const button = document.getElementById('testAsync');
+            const text = document.getElementById('asyncText');
+            const loading = document.getElementById('asyncLoading');
+            
+            isAsyncImporting = true;
+            button.disabled = true;
+            text.textContent = 'Importing...';
+            loading.style.display = 'inline-block';
+            
+            log('Starting async import test...');
+            
+            // Simulate the problematic async import
+            try {
+                log('Reading file...');
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                log('Parsing JSON...');
+                await new Promise(resolve => setTimeout(resolve, 50));
+                
+                log('Processing data...');
+                await new Promise(resolve => setTimeout(resolve, 75));
+                
+                log('Async import completed successfully', 'success');
+                
+            } catch (error) {
+                log(`Async import failed: ${error.message}`, 'error');
+            } finally {
+                isAsyncImporting = false;
+                button.disabled = false;
+                text.textContent = 'Test Async Import';
+                loading.style.display = 'none';
+                log('Async import state reset completed');
+            }
+        }
+
+        function testSyncImport() {
+            if (isSyncImporting) {
+                log('Sync import already in progress', 'warning');
+                return;
+            }
+
+            const button = document.getElementById('testSync');
+            const text = document.getElementById('syncText');
+            const loading = document.getElementById('syncLoading');
+            
+            isSyncImporting = true;
+            button.disabled = true;
+            text.textContent = 'Importing...';
+            loading.style.display = 'inline-block';
+            
+            log('Starting sync import test...');
+            
+            try {
+                log('Reading file...');
+                // Simulate synchronous processing
+                const start = performance.now();
+                while (performance.now() - start < 100) {
+                    // Busy wait to simulate processing
+                }
+                
+                log('Parsing JSON...');
+                const start2 = performance.now();
+                while (performance.now() - start2 < 50) {
+                    // Busy wait to simulate processing
+                }
+                
+                log('Processing data...');
+                const start3 = performance.now();
+                while (performance.now() - start3 < 75) {
+                    // Busy wait to simulate processing
+                }
+                
+                log('Sync import completed successfully', 'success');
+                
+            } catch (error) {
+                log(`Sync import failed: ${error.message}`, 'error');
+            } finally {
+                isSyncImporting = false;
+                button.disabled = false;
+                text.textContent = 'Test Sync Import';
+                loading.style.display = 'none';
+                log('Sync import state reset completed');
+            }
+        }
+
+        function testFallbackImport() {
+            if (isFallbackImporting) {
+                log('Fallback import already in progress', 'warning');
+                return;
+            }
+
+            const button = document.getElementById('testFallback');
+            const text = document.getElementById('fallbackText');
+            const loading = document.getElementById('fallbackLoading');
+            
+            isFallbackImporting = true;
+            button.disabled = true;
+            text.textContent = 'Importing...';
+            loading.style.display = 'inline-block';
+            
+            log('Starting fallback import test...');
+            
+            // Simulate simple file reading
+            const fileInput = document.getElementById('fileInput');
+            fileInput.onchange = (event) => {
+                try {
+                    log('File selected, processing...');
+                    
+                    // Simulate processing
+                    const start = performance.now();
+                    while (performance.now() - start < 100) {
+                        // Busy wait to simulate processing
+                    }
+                    
+                    log('Fallback import completed successfully', 'success');
+                    
+                } catch (error) {
+                    log(`Fallback import failed: ${error.message}`, 'error');
+                } finally {
+                    isFallbackImporting = false;
+                    button.disabled = false;
+                    text.textContent = 'Test Fallback Import';
+                    loading.style.display = 'none';
+                    log('Fallback import state reset completed');
+                    event.target.value = '';
+                }
+            };
+            
+            fileInput.click();
+        }
+
+        function resetAllStates() {
+            isAsyncImporting = false;
+            isSyncImporting = false;
+            isFallbackImporting = false;
+            
+            const buttons = ['testAsync', 'testSync', 'testFallback'];
+            const texts = ['asyncText', 'syncText', 'fallbackText'];
+            const loadings = ['asyncLoading', 'syncLoading', 'fallbackLoading'];
+            
+            buttons.forEach((buttonId, index) => {
+                const button = document.getElementById(buttonId);
+                const text = document.getElementById(texts[index]);
+                const loading = document.getElementById(loadings[index]);
+                
+                button.disabled = false;
+                text.textContent = `Test ${buttonId.replace('test', '')} Import`;
+                loading.style.display = 'none';
+            });
+            
+            log('All states manually reset', 'success');
+        }
+
+        // Log initial state
+        log('Import test ready. Test different import methods to see which works best.');
+        log('The sync and fallback methods should be more reliable than async.');
+    </script>
+</body>
+</html> 

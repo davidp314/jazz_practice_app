@@ -44,6 +44,7 @@ const JazzGuitarTracker = () => {
   const [showTeacherSessions, setShowTeacherSessions] = useState(false);
   const [selectedTeacherSession, setSelectedTeacherSession] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [isMainImporting, setIsMainImporting] = useState(false);
   
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -51,15 +52,32 @@ const JazzGuitarTracker = () => {
 
   // Migration function to handle the new comping step
   const migrateStandardsData = (standardsData) => {
-    return standardsData.map(standard => {
-      if (standard.steps.length === 7) {
+    // Early return if no data
+    if (!standardsData || !Array.isArray(standardsData)) {
+      return [];
+    }
+    
+    const result = standardsData.map((standard) => {
+      // Handle standards with 7 steps (old format) - add comping step
+      if (standard.steps && Array.isArray(standard.steps) && standard.steps.length === 7) {
         // Insert comping step at index 5 (between "Target the 3rds" and "Practice improv")
         const newSteps = [...standard.steps];
         newSteps.splice(5, 0, false); // Add comping step as unchecked
         return { ...standard, steps: newSteps };
       }
+      // Handle standards with 8 steps (new format) - no migration needed
+      if (standard.steps && Array.isArray(standard.steps) && standard.steps.length === 8) {
+        return standard; // Already in correct format
+      }
+      // Handle standards with no steps or invalid format - create default 8-step array
+      if (!standard.steps || !Array.isArray(standard.steps)) {
+        return { ...standard, steps: new Array(8).fill(false) };
+      }
+      // For any other case, return as-is
       return standard;
     });
+    
+    return result;
   };
 
   // Load data from localStorage on component mount
@@ -388,17 +406,38 @@ const JazzGuitarTracker = () => {
     }
   }, []);
 
-  // Save data to localStorage whenever it changes
+  // Save data to localStorage whenever it changes (debounced to prevent performance issues)
   useEffect(() => {
-    localStorage.setItem('jazzStandards', JSON.stringify(standards));
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('jazzStandards', JSON.stringify(standards));
+      } catch (error) {
+        console.error('Error saving standards:', error);
+      }
+    }, 100);
+    return () => clearTimeout(timeoutId);
   }, [standards]);
 
   useEffect(() => {
-    localStorage.setItem('otherWork', JSON.stringify(otherWork));
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('otherWork', JSON.stringify(otherWork));
+      } catch (error) {
+        console.error('Error saving other work:', error);
+      }
+    }, 100);
+    return () => clearTimeout(timeoutId);
   }, [otherWork]);
 
   useEffect(() => {
-    localStorage.setItem('practiceHistory', JSON.stringify(practiceHistory));
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('practiceHistory', JSON.stringify(practiceHistory));
+      } catch (error) {
+        console.error('Error saving practice history:', error);
+      }
+    }, 100);
+    return () => clearTimeout(timeoutId);
   }, [practiceHistory]);
 
   useEffect(() => {
@@ -406,7 +445,10 @@ const JazzGuitarTracker = () => {
   }, [isDarkMode]);
 
   useEffect(() => {
-    localStorage.setItem('teacherSessions', JSON.stringify(teacherSessions));
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem('teacherSessions', JSON.stringify(teacherSessions));
+    }, 100);
+    return () => clearTimeout(timeoutId);
   }, [teacherSessions]);
 
   // Session timer logic - runs when task timer is running
@@ -459,6 +501,28 @@ const JazzGuitarTracker = () => {
     };
   }, [isDarkMode]);
 
+  // Reset stuck import states on component mount
+  useEffect(() => {
+    resetImportStates();
+  }, []);
+
+  // Periodic check for stuck import states (Brave workaround)
+  useEffect(() => {
+    if (!isMainImporting) return;
+    
+    const interval = setInterval(() => {
+      // If import has been running for more than 5 seconds, force reset
+      console.log('Periodic check: Import state still active, forcing reset...');
+      simulateBraveWakeup();
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [isMainImporting]);
+
+
+
+
+
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
@@ -486,43 +550,78 @@ const JazzGuitarTracker = () => {
     URL.revokeObjectURL(url);
   };
 
-  const importData = (event) => {
+    const importData = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
+    // Prevent multiple simultaneous imports
+    if (isMainImporting) {
+      return;
+    }
+
+    // Show loading state
+    setIsMainImporting(true);
+
+    try {
+      // Read file
+      const fileContent = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+      });
+
+      // Parse JSON
+      let importedData;
       try {
-	const importedData = JSON.parse(e.target.result);
-	
-	if (!importedData.appName || importedData.appName !== "Jazz Guitar Practice Tracker") {
-	  alert('This file does not appear to be a Jazz Guitar Practice Tracker backup.');
-	  return;
-	}
-
-	if (importedData.standards) {
-	  const migratedStandards = migrateStandardsData(importedData.standards);
-	  setStandards(migratedStandards);
-	}
-	
-	if (importedData.otherWork) {
-	  setOtherWork(importedData.otherWork);
-	}
-	
-	if (importedData.practiceHistory) {
-	  setPracticeHistory(importedData.practiceHistory);
-	}
-
-	alert(`Successfully imported data from ${new Date(importedData.exportDate).toLocaleDateString()}`);
-	
-      } catch (error) {
-	console.error('Import error:', error);
-	alert('Error importing file. Please make sure it\'s a valid Jazz Guitar Practice Tracker backup file.');
+        importedData = JSON.parse(fileContent);
+      } catch (parseError) {
+        throw new Error('Invalid JSON format');
       }
-    };
-    
-    reader.readAsText(file);
-    event.target.value = '';
+
+      // Validate file format
+      if (!importedData.appName || importedData.appName !== "Jazz Guitar Practice Tracker") {
+        throw new Error('Invalid file format');
+      }
+
+      // Process data
+      const updates = {};
+      
+      if (importedData.standards) {
+        updates.standards = migrateStandardsData(importedData.standards);
+      }
+      if (importedData.otherWork) {
+        updates.otherWork = importedData.otherWork;
+      }
+      if (importedData.practiceHistory) {
+        updates.practiceHistory = importedData.practiceHistory;
+      }
+
+      // Apply updates
+      if (updates.standards) setStandards(updates.standards);
+      if (updates.otherWork) setOtherWork(updates.otherWork);
+      if (updates.practiceHistory) setPracticeHistory(updates.practiceHistory);
+
+      alert(`Successfully imported data from ${new Date(importedData.exportDate).toLocaleDateString()}`);
+
+    } catch (error) {
+      console.error('Import error:', error);
+      let errorMessage = 'Error importing file. Please make sure it\'s a valid Jazz Guitar Practice Tracker backup file.';
+      
+      if (error.message === 'Invalid JSON format') {
+        errorMessage = 'Invalid file format. Please make sure the file is a valid JSON backup.';
+      } else if (error.message === 'Invalid file format') {
+        errorMessage = 'This file does not appear to be a Jazz Guitar Practice Tracker backup.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      // Reset loading state and clear file input
+      setIsMainImporting(false);
+      if (event.target) {
+        event.target.value = '';
+      }
+    }
   };
 
   const triggerImport = () => {
@@ -562,25 +661,32 @@ const JazzGuitarTracker = () => {
   const importTeacherSession = (event) => {
     const file = event.target.files[0];
     if (!file) {
-      console.log('No file selected');
+      return;
+    }
+
+    // Prevent multiple simultaneous imports
+    if (isImporting) {
       return;
     }
 
     // Set loading state
     setIsImporting(true);
-    const loadingMessage = `Importing ${file.name}...`;
-    console.log(loadingMessage);
 
+    // Use synchronous FileReader to avoid async complexity
     const reader = new FileReader();
+    
     reader.onload = (e) => {
-      console.log('File read successfully, parsing JSON...');
       try {
-        const importedData = JSON.parse(e.target.result);
-        console.log('Parsed data:', importedData);
+        let importedData;
+        try {
+          importedData = JSON.parse(e.target.result);
+        } catch (parseError) {
+          throw new Error('Invalid JSON format');
+        }
         
         // Check if this is a single session or multiple sessions
         if (importedData.type === 'teacher_session') {
-          // Single session import (optimized)
+          // Single session import
           const session = {
             ...importedData.session,
             id: `ts_${Date.now()}`,
@@ -588,24 +694,24 @@ const JazzGuitarTracker = () => {
             status: SESSION_STATUS.PENDING
           };
 
+          // Process synchronously
           setTeacherSessions(prev => [session, ...prev]);
+
           alert(`Successfully imported "${session.title}" from ${importedData.teacherName}`);
-          setIsImporting(false);
           
         } else if (importedData.type === 'teacher_session_series') {
-          // Multiple sessions import (optimized)
+          // Multiple sessions import
           const sessions = importedData.sessions || [];
           
           if (sessions.length === 0) {
             alert('No sessions found in the imported file.');
-            setIsImporting(false);
-            return;
+            throw new Error('No sessions found');
           }
 
           // Generate unique timestamp for this import
           const importTimestamp = Date.now();
           
-          // Optimized processing - batch the operations
+          // Process all sessions synchronously
           const processedSessions = sessions.map((session, index) => {
             const sessionId = `ts_${importTimestamp}_${index}`;
             
@@ -630,37 +736,53 @@ const JazzGuitarTracker = () => {
             };
           });
 
-          // Batch update the state
+          // Update state synchronously
           setTeacherSessions(prev => [...processedSessions, ...prev]);
           
           const seriesName = importedData.seriesName || 'Series';
           alert(`Successfully imported ${sessions.length} sessions from "${seriesName}" by ${importedData.teacherName || 'your teacher'}`);
-          setIsImporting(false);
           
         } else {
           alert('This file does not appear to be a valid teacher session file.');
-          setIsImporting(false);
-          return;
+          throw new Error('Invalid teacher session format');
         }
         
       } catch (error) {
         console.error('Import error:', error);
-        alert('Error importing teacher session file. Please check the file format.');
+        let errorMessage = 'Error importing teacher session file. Please check the file format.';
+        
+        if (error.message === 'Invalid JSON format') {
+          errorMessage = 'Invalid file format. Please make sure the file is a valid JSON.';
+        } else if (error.message === 'Invalid teacher session format') {
+          errorMessage = 'This file does not appear to be a valid teacher session file.';
+        } else if (error.message === 'No sessions found') {
+          errorMessage = 'No sessions found in the imported file.';
+        }
+        
+        alert(errorMessage);
+      } finally {
+        // Always reset loading state and clear file input
         setIsImporting(false);
+        event.target.value = '';
       }
     };
     
-    // Add error handling for file reading
     reader.onerror = () => {
+      console.error('File read error');
       alert('Error reading the file. Please try again.');
       setIsImporting(false);
+      event.target.value = '';
     };
     
+    // Start reading the file
     reader.readAsText(file);
-    event.target.value = '';
   };
 
   const triggerTeacherSessionImport = () => {
+    // Reset any stuck states before starting new import
+    if (isImporting) {
+      setIsImporting(false);
+    }
     teacherSessionFileInputRef.current?.click(); // Use the new ref
   };
 
@@ -669,6 +791,16 @@ const JazzGuitarTracker = () => {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Reset import states on component mount
+  const resetImportStates = () => {
+    setIsMainImporting(false);
+    setIsImporting(false);
+  };
+
+
+
+
 
   const addStandard = (name) => {
     const newStandard = {
@@ -1189,15 +1321,27 @@ const JazzGuitarTracker = () => {
 
 			<button
 			  onClick={triggerImport}
+			  disabled={isMainImporting}
 			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-			    isDarkMode 
-			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
-			      : 'bg-white text-slate-700 hover:bg-gray-100 border border-slate-200 shadow-sm'
+			    isMainImporting
+			      ? 'bg-gray-400 cursor-not-allowed'
+			      : isDarkMode 
+			        ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
+			        : 'bg-white text-slate-700 hover:bg-gray-100 border border-slate-200 shadow-sm'
 			  }`}
 			  title="Import practice data from backup"
 			>
-			  <Upload size={16} />
-			  Import
+			  {isMainImporting ? (
+			    <>
+			      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+			      Importing...
+			    </>
+			  ) : (
+			    <>
+			      <Upload size={16} />
+			      Import
+			    </>
+			  )}
 			</button>
 			
 			<button
@@ -1235,6 +1379,8 @@ const JazzGuitarTracker = () => {
 			  <Play size={16} />
 			  Start Session
 			</button>
+			
+
 		      </div>
 
 		      <input

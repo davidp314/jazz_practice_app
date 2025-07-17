@@ -137,6 +137,68 @@
   "otherWork": [],
   "practiceHistory": [
     {
+      "id": "1752765386710",
+      "date": "2025-07-17T15:16:26.710Z",
+      "tasks": [
+        {
+          "id": "17527653661320.9459210190658366",
+          "name": "It Could Happen To You",
+          "type": "standard",
+          "timeAllocated": 16,
+          "practiceNote": "review",
+          "sessionNote": "",
+          "standardId": "1752522985138",
+          "focusStep": 2
+        },
+        {
+          "id": "17527653661320.5546990293495144",
+          "name": "It Could Happen To You",
+          "type": "standard",
+          "timeAllocated": 16,
+          "practiceNote": "review",
+          "sessionNote": "",
+          "standardId": "1752522985138",
+          "focusStep": 3
+        },
+        {
+          "id": "17527653661320.11503045323067951",
+          "name": "It Could Happen To You",
+          "type": "standard",
+          "timeAllocated": 20,
+          "practiceNote": "new",
+          "sessionNote": "",
+          "standardId": "1752522985138",
+          "focusStep": 4
+        },
+        {
+          "id": "1752765372696",
+          "name": "Autumn Leaves (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 10,
+          "standardId": "1752523037868",
+          "focusStep": null,
+          "practiceNote": "",
+          "sessionNote": ""
+        }
+      ],
+      "totalTime": 62,
+      "completed": true,
+      "endTime": "2025-07-17T16:45:45.072Z",
+      "taskTimeSpent": {
+        "17527653661320.9459210190658366": 1163,
+        "17527653661320.5546990293495144": 1030,
+        "17527653661320.11503045323067951": 1429,
+        "1752765372696": 1431
+      },
+      "finalNotes": {
+        "17527653661320.9459210190658366": "Getting easy.  Spend less time next time.",
+        "17527653661320.5546990293495144": "Ditto",
+        "17527653661320.11503045323067951": "Spend more time next session",
+        "1752765372696": "Worked a lot on getting the head completely solid."
+      },
+      "stepCompletions": {}
+    },
+    {
       "id": "1752622043152",
       "date": "2025-07-15T23:27:23.152Z",
       "tasks": [
@@ -253,7 +315,7 @@
       "stepCompletions": {}
     }
   ],
-  "exportDate": "2025-07-16T00:44:45.225Z",
+  "exportDate": "2025-07-17T16:45:48.427Z",
   "version": "2.1",
   "appName": "Jazz Guitar Practice Tracker"
 }

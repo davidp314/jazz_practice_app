@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Performance Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .performance-log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Import Performance Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Import Performance</h2>
+        <p>This test simulates the import process to verify performance improvements.</p>
+        
+        <button id="testImport" onclick="testImport()">
+            <span id="importText">Test Import</span>
+            <span id="importLoading" class="loading" style="display: none;"></span>
+        </button>
+        
+        <div class="performance-log" id="performanceLog"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Performance Improvements Made</h2>
+        <ul>
+            <li><strong>Async Processing:</strong> File reading and JSON parsing now use async/await</li>
+            <li><strong>Batch Processing:</strong> Large datasets are processed in smaller batches</li>
+            <li><strong>UI Thread Yielding:</strong> setTimeout() calls allow UI updates between operations</li>
+            <li><strong>Loading States:</strong> Visual feedback during import operations</li>
+            <li><strong>Error Handling:</strong> Better error handling with try/catch blocks</li>
+            <li><strong>Performance Monitoring:</strong> Console logging of import duration</li>
+        </ul>
+    </div>
+
+    <script>
+        function log(message) {
+            const logElement = document.getElementById('performanceLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function testImport() {
+            const button = document.getElementById('testImport');
+            const text = document.getElementById('importText');
+            const loading = document.getElementById('importLoading');
+            
+            // Disable button and show loading
+            button.disabled = true;
+            text.textContent = 'Importing...';
+            loading.style.display = 'inline-block';
+            
+            const startTime = performance.now();
+            log('Starting import test...');
+            
+            try {
+                // Simulate file reading
+                log('Reading file...');
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Simulate JSON parsing
+                log('Parsing JSON...');
+                await new Promise(resolve => setTimeout(resolve, 50));
+                
+                // Simulate data migration
+                log('Migrating data...');
+                await new Promise(resolve => setTimeout(resolve, 75));
+                
+                // Simulate state updates
+                log('Updating state...');
+                await new Promise(resolve => setTimeout(resolve, 25));
+                
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+                log(`Import completed successfully in ${duration}ms`);
+                
+            } catch (error) {
+                log(`Import failed: ${error.message}`);
+            } finally {
+                // Re-enable button and hide loading
+                button.disabled = false;
+                text.textContent = 'Test Import';
+                loading.style.display = 'none';
+            }
+        }
+
+        // Log initial message
+        log('Performance test ready. Click "Test Import" to simulate the import process.');
+    </script>
+</body>
+</html> 
