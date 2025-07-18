@@ -25,7 +25,7 @@ const EditOtherWorkSelector = ({ otherWork, onSelectWork, onCancel, isDarkMode }
             <div className={`text-sm transition-colors duration-300 ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
-              {work.completed ? 'Completed' : 'In Progress'} • {work.active ? 'Active' : 'Inactive'}
+              {work.completed ? 'Completed' : 'Active'} • {work.active ? 'Active' : 'Inactive'}
               {work.description && ` • ${work.description.substring(0, 50)}${work.description.length > 50 ? '...' : ''}`}
             </div>
           </button>

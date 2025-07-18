@@ -3343,7 +3343,7 @@ const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, togg
                     <div className={`px-2 py-1 rounded text-xs ${
                       session.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {session.completed ? 'Completed' : 'In Progress'}
+                      {session.completed ? 'Completed' : 'Active'}
                     </div>
                   </div>
                   <div className={`text-sm transition-colors duration-300 ${

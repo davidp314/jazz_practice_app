@@ -25,7 +25,7 @@ const EditStandardSelector = ({ standards, onSelectStandard, onCancel, isDarkMod
             <div className={`text-sm transition-colors duration-300 ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
-              {standard.completed ? 'Completed' : 'In Progress'} • {standard.active ? 'Active' : 'Inactive'}
+              {standard.completed ? 'Completed' : 'Active'} • {standard.active ? 'Active' : 'Inactive'}
             </div>
           </button>
         ))}
