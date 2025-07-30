@@ -15,7 +15,7 @@ export const STANDARD_STEPS = [
   'Post performance video'
 ];
 
-// New constants for teacher sessions
+// New constants for collections
 export const SESSION_STATUS = {
   PENDING: 'pending',
   IN_PROGRESS: 'in_progress', 
@@ -23,12 +23,12 @@ export const SESSION_STATUS = {
   OVERDUE: 'overdue'
 };
 
-export const TEACHER_SESSION_TYPES = {
+export const COLLECTION_TYPES = {
   ASSIGNED: 'assigned',      // Teacher-assigned
   SELF_CREATED: 'self_created' // Student-created
 };
 
-// New constants for teacher session series
+// New constants for collection series
 export const SERIES_STATUS = {
   IN_PROGRESS: 'in_progress',
   COMPLETED: 'completed',

@@ -1,0 +1,348 @@
+{
+  "standards": [
+    {
+      "id": "1",
+      "name": "Autumn Leaves",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "completed": false,
+      "active": true,
+      "notes": "Working on the bridge section - need to focus on shell chords",
+      "lastWorkedOn": "2025-06-28T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "All The Things You Are",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "completed": true,
+      "active": true,
+      "notes": "Great for working on ii-V-I progressions. Posted video on June 20th.",
+      "lastWorkedOn": "2025-06-25T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "name": "Body and Soul",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "completed": false,
+      "active": false,
+      "notes": "Need to work on the bridge section - put on hold for now",
+      "lastWorkedOn": "2025-06-20T00:00:00.000Z"
+    },
+    {
+      "id": "4",
+      "name": "Blue Bossa",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "completed": true,
+      "active": false,
+      "notes": "Completed last month but not actively reviewing. Good bossa nova example.",
+      "lastWorkedOn": "2025-05-15T00:00:00.000Z"
+    },
+    {
+      "id": "5",
+      "name": "Stella By Starlight",
+      "type": "standard",
+      "steps": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "completed": false,
+      "active": true,
+      "notes": "Just started - complex harmony needs careful study",
+      "lastWorkedOn": "2025-07-01T00:00:00.000Z"
+    },
+    {
+      "id": "6",
+      "name": "Take Five",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "completed": false,
+      "active": true,
+      "notes": "Working on 5/4 time signature - getting comfortable with the feel",
+      "lastWorkedOn": "2025-06-30T00:00:00.000Z"
+    },
+    {
+      "id": "7",
+      "name": "Girl from Ipanema",
+      "type": "standard",
+      "steps": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "completed": true,
+      "active": true,
+      "notes": "Classic bossa nova - keep in rotation for gigs",
+      "lastWorkedOn": "2025-06-22T00:00:00.000Z"
+    }
+  ],
+  "otherWork": [
+    {
+      "id": "1",
+      "name": "Galbraith Etude #5",
+      "type": "other_work",
+      "description": "Working on smooth voice leading and finger independence",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-06-29T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Melodic Minor Fingerings",
+      "type": "other_work",
+      "description": "Berklee fingering system practice - all positions",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-06-27T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "name": "ii-V-I Licks in Bb",
+      "type": "other_work",
+      "description": "Building jazz vocabulary - 10 essential licks",
+      "completed": true,
+      "active": false,
+      "lastWorkedOn": "2025-06-15T00:00:00.000Z"
+    },
+    {
+      "id": "4",
+      "name": "Hotel California Solo",
+      "type": "other_work",
+      "description": "Learning the Eagles solo note-for-note for rock gig",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-07-02T00:00:00.000Z"
+    },
+    {
+      "id": "5",
+      "name": "Bach Invention #1",
+      "type": "other_work",
+      "description": "Classical piece for fingerstyle technique development",
+      "completed": false,
+      "active": false,
+      "lastWorkedOn": "2025-05-20T00:00:00.000Z"
+    },
+    {
+      "id": "6",
+      "name": "Chromatic Exercises",
+      "type": "other_work",
+      "description": "Daily warm-up routine - Spider exercises 1-4",
+      "completed": true,
+      "active": true,
+      "lastWorkedOn": "2025-07-03T00:00:00.000Z"
+    },
+    {
+      "id": "7",
+      "name": "Altered Scale Practice",
+      "type": "other_work",
+      "description": "Working on altered dominant sounds - 3 note per string patterns",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-06-26T00:00:00.000Z"
+    },
+    {
+      "id": "8",
+      "name": "Wes Montgomery Octaves",
+      "type": "other_work",
+      "description": "Learning octave technique from transcribed solos",
+      "completed": false,
+      "active": false,
+      "lastWorkedOn": "2025-06-10T00:00:00.000Z"
+    },
+    {
+      "id": "9",
+      "name": "Bossa Nova Comping",
+      "type": "other_work",
+      "description": "Brazilian rhythm patterns and chord voicings",
+      "completed": true,
+      "active": true,
+      "lastWorkedOn": "2025-06-28T00:00:00.000Z"
+    }
+  ],
+  "practiceHistory": [
+    {
+      "id": "hist1",
+      "date": "2025-07-03T21:30:00.000Z",
+      "tasks": [
+        {
+          "id": "t1",
+          "name": "Autumn Leaves",
+          "type": "standard",
+          "timeAllocated": 25
+        },
+        {
+          "id": "t2",
+          "name": "Chromatic Exercises",
+          "type": "other_work",
+          "timeAllocated": 15
+        },
+        {
+          "id": "t3",
+          "name": "Scale practice",
+          "type": "one_off",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 50,
+      "completed": true,
+      "endTime": "2025-07-03T22:20:00.000Z"
+    },
+    {
+      "id": "hist2",
+      "date": "2025-07-02T23:00:00.000Z",
+      "tasks": [
+        {
+          "id": "t4",
+          "name": "Take Five",
+          "type": "standard",
+          "timeAllocated": 30
+        },
+        {
+          "id": "t5",
+          "name": "Hotel California Solo",
+          "type": "other_work",
+          "timeAllocated": 20
+        },
+        {
+          "id": "t6",
+          "name": "All The Things You Are (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 65,
+      "completed": true,
+      "endTime": "2025-07-03T00:05:00.000Z"
+    },
+    {
+      "id": "hist3",
+      "date": "2025-07-01T17:00:00.000Z",
+      "tasks": [
+        {
+          "id": "t7",
+          "name": "Stella By Starlight",
+          "type": "standard",
+          "timeAllocated": 35
+        },
+        {
+          "id": "t8",
+          "name": "Altered Scale Practice",
+          "type": "other_work",
+          "timeAllocated": 20
+        }
+      ],
+      "totalTime": 55,
+      "completed": true,
+      "endTime": "2025-07-01T17:55:00.000Z"
+    },
+    {
+      "id": "hist4",
+      "date": "2025-07-01T02:30:00.000Z",
+      "tasks": [
+        {
+          "id": "t9",
+          "name": "Take Five",
+          "type": "standard",
+          "timeAllocated": 20
+        },
+        {
+          "id": "t10",
+          "name": "Bossa Nova Comping",
+          "type": "other_work",
+          "timeAllocated": 25
+        },
+        {
+          "id": "t11",
+          "name": "Jam session prep",
+          "type": "one_off",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-07-01T03:30:00.000Z"
+    },
+    {
+      "id": "hist5",
+      "date": "2025-06-29T22:15:00.000Z",
+      "tasks": [
+        {
+          "id": "t12",
+          "name": "Galbraith Etude #5",
+          "type": "other_work",
+          "timeAllocated": 30
+        },
+        {
+          "id": "t13",
+          "name": "Girl from Ipanema (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 40,
+      "completed": true,
+      "endTime": "2025-06-29T22:55:00.000Z"
+    }
+  ],
+  "exportDate": "2025-07-12T01:05:19.497Z",
+  "version": "2.1",
+  "appName": "Jazz Guitar Practice Tracker"
+}

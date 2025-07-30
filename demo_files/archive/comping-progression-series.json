@@ -1,0 +1,166 @@
+{
+  "version": "1.0",
+  "type": "teacher_session_series",
+  "seriesName": "Comping Progression Series",
+  "teacherName": "Marc-Andre Seguin",
+  "description": "Four-week progression focusing on jazz comping skills",
+  "exportDate": "2025-01-15T10:00:00.000Z",
+  "sessions": [
+    {
+      "title": "Session 1: Basic Shell Voicings",
+      "teacherName": "Marc-Andre Seguin",
+      "assignedDate": "2025-01-15",
+      "dueDate": "2025-01-22",
+      "status": "pending",
+      "type": "assigned",
+      "description": "Learn and practice basic shell voicings (3rds and 7ths) in all keys.",
+      "seriesId": "comping_progression_2025",
+      "seriesOrder": 1,
+      "prerequisites": [],
+      "tasks": [
+        {
+          "id": "shell_voicings_practice",
+          "name": "Shell Voicings Practice",
+          "type": "other_work",
+          "timeAllocated": 20,
+          "teacherNotes": "Focus on clean shell voicings (3rds and 7ths) in all keys. Practice ii-V-I progressions in C, F, Bb, Eb. Use metronome at 80 BPM.",
+          "practiceNote": "",
+          "sessionNote": ""
+        },
+        {
+          "id": "autumn_leaves_shells",
+          "name": "Autumn Leaves - Shell Voicings",
+          "type": "standard",
+          "timeAllocated": 15,
+          "standardId": "1",
+          "focusStep": 1,
+          "teacherNotes": "Apply shell voicings to Autumn Leaves. Focus on smooth voice leading between chords.",
+          "practiceNote": "",
+          "sessionNote": ""
+        }
+      ],
+      "totalTime": 35,
+      "completed": false,
+      "completionDate": null,
+      "teacherFeedback": "",
+      "studentNotes": ""
+    },
+    {
+      "title": "Session 2: Drop 2 Voicings",
+      "teacherName": "Marc-Andre Seguin",
+      "assignedDate": "2025-01-22",
+      "dueDate": "2025-01-29",
+      "status": "pending",
+      "type": "assigned",
+      "description": "Learn drop 2 voicings for major 7th, minor 7th, and dominant 7th chords.",
+      "seriesId": "comping_progression_2025",
+      "seriesOrder": 2,
+      "prerequisites": ["ts_comping_week1"],
+      "tasks": [
+        {
+          "id": "drop2_voicings_practice",
+          "name": "Drop 2 Voicings Practice",
+          "type": "other_work",
+          "timeAllocated": 25,
+          "teacherNotes": "Learn drop 2 voicings for major 7th, minor 7th, and dominant 7th chords. Practice in all 12 keys. Focus on smooth voice leading between chords.",
+          "practiceNote": "",
+          "sessionNote": ""
+        },
+        {
+          "id": "autumn_leaves_drop2",
+          "name": "Autumn Leaves - Drop 2 Voicings",
+          "type": "standard",
+          "timeAllocated": 20,
+          "standardId": "1",
+          "focusStep": 1,
+          "teacherNotes": "Apply drop 2 voicings to Autumn Leaves. Compare with shell voicings from last week.",
+          "practiceNote": "",
+          "sessionNote": ""
+        }
+      ],
+      "totalTime": 45,
+      "completed": false,
+      "completionDate": null,
+      "teacherFeedback": "",
+      "studentNotes": ""
+    },
+    {
+      "title": "Session 3: Rhythmic Patterns",
+      "teacherName": "Marc-Andre Seguin",
+      "assignedDate": "2025-01-29",
+      "dueDate": "2025-02-05",
+      "status": "pending",
+      "type": "assigned",
+      "description": "Work on jazz comping rhythms: Charleston pattern, dotted quarter notes, syncopated patterns.",
+      "seriesId": "comping_progression_2025",
+      "seriesOrder": 3,
+      "prerequisites": ["ts_comping_week1", "ts_comping_week2"],
+      "tasks": [
+        {
+          "id": "rhythmic_patterns_practice",
+          "name": "Rhythmic Patterns Practice",
+          "type": "other_work",
+          "timeAllocated": 30,
+          "teacherNotes": "Work on jazz comping rhythms: Charleston pattern, dotted quarter notes, syncopated patterns. Practice with backing tracks.",
+          "practiceNote": "",
+          "sessionNote": ""
+        },
+        {
+          "id": "all_the_things_rhythm",
+          "name": "All The Things You Are - Rhythm Practice",
+          "type": "standard",
+          "timeAllocated": 25,
+          "standardId": "2",
+          "focusStep": 5,
+          "teacherNotes": "Apply rhythmic patterns to All The Things You Are. Focus on groove and feel.",
+          "practiceNote": "",
+          "sessionNote": ""
+        }
+      ],
+      "totalTime": 55,
+      "completed": false,
+      "completionDate": null,
+      "teacherFeedback": "",
+      "studentNotes": ""
+    },
+    {
+      "title": "Session 4: Advanced Voice Leading",
+      "teacherName": "Marc-Andre Seguin",
+      "assignedDate": "2025-02-05",
+      "dueDate": "2025-02-12",
+      "status": "pending",
+      "type": "assigned",
+      "description": "Practice chromatic voice leading, passing chords, and reharmonization techniques.",
+      "seriesId": "comping_progression_2025",
+      "seriesOrder": 4,
+      "prerequisites": ["ts_comping_week1", "ts_comping_week2", "ts_comping_week3"],
+      "tasks": [
+        {
+          "id": "advanced_voice_leading_practice",
+          "name": "Advanced Voice Leading Practice",
+          "type": "other_work",
+          "timeAllocated": 35,
+          "teacherNotes": "Practice chromatic voice leading, passing chords, and reharmonization techniques.",
+          "practiceNote": "",
+          "sessionNote": ""
+        },
+        {
+          "id": "stella_advanced_voicings",
+          "name": "Stella By Starlight - Advanced Voicings",
+          "type": "standard",
+          "timeAllocated": 30,
+          "standardId": "5",
+          "focusStep": 1,
+          "teacherNotes": "Apply advanced voicings to Stella By Starlight. Record a complete performance.",
+          "practiceNote": "",
+          "sessionNote": ""
+        }
+      ],
+      "totalTime": 65,
+      "completed": false,
+      "completionDate": null,
+      "teacherFeedback": "",
+      "studentNotes": ""
+    }
+  ]
+} 

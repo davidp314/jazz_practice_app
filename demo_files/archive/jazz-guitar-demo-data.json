@@ -1,0 +1,446 @@
+{
+  "standards": [
+    {
+      "id": "demo_1",
+      "name": "Autumn Leaves",
+      "type": "standard",
+      "steps": [true, true, true, true, true, true, false, false],
+      "completed": false,
+      "active": true,
+      "notes": "Almost ready for performance! Need to work on improvisation over the bridge section. Shell chords are solid.",
+      "lastWorkedOn": "2025-07-10T14:30:00.000Z"
+    },
+    {
+      "id": "demo_2",
+      "name": "All The Things You Are",
+      "type": "standard",
+      "steps": [true, true, true, true, true, true, true, true],
+      "completed": true,
+      "active": true,
+      "notes": "Completed and performance-ready! Great for demonstrating ii-V-I progressions. Posted video June 15th.",
+      "lastWorkedOn": "2025-07-08T16:45:00.000Z"
+    },
+    {
+      "id": "demo_3",
+      "name": "Blue Bossa",
+      "type": "standard",
+      "steps": [true, true, true, true, true, true, true, true],
+      "completed": true,
+      "active": true,
+      "notes": "Perfect bossa nova example. Keep in rotation for Latin gigs. Students love this one.",
+      "lastWorkedOn": "2025-07-05T10:20:00.000Z"
+    },
+    {
+      "id": "demo_4",
+      "name": "Stella By Starlight",
+      "type": "standard",
+      "steps": [true, true, false, false, false, false, false, false],
+      "completed": false,
+      "active": true,
+      "notes": "Complex harmony - taking time with this one. Need to really understand the chord relationships before moving forward.",
+      "lastWorkedOn": "2025-07-09T19:15:00.000Z"
+    },
+    {
+      "id": "demo_5",
+      "name": "Take Five",
+      "type": "standard",
+      "steps": [true, true, true, true, false, false, false, false],
+      "completed": false,
+      "active": true,
+      "notes": "5/4 time signature is challenging but getting more comfortable. Great for teaching odd meters.",
+      "lastWorkedOn": "2025-07-07T13:45:00.000Z"
+    },
+    {
+      "id": "demo_6",
+      "name": "Body and Soul",
+      "type": "standard",
+      "steps": [true, true, true, false, false, false, false, false],
+      "completed": false,
+      "active": false,
+      "notes": "Put on hold to focus on other priorities. Will return to this next month.",
+      "lastWorkedOn": "2025-06-20T11:30:00.000Z"
+    },
+    {
+      "id": "demo_7",
+      "name": "Girl from Ipanema",
+      "type": "standard",
+      "steps": [true, true, true, true, true, true, true, true],
+      "completed": true,
+      "active": true,
+      "notes": "Essential bossa nova tune. Perfect for wedding gigs and teaching basic Latin feel.",
+      "lastWorkedOn": "2025-07-06T15:20:00.000Z"
+    },
+    {
+      "id": "demo_8",
+      "name": "Fly Me to the Moon",
+      "type": "standard",
+      "steps": [true, true, true, true, true, false, false, false],
+      "completed": false,
+      "active": true,
+      "notes": "Great beginner standard. Working through different key centers and comping patterns.",
+      "lastWorkedOn": "2025-07-11T09:30:00.000Z"
+    },
+    {
+      "id": "demo_9",
+      "name": "Summertime",
+      "type": "standard",
+      "steps": [true, false, false, false, false, false, false, false],
+      "completed": false,
+      "active": true,
+      "notes": "Just started - love the blues progression. Will be great for exploring different jazz styles.",
+      "lastWorkedOn": "2025-07-11T11:15:00.000Z"
+    },
+    {
+      "id": "demo_10",
+      "name": "Cherokee",
+      "type": "standard",
+      "steps": [true, true, true, true, true, true, true, true],
+      "completed": true,
+      "active": false,
+      "notes": "Advanced standard completed last year. Occasionally review for technique maintenance.",
+      "lastWorkedOn": "2025-05-15T14:00:00.000Z"
+    }
+  ],
+  "otherWork": [
+    {
+      "id": "demo_ow_1",
+      "name": "Galbraith Etude #5",
+      "type": "other_work",
+      "description": "Working on smooth voice leading and finger independence. Focus on measures 16-24.",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-07-10T08:45:00.000Z"
+    },
+    {
+      "id": "demo_ow_2",
+      "name": "Melodic Minor Scale System",
+      "type": "other_work",
+      "description": "Berklee fingering patterns - all positions across the neck. Currently on position 4.",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-07-09T07:30:00.000Z"
+    },
+    {
+      "id": "demo_ow_3",
+      "name": "Pat Martino - Sunny Transcription",
+      "type": "other_work",
+      "description": "Learning Pat's solo note-for-note. Amazing use of octaves and chromatic approach tones.",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-07-08T20:15:00.000Z"
+    },
+    {
+      "id": "demo_ow_4",
+      "name": "ii-V-I Licks in All Keys",
+      "type": "other_work",
+      "description": "Building comprehensive vocabulary. Completed C, F, Bb, Eb, Ab. Working on D major next.",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-07-11T10:00:00.000Z"
+    },
+    {
+      "id": "demo_ow_5",
+      "name": "Chord Melody Arrangement - Yesterday",
+      "type": "other_work",
+      "description": "Solo guitar arrangement for wedding gigs. Working on smooth bass lines.",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-07-07T18:30:00.000Z"
+    },
+    {
+      "id": "demo_ow_6",
+      "name": "Daily Chromatic Exercises",
+      "type": "other_work",
+      "description": "Spider exercises 1-4 for warm-up routine. Essential for maintaining finger strength.",
+      "completed": true,
+      "active": true,
+      "lastWorkedOn": "2025-07-11T07:00:00.000Z"
+    },
+    {
+      "id": "demo_ow_7",
+      "name": "Altered Dominant Substitutions",
+      "type": "other_work",
+      "description": "Working on tritone substitutions and altered scales. Theory and practical application.",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-07-06T21:45:00.000Z"
+    },
+    {
+      "id": "demo_ow_8",
+      "name": "Wes Montgomery Octave Technique",
+      "type": "other_work",
+      "description": "Learning the thumb technique and octave patterns from 'Four on Six'.",
+      "completed": false,
+      "active": false,
+      "lastWorkedOn": "2025-06-25T16:20:00.000Z"
+    },
+    {
+      "id": "demo_ow_9",
+      "name": "Brazilian Comping Patterns",
+      "type": "other_work",
+      "description": "Bossa nova and samba rhythms. Essential for Latin jazz gigs.",
+      "completed": true,
+      "active": true,
+      "lastWorkedOn": "2025-07-05T17:00:00.000Z"
+    },
+    {
+      "id": "demo_ow_10",
+      "name": "Jazz Chord Voicings - Drop 2",
+      "type": "other_work",
+      "description": "Systematic study of drop 2 voicings across all string sets. Currently on string set 2-3-4-5.",
+      "completed": false,
+      "active": true,
+      "lastWorkedOn": "2025-07-08T12:30:00.000Z"
+    }
+  ],
+  "practiceHistory": [
+    {
+      "id": "demo_session_1",
+      "date": "2025-07-11T09:00:00.000Z",
+      "tasks": [
+        {
+          "id": "dt1",
+          "name": "Daily Chromatic Exercises",
+          "type": "other_work",
+          "timeAllocated": 10
+        },
+        {
+          "id": "dt2", 
+          "name": "Autumn Leaves",
+          "type": "standard",
+          "timeAllocated": 25
+        },
+        {
+          "id": "dt3",
+          "name": "ii-V-I Licks in All Keys", 
+          "type": "other_work",
+          "timeAllocated": 15
+        },
+        {
+          "id": "dt4",
+          "name": "Fly Me to the Moon",
+          "type": "standard", 
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt5",
+          "name": "All The Things You Are (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 80,
+      "completed": true,
+      "endTime": "2025-07-11T10:20:00.000Z",
+      "taskTimeSpent": {
+        "dt1": 720,
+        "dt2": 1680,
+        "dt3": 900,
+        "dt4": 1200,
+        "dt5": 600
+      }
+    },
+    {
+      "id": "demo_session_2",
+      "date": "2025-07-10T14:00:00.000Z",
+      "tasks": [
+        {
+          "id": "dt6",
+          "name": "Stella By Starlight",
+          "type": "standard",
+          "timeAllocated": 30
+        },
+        {
+          "id": "dt7",
+          "name": "Galbraith Etude #5",
+          "type": "other_work", 
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt8",
+          "name": "Scale practice warmup",
+          "type": "one_off",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-07-10T15:00:00.000Z",
+      "taskTimeSpent": {
+        "dt6": 1950,
+        "dt7": 1200,
+        "dt8": 450
+      }
+    },
+    {
+      "id": "demo_session_3", 
+      "date": "2025-07-09T19:00:00.000Z",
+      "tasks": [
+        {
+          "id": "dt9",
+          "name": "Melodic Minor Scale System",
+          "type": "other_work",
+          "timeAllocated": 15
+        },
+        {
+          "id": "dt10",
+          "name": "Take Five",
+          "type": "standard",
+          "timeAllocated": 25
+        },
+        {
+          "id": "dt11", 
+          "name": "Pat Martino - Sunny Transcription",
+          "type": "other_work",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt12",
+          "name": "Blue Bossa (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 75,
+      "completed": true,
+      "endTime": "2025-07-09T20:15:00.000Z",
+      "taskTimeSpent": {
+        "dt9": 900,
+        "dt10": 1620,
+        "dt11": 1200,
+        "dt12": 780
+      }
+    },
+    {
+      "id": "demo_session_4",
+      "date": "2025-07-08T16:30:00.000Z",
+      "tasks": [
+        {
+          "id": "dt13",
+          "name": "Jazz Chord Voicings - Drop 2",
+          "type": "other_work",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt14",
+          "name": "Autumn Leaves",
+          "type": "standard", 
+          "timeAllocated": 30
+        },
+        {
+          "id": "dt15",
+          "name": "Metronome practice",
+          "type": "one_off",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-07-08T17:30:00.000Z",
+      "taskTimeSpent": {
+        "dt13": 1200,
+        "dt14": 1980,
+        "dt15": 420
+      }
+    },
+    {
+      "id": "demo_session_5",
+      "date": "2025-07-07T13:15:00.000Z",
+      "tasks": [
+        {
+          "id": "dt16",
+          "name": "Chord Melody Arrangement - Yesterday",
+          "type": "other_work",
+          "timeAllocated": 25
+        },
+        {
+          "id": "dt17",
+          "name": "Take Five",
+          "type": "standard",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt18",
+          "name": "Girl from Ipanema (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 55,
+      "completed": true,
+      "endTime": "2025-07-07T14:10:00.000Z",
+      "taskTimeSpent": {
+        "dt16": 1500,
+        "dt17": 1320,
+        "dt18": 480
+      }
+    },
+    {
+      "id": "demo_session_6",
+      "date": "2025-07-06T20:45:00.000Z", 
+      "tasks": [
+        {
+          "id": "dt19",
+          "name": "Altered Dominant Substitutions",
+          "type": "other_work",
+          "timeAllocated": 30
+        },
+        {
+          "id": "dt20",
+          "name": "Theory review session",
+          "type": "one_off",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 45,
+      "completed": true,
+      "endTime": "2025-07-06T21:30:00.000Z",
+      "taskTimeSpent": {
+        "dt19": 1800,
+        "dt20": 900
+      }
+    },
+    {
+      "id": "demo_session_7",
+      "date": "2025-07-05T09:30:00.000Z",
+      "tasks": [
+        {
+          "id": "dt21",
+          "name": "Brazilian Comping Patterns",
+          "type": "other_work",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt22",
+          "name": "Fly Me to the Moon",
+          "type": "standard",
+          "timeAllocated": 25
+        },
+        {
+          "id": "dt23",
+          "name": "All The Things You Are (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 15
+        },
+        {
+          "id": "dt24",
+          "name": "Jam session preparation",
+          "type": "one_off",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 70,
+      "completed": true,
+      "endTime": "2025-07-05T10:40:00.000Z",
+      "taskTimeSpent": {
+        "dt21": 1200,
+        "dt22": 1620,
+        "dt23": 780,
+        "dt24": 600
+      }
+    }
+  ],
+  "exportDate": "2025-07-11T18:30:00.000Z",
+  "version": "2.1",
+  "appName": "Jazz Guitar Practice Tracker"
+}

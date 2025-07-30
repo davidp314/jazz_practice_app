@@ -9,7 +9,7 @@ import EditStandardSelector from "./components/EditStandardSelector";
 import EditStandardForm from "./components/EditStandardForm";
 import EditOtherWorkSelector from "./components/EditOtherWorkSelector";
 import EditOtherWorkForm from "./components/EditOtherWorkForm";
-import { TASK_TYPES, STANDARD_STEPS, SESSION_STATUS, TEACHER_SESSION_TYPES, SERIES_STATUS, DEPENDENCY_STATUS } from "./constants";
+import { TASK_TYPES, STANDARD_STEPS, SESSION_STATUS, COLLECTION_TYPES, SERIES_STATUS, DEPENDENCY_STATUS } from "./constants";
 
 const JazzGuitarTracker = () => {
   // State management
@@ -39,16 +39,16 @@ const JazzGuitarTracker = () => {
   const [sessionSummaryData, setSessionSummaryData] = useState(null);
   const [sessionStarted, setSessionStarted] = useState(false);
   
-  // Teacher sessions state management
-  const [teacherSessions, setTeacherSessions] = useState([]);
-  const [showTeacherSessions, setShowTeacherSessions] = useState(false);
-  const [selectedTeacherSession, setSelectedTeacherSession] = useState(null);
+  // Collections state management
+  const [collections, setCollections] = useState([]);
+  const [showCollections, setShowCollections] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isMainImporting, setIsMainImporting] = useState(false);
   
   const timerRef = useRef(null);
   const fileInputRef = useRef(null);
-  const teacherSessionFileInputRef = useRef(null); // NEW: for teacher session import
+  const collectionFileInputRef = useRef(null); // NEW: for collection import
 
   // Migration function to handle the new comping step
   const migrateStandardsData = (standardsData) => {
@@ -86,7 +86,7 @@ const JazzGuitarTracker = () => {
     const savedOtherWork = localStorage.getItem('otherWork');
     const savedHistory = localStorage.getItem('practiceHistory');
     const savedDarkMode = localStorage.getItem('darkMode');
-    const savedTeacherSessions = localStorage.getItem('teacherSessions');
+    const savedCollections = localStorage.getItem('collections');
     
     // Load dark mode preference
     if (savedDarkMode !== null) {
@@ -330,12 +330,12 @@ const JazzGuitarTracker = () => {
       setPracticeHistory(sampleHistory);
     }
     
-    // Load teacher sessions
-    if (savedTeacherSessions && JSON.parse(savedTeacherSessions).length > 0) {
-      setTeacherSessions(JSON.parse(savedTeacherSessions));
+    // Load collections
+    if (savedCollections && JSON.parse(savedCollections).length > 0) {
+      setCollections(JSON.parse(savedCollections));
     } else {
-      // Initialize with empty teacher sessions for demo
-      setTeacherSessions([]);
+      // Initialize with empty collections for demo
+      setCollections([]);
     }
   }, []);
 
@@ -379,10 +379,10 @@ const JazzGuitarTracker = () => {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      localStorage.setItem('teacherSessions', JSON.stringify(teacherSessions));
+      localStorage.setItem('collections', JSON.stringify(collections));
     }, 100);
     return () => clearTimeout(timeoutId);
-  }, [teacherSessions]);
+  }, [collections]);
 
   // Session timer logic - runs when task timer is running
   useEffect(() => {
@@ -561,11 +561,11 @@ const JazzGuitarTracker = () => {
     fileInputRef.current?.click();
   };
 
-  // Teacher session import/export functions
-  const exportTeacherSession = (session) => {
-    const exportData = {
-      version: "1.0",
-      type: "teacher_session",
+  // Collection import/export functions
+  const exportCollection = (session) => {
+          const exportData = {
+        version: "1.0",
+        type: "collection",
       session: {
         ...session,
         id: undefined, // Remove internal ID
@@ -584,14 +584,14 @@ const JazzGuitarTracker = () => {
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = `teacher-session-${session.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.json`;
+    link.download = `collection-${session.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  const importTeacherSession = (event) => {
+  const importCollection = (event) => {
     const file = event.target.files[0];
     if (!file) {
       return;
@@ -628,7 +628,7 @@ const JazzGuitarTracker = () => {
           };
 
           // Process synchronously
-          setTeacherSessions(prev => [session, ...prev]);
+          setCollections(prev => [session, ...prev]);
 
           alert(`Successfully imported "${session.title}" from ${importedData.teacherName}`);
           
@@ -670,24 +670,24 @@ const JazzGuitarTracker = () => {
           });
 
           // Update state synchronously
-          setTeacherSessions(prev => [...processedSessions, ...prev]);
+          setCollections(prev => [...processedSessions, ...prev]);
           
           const seriesName = importedData.seriesName || 'Series';
           alert(`Successfully imported ${sessions.length} sessions from "${seriesName}" by ${importedData.teacherName || 'your teacher'}`);
           
         } else {
-          alert('This file does not appear to be a valid teacher session file.');
-          throw new Error('Invalid teacher session format');
+          alert('This file does not appear to be a valid collection file.');
+          throw new Error('Invalid collection format');
         }
         
       } catch (error) {
         console.error('Import error:', error);
-        let errorMessage = 'Error importing teacher session file. Please check the file format.';
+        let errorMessage = 'Error importing collection file. Please check the file format.';
         
         if (error.message === 'Invalid JSON format') {
           errorMessage = 'Invalid file format. Please make sure the file is a valid JSON.';
-        } else if (error.message === 'Invalid teacher session format') {
-          errorMessage = 'This file does not appear to be a valid teacher session file.';
+        } else if (error.message === 'Invalid collection format') {
+          errorMessage = 'This file does not appear to be a valid collection file.';
         } else if (error.message === 'No sessions found') {
           errorMessage = 'No sessions found in the imported file.';
         }
@@ -711,12 +711,12 @@ const JazzGuitarTracker = () => {
     reader.readAsText(file);
   };
 
-  const triggerTeacherSessionImport = () => {
+  const triggerCollectionImport = () => {
     // Reset any stuck states before starting new import
     if (isImporting) {
       setIsImporting(false);
     }
-    teacherSessionFileInputRef.current?.click(); // Use the new ref
+    collectionFileInputRef.current?.click(); // Use the new ref
   };
 
   const formatTime = (seconds) => {
@@ -1041,20 +1041,20 @@ const JazzGuitarTracker = () => {
     }
   };
 
-  // Teacher session utility functions
-  const getTeacherSessionStats = () => {
-    const completedSessions = teacherSessions.filter(s => s.completed);
-    const overdueSessions = teacherSessions.filter(s => 
+  // Collection utility functions
+  const getCollectionStats = () => {
+    const completedSessions = collections.filter(s => s.completed);
+    const overdueSessions = collections.filter(s => 
       s.status === SESSION_STATUS.PENDING && 
       new Date(s.dueDate) < new Date()
     );
     
     return {
-      total: teacherSessions.length,
+            total: collections.length,
       completed: completedSessions.length,
       overdue: overdueSessions.length,
-      completionRate: teacherSessions.length > 0 
-        ? Math.round((completedSessions.length / teacherSessions.length) * 100)
+      completionRate: collections.length > 0
+        ? Math.round((completedSessions.length / collections.length) * 100)
         : 0
     };
   };
@@ -1065,7 +1065,7 @@ const JazzGuitarTracker = () => {
       return DEPENDENCY_STATUS.AVAILABLE;
     }
     
-    const completedSessions = teacherSessions.filter(s => s.completed);
+    const completedSessions = collections.filter(s => s.completed);
     const completedIds = completedSessions.map(s => s.id);
     
     const unmetPrerequisites = session.prerequisites.filter(prereq => 
@@ -1080,7 +1080,7 @@ const JazzGuitarTracker = () => {
   };
 
   const getSeriesProgress = (seriesId) => {
-    const seriesSessions = teacherSessions.filter(s => s.seriesId === seriesId);
+    const seriesSessions = collections.filter(s => s.seriesId === seriesId);
     if (seriesSessions.length === 0) return SERIES_STATUS.NOT_STARTED;
     
     const completedSessions = seriesSessions.filter(s => s.completed);
@@ -1092,20 +1092,20 @@ const JazzGuitarTracker = () => {
   };
 
   const getSeriesSessions = (seriesId) => {
-    return teacherSessions
+    return collections
       .filter(s => s.seriesId === seriesId)
       .sort((a, b) => (a.seriesOrder || 0) - (b.seriesOrder || 0));
   };
 
   const getAvailableSessions = () => {
-    return teacherSessions.filter(session => {
+    return collections.filter(session => {
       const dependencyStatus = getSessionDependencyStatus(session);
       return dependencyStatus === DEPENDENCY_STATUS.AVAILABLE && !session.completed;
     });
   };
 
   const getLockedSessions = () => {
-    return teacherSessions.filter(session => {
+    return collections.filter(session => {
       const dependencyStatus = getSessionDependencyStatus(session);
       return dependencyStatus === DEPENDENCY_STATUS.LOCKED && !session.completed;
     });
@@ -1184,12 +1184,12 @@ const JazzGuitarTracker = () => {
     />;
   }
 
-  if (showTeacherSessions) {
-    return <TeacherSessionsView 
-      teacherSessions={teacherSessions}
-      onBack={() => setShowTeacherSessions(false)}
+  if (showCollections) {
+    return <CollectionsView 
+      collections={collections}
+      onBack={() => setShowCollections(false)}
       onSelectSession={(session) => {
-        // Convert teacher session tasks to practice session format
+        // Convert collection tasks to practice session format
         const practiceTasks = session.tasks.map(task => ({
           ...task,
           id: Date.now().toString() + Math.random(), // Generate new IDs
@@ -1199,16 +1199,16 @@ const JazzGuitarTracker = () => {
         
         // Create and start the session directly
         createSession(practiceTasks);
-        setShowTeacherSessions(false);
+        setShowCollections(false);
       }}
-      onExportSession={exportTeacherSession}
-      onImportSession={importTeacherSession}
+      onExportSession={exportCollection}
+      onImportSession={importCollection}
       setIsImporting={setIsImporting}
       isImporting={isImporting}
-      triggerImport={triggerTeacherSessionImport}
+      triggerImport={triggerCollectionImport}
       isDarkMode={isDarkMode}
       toggleDarkMode={toggleDarkMode}
-      getTeacherSessionStats={getTeacherSessionStats}
+      getCollectionStats={getCollectionStats}
       getSessionDependencyStatus={getSessionDependencyStatus}
       getSeriesProgress={getSeriesProgress}
       getSeriesSessions={getSeriesSessions}
@@ -1290,7 +1290,7 @@ const JazzGuitarTracker = () => {
 			</button>
 			
 			<button
-			  onClick={() => setShowTeacherSessions(true)}
+			  onClick={() => setShowCollections(true)}
 			  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
 			    isDarkMode 
 			      ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
@@ -1298,7 +1298,7 @@ const JazzGuitarTracker = () => {
 			  }`}
 			>
 			  <FileText size={16} />
-			  Teacher Sessions
+			  Collections
 			</button>
 			
 			<button
@@ -3641,8 +3641,8 @@ const SessionSummaryModal = ({
   );
 };
 
-const TeacherSessionsView = ({ 
-  teacherSessions, 
+const CollectionsView = ({ 
+  collections, 
   onBack, 
   onSelectSession, 
   onExportSession, 
@@ -3652,28 +3652,28 @@ const TeacherSessionsView = ({
   triggerImport,
   isDarkMode, 
   toggleDarkMode,
-  getTeacherSessionStats,
+  getCollectionStats,
   getSessionDependencyStatus,
   getSeriesProgress,
   getSeriesSessions,
   getAvailableSessions,
   getLockedSessions
 }) => {
-  // Local ref for teacher session file input
-  const localTeacherSessionFileInputRef = useRef(null);
+  // Local ref for collection file input
+  const localCollectionFileInputRef = useRef(null);
   
-  const stats = getTeacherSessionStats();
+  const stats = getCollectionStats();
   const availableSessions = getAvailableSessions();
   const lockedSessions = getLockedSessions();
-  const completedSessions = teacherSessions.filter(s => s.completed);
-  const overdueSessions = teacherSessions.filter(s => 
+  const completedSessions = collections.filter(s => s.completed);
+  const overdueSessions = collections.filter(s => 
     s.status === SESSION_STATUS.PENDING && 
     new Date(s.dueDate) < new Date()
   );
 
   // Group sessions by series
   const seriesGroups = {};
-  teacherSessions.forEach(session => {
+  collections.forEach(session => {
     if (session.seriesId) {
       if (!seriesGroups[session.seriesId]) {
         seriesGroups[session.seriesId] = [];
@@ -3692,7 +3692,7 @@ const TeacherSessionsView = ({
   // Local trigger function that uses the local ref
   const localTriggerImport = () => {
     console.log('Triggering file input...');
-    localTeacherSessionFileInputRef.current?.click();
+    localCollectionFileInputRef.current?.click();
   };
 
   return (
@@ -3703,7 +3703,7 @@ const TeacherSessionsView = ({
         <div className="flex justify-between items-center mb-6">
           <h1 className={`text-2xl font-bold transition-colors duration-300 ${
             isDarkMode ? 'text-white' : 'text-gray-800'
-          }`}>Teacher Sessions</h1>
+          }`}>Collections</h1>
           <div className="flex gap-3 items-center">
             {/* Dark Mode Toggle */}
             <DarkModeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} square />
@@ -3774,7 +3774,7 @@ const TeacherSessionsView = ({
         }`}>
           <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
             isDarkMode ? 'text-white' : 'text-gray-800'
-          }`}>Import Teacher Sessions</h3>
+          }`}>Import Collections</h3>
           <div className="space-y-3">
             <div className="flex gap-3 items-center">
               <button
@@ -3803,7 +3803,7 @@ const TeacherSessionsView = ({
               <p className={`text-sm transition-colors duration-300 ${
                 isDarkMode ? 'text-gray-400' : 'text-gray-600'
               }`}>
-                Import single sessions or complete series from your teacher
+                Import single sessions or complete series from collections
               </p>
             </div>
             <div className={`text-sm p-3 rounded transition-colors duration-300 ${
@@ -3811,7 +3811,7 @@ const TeacherSessionsView = ({
                 ? 'bg-blue-900/30 text-blue-300 border border-blue-700' 
                 : 'bg-blue-50 text-blue-700 border border-blue-200'
             }`}>
-              <strong>💡 Tip:</strong> Teachers can now send you a single file containing multiple lessons that will automatically appear in the correct order with proper dependencies.
+              <strong>💡 Tip:</strong> Collections can contain multiple lessons that will automatically appear in the correct order with proper dependencies.
             </div>
           </div>
         </div>
@@ -3821,13 +3821,13 @@ const TeacherSessionsView = ({
           <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
             isDarkMode ? 'text-white' : 'text-gray-800'
           }`}>
-            📚 All Assignments ({teacherSessions.length})
+            📚 All Collections ({collections.length})
           </h3>
-          {teacherSessions.length === 0 ? (
+                      {collections.length === 0 ? (
             <div className={`text-center py-8 transition-colors duration-300 ${
               isDarkMode ? 'text-gray-400' : 'text-gray-500'
             }`}>
-              <p>No assignments yet</p>
+              <p>No collections yet</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -3835,7 +3835,7 @@ const TeacherSessionsView = ({
               {(() => {
                 // Group all sessions by series
                 const seriesGroups = {};
-                teacherSessions.forEach(session => {
+                collections.forEach(session => {
                   if (session.seriesId) {
                     if (!seriesGroups[session.seriesId]) {
                       seriesGroups[session.seriesId] = [];
@@ -3856,7 +3856,7 @@ const TeacherSessionsView = ({
                     return (
                       <div key="standalone" className="space-y-4">
                         {sessions.map(session => (
-                          <TeacherSessionCard 
+                          <CollectionCard 
                             key={session.id}
                             session={session}
                             onSelect={() => onSelectSession(session)}
@@ -4071,39 +4071,11 @@ const TeacherSessionsView = ({
           </div>
         )}
 
-        {/* Completed Assignments */}
-        <div>
-          <h3 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
-            isDarkMode ? 'text-white' : 'text-gray-800'
-          }`}>
-            ✅ Completed Assignments ({completedSessions.length})
-          </h3>
-          {completedSessions.length === 0 ? (
-            <div className={`text-center py-8 transition-colors duration-300 ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>
-              <p>No completed assignments yet</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {completedSessions.map(session => (
-                <TeacherSessionCard 
-                  key={session.id}
-                  session={session}
-                  onSelect={() => onSelectSession(session)}
-                  onExport={() => onExportSession(session)}
-                  isDarkMode={isDarkMode}
-                  completed
-                />
-              ))}
-            </div>
-          )}
-        </div>
       </div>
       
-      {/* Teacher Session File Input - moved here so it's available when TeacherSessionsView is rendered */}
+      {/* Collection File Input - moved here so it's available when CollectionsView is rendered */}
       <input
-        ref={localTeacherSessionFileInputRef}
+        ref={localCollectionFileInputRef}
         type="file"
         accept=".json"
         onChange={(event) => {
@@ -4116,7 +4088,7 @@ const TeacherSessionsView = ({
   );
 };
 
-const TeacherSessionCard = ({ session, onSelect, onExport, isDarkMode, completed = false, dependencyStatus, locked = false }) => {
+const CollectionCard = ({ session, onSelect, onExport, isDarkMode, completed = false, dependencyStatus, locked = false }) => {
   const daysUntilDue = Math.ceil((new Date(session.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
   const isOverdue = daysUntilDue < 0;
   const isLocked = locked || dependencyStatus === DEPENDENCY_STATUS.LOCKED;
@@ -4141,7 +4113,7 @@ const TeacherSessionCard = ({ session, onSelect, onExport, isDarkMode, completed
           <div className={`text-sm mb-2 transition-colors duration-300 ${
             isDarkMode ? 'text-gray-400' : 'text-gray-600'
           }`}>
-            <div>👨‍🏫 {session.teacherName}</div>
+            <div>👤 {session.teacherName}</div>
             <div>📅 Due: {new Date(session.dueDate).toLocaleDateString()}</div>
             <div>⏱️ {session.totalTime} minutes • {session.tasks.length} tasks</div>
             {session.seriesOrder && (

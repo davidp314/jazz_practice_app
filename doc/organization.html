@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jazz Guitar Practice Tracker - System Structure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1em;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #34495e;
+            margin: 2em 0 1em 0;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5em;
+        }
+        
+        h3 {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 1.5em 0 0.5em 0;
+        }
+        
+        p {
+            margin-bottom: 1em;
+            color: #555;
+        }
+        
+        .intro {
+            font-size: 1.1em;
+            color: #666;
+            text-align: center;
+            margin-bottom: 3em;
+            padding: 0 2em;
+        }
+        
+        .hierarchy {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px 25px;
+            margin: 2em 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .hierarchy code {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: none;
+            color: #2c3e50;
+            font-size: 0.95em;
+        }
+        
+        .task-example {
+            background: #f1f8ff;
+            border: 1px solid #c6e2ff;
+            padding: 20px;
+            margin: 1.5em 0;
+            border-radius: 6px;
+        }
+        
+        .task-example h4 {
+            color: #0366d6;
+            margin-bottom: 0.5em;
+            font-size: 1.1em;
+        }
+        
+        .goals-list {
+            margin: 1em 0;
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .goals-list li {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+            position: relative;
+        }
+        
+        .goals-list li:before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            color: #666;
+        }
+        
+        .goals-list li.completed:before {
+            content: "☑";
+            color: #27ae60;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5em;
+            margin: 2em 0;
+        }
+        
+        .feature-card {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            padding: 1.5em;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h4 {
+            color: #3498db;
+            margin-bottom: 0.5em;
+            font-size: 1.1em;
+        }
+        
+        .feature-card p {
+            font-size: 0.95em;
+            margin-bottom: 0;
+        }
+        
+        .practice-flows {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 6px;
+            margin: 2em 0;
+        }
+        
+        .flow {
+            margin: 1em 0;
+            padding: 1em;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #3498db;
+        }
+        
+        .flow-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5em;
+        }
+        
+        .flow-steps {
+            font-family: 'SF Mono', Monaco, monospace;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jazz Guitar Practice Tracker</h1>
+        <p class="intro">A task-centered approach to structured jazz guitar practice with flexible goals and collaborative sharing.</p>
+        
+        <h2>Core Structure</h2>
+        
+        <div class="hierarchy">
+            <strong>Practice Organization Hierarchy:</strong><br><br>
+            <code>
+            Goals (flexible duration: one session to months)<br>
+            &nbsp;&nbsp;├── Practice Session 1<br>
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── Work on: Autumn Leaves<br>
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── Work on: Scale practice<br>
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── Work on: Repertoire review<br>
+            &nbsp;&nbsp;├── Practice Session 2<br>
+            &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── Work on: Autumn Leaves (continued)<br>
+            &nbsp;&nbsp;└── Practice Session 3<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Work on: Record performance video
+            </code>
+        </div>
+        
+        <h2>Tasks: The Fundamental Unit</h2>
+        
+        <p>Tasks are persistent practice objectives that evolve over time. Each task represents something you're working on that might span multiple practice sessions.</p>
+        
+        <div class="task-example">
+            <h4>Example Task: "Autumn Leaves"</h4>
+            <p><strong>Type:</strong> Jazz Standard &nbsp;|&nbsp; <strong>Key:</strong> Bb major &nbsp;|&nbsp; <strong>Status:</strong> Active</p>
+            
+            <p><strong>Goals:</strong></p>
+            <ul class="goals-list">
+                <li class="completed">Learn basic chord progression</li>
+                <li class="completed">Practice shell voicings</li>
+                <li>Work on arpeggios in bridge section</li>
+                <li>Practice improvisation over changes</li>
+                <li>Record performance video</li>
+            </ul>
+            
+            <p><strong>Practice Details:</strong> iReal Pro backing track, Medium Swing, Focus on voice leading</p>
+        </div>
+        
+        <h3>Task Types</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Jazz Standards</h4>
+                <p>Traditional jazz compositions with suggested goal templates (chord progressions, scales, improvisation, etc.)</p>
+            </div>
+            <div class="feature-card">
+                <h4>Repertoire</h4>
+                <p>Any completed piece that needs maintenance - jazz standards, classical pieces, technical exercises</p>
+            </div>
+            <div class="feature-card">
+                <h4>Other Work</h4>
+                <p>Technical exercises, transcriptions, theory study, equipment practice</p>
+            </div>
+        </div>
+        
+        <h3>Flexible Goals</h3>
+        <p>Instead of rigid step-by-step algorithms, tasks have customizable goals. When creating jazz standard tasks, users can choose from common goal templates or create their own:</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Beginner Template</h4>
+                <p>Basic chord progression → Melody → Combine → Performance</p>
+            </div>
+            <div class="feature-card">
+                <h4>Intermediate Template</h4>
+                <p>Shell voicings → Scales → Voice leading → Improvisation → Performance</p>
+            </div>
+            <div class="feature-card">
+                <h4>Custom Goals</h4>
+                <p>Create specific objectives tailored to your learning needs and teacher's approach</p>
+            </div>
+        </div>
+        
+        <h2>Practice Sessions</h2>
+        
+        <p>A Practice Session represents a single sitting at your instrument - what you actually do when you sit down to practice. Sessions consist of work on multiple tasks and can last anywhere from 20 minutes to several hours.</p>
+        
+        <div class="task-example">
+            <h4>Example Practice Session: "Tuesday Evening Practice"</h4>
+            <p><strong>Total Time:</strong> 60 minutes &nbsp;|&nbsp; <strong>Date:</strong> January 15, 2025</p>
+            
+            <p><strong>Work on tasks in this session:</strong></p>
+            <ul class="goals-list">
+                <li>Autumn Leaves - work on shell voicings (25 min)</li>
+                <li>Scale warmups - major scales (15 min)</li>
+                <li>Blue Bossa - repertoire review (10 min)</li>
+                <li>Metronome practice - timing exercises (10 min)</li>
+            </ul>
+            
+            <p><strong>Session Focus:</strong> Voice leading and rhythm</p>
+        </div>
+        
+        <h3>Session Characteristics</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Task Persistence</h4>
+                <p>The same task (like "Autumn Leaves") appears across multiple sessions as you dedicate time to working toward its goals</p>
+            </div>
+            <div class="feature-card">
+                <h4>Time Management</h4>
+                <p>Allocate time to work on each task, with flexible overtime tracking when you're in the zone</p>
+            </div>
+            <div class="feature-card">
+                <h4>Session Notes</h4>
+                <p>Record discoveries, challenges, and breakthroughs while working on each task during practice</p>
+            </div>
+            <div class="feature-card">
+                <h4>Progress Tracking</h4>
+                <p>Mark task goals as completed during the session based on your work, updating your overall progress</p>
+            </div>
+        </div>
+        
+        <h2>Goals</h2>
+        
+        <p>Goals are overarching objectives that provide direction and motivation for your practice. They span multiple practice sessions and can range from short-term projects to long-term musical development.</p>
+        
+        <div class="task-example">
+            <h4>Example Goal: "Master Autumn Leaves for Jazz Ensemble Audition"</h4>
+            <p><strong>Target Date:</strong> March 15, 2025 &nbsp;|&nbsp; <strong>Priority:</strong> High &nbsp;|&nbsp; <strong>Status:</strong> In Progress</p>
+            
+            <p><strong>Success Criteria:</strong></p>
+            <ul class="goals-list">
+                <li class="completed">Play melody and chords confidently</li>
+                <li class="completed">Demonstrate solid voice leading</li>
+                <li>Improvise coherently over the changes</li>
+                <li>Perform at 140 BPM with backing track</li>
+                <li>Record audition video</li>
+            </ul>
+            
+            <p><strong>Associated Tasks:</strong> Autumn Leaves, ii-V-I exercises, Bebop scale practice</p>
+            <p><strong>Progress:</strong> 2 of 5 criteria completed, 8 practice sessions logged</p>
+        </div>
+        
+        <h3>Goal Information</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Objective & Timeline</h4>
+                <p>Clear description of what you want to achieve and when, with flexible duration from days to months</p>
+            </div>
+            <div class="feature-card">
+                <h4>Success Criteria</h4>
+                <p>Specific, measurable outcomes that define goal completion - performance standards, technique milestones, repertoire additions</p>
+            </div>
+            <div class="feature-card">
+                <h4>Associated Tasks</h4>
+                <p>Link existing tasks to the goal, showing how daily practice connects to bigger objectives</p>
+            </div>
+            <div class="feature-card">
+                <h4>Priority & Context</h4>
+                <p>Importance level, motivation, and context (gig preparation, lesson assignment, personal growth)</p>
+            </div>
+        </div>
+        
+        <h3>Goal Tracking</h3>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Progress Metrics</h4>
+                <p>Completion percentage, time invested, practice sessions dedicated to goal-related tasks</p>
+            </div>
+            <div class="feature-card">
+                <h4>Milestone Recognition</h4>
+                <p>Celebrate achievements along the way - first clean playthrough, successful improvisation, performance readiness</p>
+            </div>
+            <div class="feature-card">
+                <h4>Reflection Notes</h4>
+                <p>Record insights, challenges overcome, and lessons learned throughout the goal journey</p>
+            </div>
+            <div class="feature-card">
+                <h4>Accountability</h4>
+                <p>Due date reminders, progress reports, and motivation tracking to maintain momentum</p>
+            </div>
+        </div>
+        
+        <h2>Practice Approaches</h2>
+        
+        <div class="practice-flows">
+            <div class="flow">
+                <div class="flow-title">Quick Practice Session</div>
+                <div class="flow-steps">Start Session → Select tasks to work on → Optional focus → Practice</div>
+                <p>Minimal planning for spontaneous practice. Select tasks to work on and optionally set a session focus to encourage intentionality without being pushy.</p>
+            </div>
+            
+            <div class="flow">
+                <div class="flow-title">Goal-Based Practice</div>
+                <div class="flow-steps">Create Goal → Plan Sessions → Execute Sessions → Complete Goal</div>
+                <p>Structured approach for working toward specific objectives over days, weeks, or months.</p>
+            </div>
+            
+            <div class="flow">
+                <div class="flow-title">Package-Based Practice</div>
+                <div class="flow-steps">Import Package → Follow Session Sequence → Complete Package</div>
+                <p>Use pre-designed practice curricula from teachers or other musicians.</p>
+            </div>
+        </div>
+        
+        <h2>Practice Packages</h2>
+        
+        <p>Groups of related practice sessions that can be shared between users. Anyone can create packages - teachers assigning work, advanced players sharing transcription studies, or personal practice curricula.</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>Teacher Assignments</h4>
+                <p>Multi-session curricula with dependencies, due dates, and progress tracking</p>
+            </div>
+            <div class="feature-card">
+                <h4>Community Content</h4>
+                <p>Shared practice sequences for specific techniques, styles, or repertoire</p>
+            </div>
+            <div class="feature-card">
+                <h4>Personal Programs</h4>
+                <p>Self-created practice series for focused skill development</p>
+            </div>
+        </div>
+        
+        <h2>Key Design Principles</h2>
+        
+        <p><strong>Flexible Structure:</strong> Accommodates different learning styles from spontaneous practice to rigid curriculum following.</p>
+        
+        <p><strong>Task Persistence:</strong> Practice objectives evolve over multiple sessions, reflecting how real learning works.</p>
+        
+        <p><strong>Goal Customization:</strong> No rigid algorithms - adapt objectives to your needs and teacher's approach.</p>
+        
+        <p><strong>Collaborative Learning:</strong> Share practice sequences and learn from other musicians' approaches.</p>
+        
+        <p><strong>Progressive Enhancement:</strong> Start simple, add structure and detail as you see value.</p>
+    </div>
+</body>
+</html>
