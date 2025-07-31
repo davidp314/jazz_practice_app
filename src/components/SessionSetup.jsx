@@ -135,7 +135,7 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
     setSessionTasks(sessionTasks.map(task =>
       task.id === taskId ? { 
         ...task, 
-        timeAllocated: newTime === '' ? '' : parseInt(newTime) || 0 
+        timeAllocated: newTime === '' ? 0 : parseInt(newTime) || 0 
       } : task
     ));
   };

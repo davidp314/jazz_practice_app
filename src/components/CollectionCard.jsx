@@ -1,11 +1,13 @@
 import React from 'react';
 import { Play, Download } from 'lucide-react';
-import { DEPENDENCY_STATUS } from "../constants";
+
 
 const CollectionCard = ({ session, onSelect, onExport, isDarkMode, completed = false, dependencyStatus, locked = false }) => {
-  const daysUntilDue = Math.ceil((new Date(session.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
-  const isOverdue = daysUntilDue < 0;
-  const isLocked = locked || dependencyStatus === DEPENDENCY_STATUS.LOCKED;
+  // Handle missing dueDate
+  const dueDate = session.dueDate ? new Date(session.dueDate) : null;
+  const daysUntilDue = dueDate ? Math.ceil((dueDate - new Date()) / (1000 * 60 * 60 * 24)) : null;
+  const isOverdue = daysUntilDue !== null && daysUntilDue < 0;
+  const isLocked = locked || dependencyStatus === 'locked';
   
   return (
     <div className={`p-4 rounded-lg border transition-all duration-300 ${
@@ -28,7 +30,7 @@ const CollectionCard = ({ session, onSelect, onExport, isDarkMode, completed = f
                   ? (isDarkMode ? 'text-red-300' : 'text-red-800')
                   : (isDarkMode ? 'text-white' : 'text-gray-800')
           }`}>
-            {session.name}
+            {session.name || 'Untitled Session'}
           </h4>
           <p className={`text-sm transition-colors duration-300 ${
             completed
@@ -39,7 +41,7 @@ const CollectionCard = ({ session, onSelect, onExport, isDarkMode, completed = f
                   ? (isDarkMode ? 'text-red-400' : 'text-red-600')
                   : (isDarkMode ? 'text-gray-400' : 'text-gray-600')
           }`}>
-            {session.description}
+            {session.description || 'No description available'}
           </p>
         </div>
         <div className="flex gap-2">
@@ -80,7 +82,7 @@ const CollectionCard = ({ session, onSelect, onExport, isDarkMode, completed = f
                 ? (isDarkMode ? 'text-red-400' : 'text-red-600')
                 : (isDarkMode ? 'text-gray-400' : 'text-gray-600')
         }`}>
-          {session.totalTime} min
+          {session.totalTime || 0} min
         </div>
         <div className={`transition-colors duration-300 ${
           completed
@@ -103,9 +105,13 @@ const CollectionCard = ({ session, onSelect, onExport, isDarkMode, completed = f
             <span className="flex items-center gap-1">
               ⚠️ {Math.abs(daysUntilDue)} days overdue
             </span>
-          ) : (
+          ) : daysUntilDue !== null ? (
             <span className="flex items-center gap-1">
               📅 Due in {daysUntilDue} days
+            </span>
+          ) : (
+            <span className="flex items-center gap-1">
+              📋 Available
             </span>
           )}
         </div>

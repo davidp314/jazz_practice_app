@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Upload } from 'lucide-react';
 import DarkModeToggle from "./DarkModeToggle";
 import CollectionCard from "./CollectionCard";
-import { SESSION_STATUS, SERIES_STATUS, DEPENDENCY_STATUS } from "../constants";
+
 
 const CollectionsView = ({ 
   collections, 
@@ -156,54 +156,104 @@ const CollectionsView = ({
         {/* Collections List */}
         <div className="space-y-6">
           {collections.map((collection) => {
-            const seriesSessions = getSeriesSessions(collection.id);
-            const seriesProgress = getSeriesProgress(collection.id);
-            
-            return (
-              <div key={collection.id} className={`p-6 rounded-lg border transition-colors duration-300 ${
-                isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
-              }`}>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className={`text-xl font-semibold mb-2 transition-colors duration-300 ${
-                      isDarkMode ? 'text-white' : 'text-gray-800'
-                    }`}>{collection.name}</h3>
-                    <p className={`text-sm transition-colors duration-300 ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                    }`}>{collection.description}</p>
+            // Handle both collection objects with sessions and individual session objects
+            if (collection.sessions && Array.isArray(collection.sessions)) {
+              // This is a collection with multiple sessions
+              const seriesSessions = getSeriesSessions(collection.id);
+              const seriesProgress = getSeriesProgress(collection.id);
+              
+              return (
+                <div key={collection.id} className={`p-6 rounded-lg border transition-colors duration-300 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
+                }`}>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className={`text-xl font-semibold mb-2 transition-colors duration-300 ${
+                        isDarkMode ? 'text-white' : 'text-gray-800'
+                      }`}>{collection.name}</h3>
+                      <p className={`text-sm transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>{collection.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>Progress</div>
+                      <div className={`text-lg font-bold transition-colors duration-300 ${
+                        isDarkMode ? 'text-white' : 'text-gray-800'
+                      }`}>{seriesProgress.completed}/{seriesProgress.total}</div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className={`text-sm transition-colors duration-300 ${
-                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                    }`}>Progress</div>
-                    <div className={`text-lg font-bold transition-colors duration-300 ${
-                      isDarkMode ? 'text-white' : 'text-gray-800'
-                    }`}>{seriesProgress.completed}/{seriesProgress.total}</div>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {seriesSessions.map((session) => {
-                    const dependencyStatus = getSessionDependencyStatus(session);
-                    const isCompleted = session.status === SESSION_STATUS.COMPLETED;
-                    const isLocked = dependencyStatus === DEPENDENCY_STATUS.LOCKED;
-                    
-                    return (
-                      <CollectionCard
-                        key={session.id}
-                        session={session}
-                        onSelect={() => onSelectSession(session)}
-                        onExport={() => onExportSession(session)}
-                        isDarkMode={isDarkMode}
-                        completed={isCompleted}
-                        dependencyStatus={dependencyStatus}
-                        locked={isLocked}
-                      />
-                    );
-                  })}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {seriesSessions.map((session) => {
+                      const dependencyStatus = getSessionDependencyStatus(session);
+                      const isCompleted = session.status === 'completed';
+                      const isLocked = dependencyStatus === 'locked';
+                      
+                      return (
+                        <CollectionCard
+                          key={session.id}
+                          session={session}
+                          onSelect={() => onSelectSession(session)}
+                          onExport={() => onExportSession(session)}
+                          isDarkMode={isDarkMode}
+                          completed={isCompleted}
+                          dependencyStatus={dependencyStatus}
+                          locked={isLocked}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
+              );
+            } else {
+              // This is an individual session
+              const dependencyStatus = getSessionDependencyStatus(collection);
+              const isCompleted = collection.status === 'completed';
+              const isLocked = dependencyStatus === 'locked';
+              
+              return (
+                <div key={collection.id} className={`p-6 rounded-lg border transition-colors duration-300 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
+                }`}>
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className={`text-xl font-semibold mb-2 transition-colors duration-300 ${
+                        isDarkMode ? 'text-white' : 'text-gray-800'
+                      }`}>{collection.name}</h3>
+                      <p className={`text-sm transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>{collection.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className={`text-sm transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>Status</div>
+                      <div className={`text-lg font-bold transition-colors duration-300 ${
+                        isCompleted 
+                          ? (isDarkMode ? 'text-green-400' : 'text-green-600')
+                          : (isDarkMode ? 'text-blue-400' : 'text-blue-600')
+                      }`}>
+                        {isCompleted ? 'Completed' : 'Available'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <CollectionCard
+                      session={collection}
+                      onSelect={() => onSelectSession(collection)}
+                      onExport={() => onExportSession(collection)}
+                      isDarkMode={isDarkMode}
+                      completed={isCompleted}
+                      dependencyStatus={dependencyStatus}
+                      locked={isLocked}
+                    />
+                  </div>
+                </div>
+              );
+            }
           })}
         </div>
 

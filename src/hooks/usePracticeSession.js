@@ -3,37 +3,121 @@ import { useState, useEffect, useRef } from 'react';
 export const usePracticeSession = () => {
   const [session, setSession] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
-  const [timeRemaining, setTimeRemaining] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [taskTimeSpent, setTaskTimeSpent] = useState({});
   const [sessionStarted, setSessionStarted] = useState(false);
   
+  // Individual timers for each task
+  const [taskTimers, setTaskTimers] = useState({});
+  
   const timerRef = useRef(null);
   const sessionStartTimeRef = useRef(null);
+  const currentTimingTaskRef = useRef(null);
+
+  // Timer effect - runs individual task timers
+  useEffect(() => {
+    if (isTimerRunning && currentTimingTaskRef.current) {
+      const runTimer = () => {
+        if (currentTimingTaskRef.current && isTimerRunning) {
+          const taskId = currentTimingTaskRef.current.id;
+          
+          setTaskTimers(prev => {
+            const currentTime = prev[taskId] || 0;
+            // Allow negative values to continue counting down past allocated time
+            const newTime = currentTime - 1;
+            
+            return {
+              ...prev,
+              [taskId]: newTime
+            };
+          });
+          
+          setTaskTimeSpent(prev => ({
+            ...prev,
+            [taskId]: (prev[taskId] || 0) + 1
+          }));
+          
+          // Schedule next tick
+          timerRef.current = setTimeout(runTimer, 1000);
+        }
+      };
+      
+      // Start the timer
+      runTimer();
+      
+      return () => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+        }
+      };
+    } else {
+      // Clear timer when not running
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+  }, [isTimerRunning, currentTimingTaskRef.current]);
 
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) {
-        clearInterval(timerRef.current);
+        clearTimeout(timerRef.current);
       }
     };
   }, []);
 
   const startSession = (sessionData) => {
     setSession(sessionData);
-    setActiveTask(null);
-    setTimeRemaining(0);
     setIsTimerRunning(false);
     setTaskTimeSpent({});
+    setTaskTimers({});
     setSessionStarted(false);
     sessionStartTimeRef.current = null;
+    currentTimingTaskRef.current = null;
+    
+    // Initialize individual timers for each task
+    if (sessionData && sessionData.tasks) {
+      const initialTimers = {};
+      sessionData.tasks.forEach(task => {
+        initialTimers[task.id] = (task.timeAllocated || 0) * 60;
+      });
+      setTaskTimers(initialTimers);
+    }
+    
+    // Auto-select the first task if available
+    if (sessionData && sessionData.tasks && sessionData.tasks.length > 0) {
+      const firstTask = sessionData.tasks[0];
+      setActiveTask(firstTask);
+    } else {
+      setActiveTask(null);
+    }
+  };
+
+  const selectTask = (task) => {
+    setActiveTask(task);
+    // No need to update timeRemaining since we now use individual task timers
   };
 
   const startTimer = (task) => {
-    setActiveTask(task);
-    const allocatedTime = task.timeAllocated * 60; // Convert to seconds
-    setTimeRemaining(allocatedTime);
+    // If no task is provided, use the currently active task
+    const taskToStart = task || activeTask;
+    if (!taskToStart) return;
+    
+    // Clear any existing timer first
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    
+    // Only select the task if it's different from the current one
+    if (!activeTask || activeTask.id !== taskToStart.id) {
+      selectTask(taskToStart);
+    }
+    
+    // Store which task we're timing
+    currentTimingTaskRef.current = taskToStart;
     
     if (!sessionStarted) {
       setSessionStarted(true);
@@ -41,58 +125,34 @@ export const usePracticeSession = () => {
     }
     
     setIsTimerRunning(true);
-    
-    // Clear existing timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    
-    // Start new timer
-    timerRef.current = setInterval(() => {
-      setTimeRemaining(prev => {
-        const newTime = prev - 1;
-        
-        // Update task time spent
-        setTaskTimeSpent(prev => ({
-          ...prev,
-          [task.id]: (prev[task.id] || 0) + 1
-        }));
-        
-        return newTime;
-      });
-    }, 1000);
   };
 
   const pauseTimer = () => {
     setIsTimerRunning(false);
     if (timerRef.current) {
-      clearInterval(timerRef.current);
+      clearTimeout(timerRef.current);
     }
   };
 
   const resumeTimer = () => {
     if (activeTask) {
+      // Clear any existing timer first
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      
+      // Store which task we're timing
+      currentTimingTaskRef.current = activeTask;
+      
       setIsTimerRunning(true);
-      timerRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          const newTime = prev - 1;
-          
-          // Update task time spent
-          setTaskTimeSpent(prev => ({
-            ...prev,
-            [activeTask.id]: (prev[activeTask.id] || 0) + 1
-          }));
-          
-          return newTime;
-        });
-      }, 1000);
     }
   };
 
   const endSession = () => {
     setIsTimerRunning(false);
     if (timerRef.current) {
-      clearInterval(timerRef.current);
+      clearTimeout(timerRef.current);
     }
     
     const sessionData = {
@@ -104,11 +164,12 @@ export const usePracticeSession = () => {
     // Reset state
     setSession(null);
     setActiveTask(null);
-    setTimeRemaining(0);
     setIsTimerRunning(false);
     setTaskTimeSpent({});
+    setTaskTimers({});
     setSessionStarted(false);
     sessionStartTimeRef.current = null;
+    currentTimingTaskRef.current = null;
     
     return sessionData;
   };
@@ -121,6 +182,14 @@ export const usePracticeSession = () => {
           task.id === taskId ? { ...task, ...updates } : task
         )
       }));
+      
+      // Update the task timer if timeAllocated changed
+      if (updates.timeAllocated !== undefined) {
+        setTaskTimers(prev => ({
+          ...prev,
+          [taskId]: (updates.timeAllocated || 0) * 60
+        }));
+      }
     }
   };
 
@@ -129,14 +198,30 @@ export const usePracticeSession = () => {
     return Math.floor((Date.now() - sessionStartTimeRef.current) / 1000);
   };
 
+  const getTotalTaskTimeSpent = () => {
+    // Sum up all time spent on individual tasks, including overtime
+    return Object.values(taskTimeSpent).reduce((sum, time) => sum + time, 0);
+  };
+
   const getTaskElapsedTime = (taskId) => {
     return taskTimeSpent[taskId] || 0;
+  };
+
+  const getTaskRemainingTime = (taskId) => {
+    // Return the actual remaining time, which can be negative
+    return taskTimers[taskId] || 0;
+  };
+
+  const getActiveTaskRemainingTime = () => {
+    if (!activeTask) return 0;
+    // Return the actual remaining time, which can be negative
+    return taskTimers[activeTask.id] || 0;
   };
 
   const getSessionProgress = () => {
     if (!session) return 0;
     
-    const totalAllocated = session.tasks.reduce((sum, task) => sum + (task.timeAllocated * 60), 0);
+    const totalAllocated = session.tasks.reduce((sum, task) => sum + ((task.timeAllocated || 0) * 60), 0);
     const totalSpent = Object.values(taskTimeSpent).reduce((sum, time) => sum + time, 0);
     
     return totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0;
@@ -145,7 +230,7 @@ export const usePracticeSession = () => {
   const getRemainingTaskTime = () => {
     if (!session) return 0;
     
-    const totalAllocated = session.tasks.reduce((sum, task) => sum + (task.timeAllocated * 60), 0);
+    const totalAllocated = session.tasks.reduce((sum, task) => sum + ((task.timeAllocated || 0) * 60), 0);
     const totalSpent = Object.values(taskTimeSpent).reduce((sum, time) => sum + time, 0);
     
     return Math.max(0, totalAllocated - totalSpent);
@@ -154,7 +239,7 @@ export const usePracticeSession = () => {
   const getCappedTotalTimeSpent = () => {
     if (!session) return 0;
     
-    const totalAllocated = session.tasks.reduce((sum, task) => sum + (task.timeAllocated * 60), 0);
+    const totalAllocated = session.tasks.reduce((sum, task) => sum + ((task.timeAllocated || 0) * 60), 0);
     const totalSpent = Object.values(taskTimeSpent).reduce((sum, time) => sum + time, 0);
     
     return Math.min(totalSpent, totalAllocated);
@@ -163,11 +248,12 @@ export const usePracticeSession = () => {
   return {
     session,
     activeTask,
-    timeRemaining,
     isTimerRunning,
     taskTimeSpent,
+    taskTimers,
     sessionStarted,
     startSession,
+    selectTask,
     startTimer,
     pauseTimer,
     resumeTimer,
@@ -175,8 +261,11 @@ export const usePracticeSession = () => {
     updateTask,
     getSessionElapsedTime,
     getTaskElapsedTime,
+    getTaskRemainingTime,
+    getActiveTaskRemainingTime,
     getSessionProgress,
     getRemainingTaskTime,
-    getCappedTotalTimeSpent
+    getCappedTotalTimeSpent,
+    getTotalTaskTimeSpent
   };
 }; 

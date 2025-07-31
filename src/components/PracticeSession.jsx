@@ -6,8 +6,9 @@ import { TASK_TYPES } from "../constants";
 const PracticeSession = ({ 
   session, 
   activeTask, 
-  timeRemaining, 
+  taskTimers,
   isTimerRunning, 
+  onSelectTask,
   onStartTimer, 
   onPauseTimer, 
   onResumeTimer, 
@@ -18,9 +19,12 @@ const PracticeSession = ({
   toggleDarkMode,
   getSessionElapsedTime,
   getTaskElapsedTime,
+  getTaskRemainingTime,
+  getActiveTaskRemainingTime,
   getSessionProgress,
   getRemainingTaskTime,
   getCappedTotalTimeSpent,
+  getTotalTaskTimeSpent,
   taskTimeSpent,
   sessionStarted
 }) => {
@@ -43,11 +47,19 @@ const PracticeSession = ({
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
         const prevIndex = currentTaskIndex > 0 ? currentTaskIndex - 1 : session.tasks.length - 1;
-        onStartTimer(session.tasks[prevIndex]);
+        // Only select the task, don't start the timer
+        if (isTimerRunning) {
+          onPauseTimer();
+        }
+        onSelectTask(session.tasks[prevIndex]);
       } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();
         const nextIndex = currentTaskIndex < session.tasks.length - 1 ? currentTaskIndex + 1 : 0;
-        onStartTimer(session.tasks[nextIndex]);
+        // Only select the task, don't start the timer
+        if (isTimerRunning) {
+          onPauseTimer();
+        }
+        onSelectTask(session.tasks[nextIndex]);
       } else if (e.key === ' ') {
         e.preventDefault();
         if (activeTask) {
@@ -62,18 +74,18 @@ const PracticeSession = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentTaskIndex, session.tasks, onStartTimer, activeTask, isTimerRunning, onPauseTimer, onResumeTimer, showNotePanel]);
+  }, [currentTaskIndex, session.tasks, onSelectTask, activeTask, isTimerRunning, onPauseTimer, onResumeTimer, showNotePanel]);
 
   const handleTaskClick = (task) => {
     if (isTimerRunning) {
       onPauseTimer();
     }
-    onStartTimer(task);
+    onSelectTask(task);
   };
 
   const handleTaskDoubleClick = (task) => {
     if (!activeTask || activeTask.id !== task.id) {
-      onStartTimer(task);
+      onSelectTask(task);
     }
     
     if (isTimerRunning) {
@@ -129,10 +141,10 @@ const PracticeSession = ({
             <div className={`text-right transition-colors duration-300 ${
               isDarkMode ? 'text-blue-400' : 'text-gray-600'
             }`}>
-              <div className="text-xs font-medium">Session Time</div>
+              <div className="text-xs font-medium">Total Task Time</div>
               <div className={`text-sm font-bold transition-colors duration-300 ${
                 isDarkMode ? 'text-blue-300' : 'text-blue-700'
-              }`}>{formatTime(getSessionElapsedTime())}</div>
+              }`}>{formatTime(getTotalTaskTimeSpent())}</div>
             </div>
           </div>
 
@@ -147,18 +159,18 @@ const PracticeSession = ({
                   isDarkMode ? 'text-blue-400' : 'text-gray-600'
                 }`}>Active Task Countdown</div>
                 <div className={`text-4xl font-bold transition-colors duration-300 ${
-                  timeRemaining < 0 
+                  getActiveTaskRemainingTime() < 0 
                     ? (isDarkMode ? 'text-orange-400' : 'text-orange-600')
                     : (isDarkMode ? 'text-blue-300' : 'text-blue-600')
                 }`}>
-                  {timeRemaining < 0 ? '-' : ''}{formatTime(Math.abs(timeRemaining))}
+                  {formatTime(getActiveTaskRemainingTime())}
                 </div>
               </div>
 
               <div className="flex justify-center gap-4">
                 {!isTimerRunning ? (
                   <button
-                    onClick={onResumeTimer}
+                    onClick={() => sessionStarted ? onResumeTimer() : onStartTimer()}
                     className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
                   >
                     <Play size={20} />
@@ -295,7 +307,7 @@ const PracticeSession = ({
                           ? (isDarkMode ? 'text-orange-400' : 'text-orange-600')
                           : (isDarkMode ? 'text-gray-400' : 'text-gray-500')
                     }`}>
-                      {task.type.replace('_', ' ')} • {formatTime(taskElapsed)} / {formatTime(taskAllocated)}
+                      {task.type.replace('_', ' ')} • {formatTime(getTaskRemainingTime(task.id))} / {formatTime(taskAllocated)}
                       {isOverTime && (
                         <span className="ml-1 font-medium">
                           (+{formatTime(taskElapsed - taskAllocated)} over)
@@ -336,7 +348,7 @@ const PracticeSession = ({
             isDarkMode ? 'text-gray-300' : 'text-gray-600'
           }`}>
             <span>Time Progress</span>
-            <span>{formatTime(getCappedTotalTimeSpent())} / {formatTime(session.totalTime * 60)}</span>
+            <span>{formatTime(getTotalTaskTimeSpent())} / {formatTime(session.totalTime * 60)}</span>
           </div>
           
           <div className={`w-full h-3 rounded-full transition-colors duration-300 ${
@@ -354,7 +366,7 @@ const PracticeSession = ({
                 sum + ((t.timeAllocated * 60) / totalAllocated) * 100, 0
               );
               
-              const fillWidth = Math.min((taskElapsed / taskAllocated) * 100, 100);
+              const fillWidth = (taskElapsed / taskAllocated) * 100;
               
               return (
                 <div key={task.id} style={{ 

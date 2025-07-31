@@ -20,9 +20,23 @@ export const getWeeklyStats = (practiceHistory) => {
 };
 
 export const getCollectionStats = (collections) => {
+  // Handle undefined or null collections
+  if (!collections || !Array.isArray(collections)) {
+    return {
+      totalCollections: 0,
+      completedSessions: 0
+    };
+  }
+
   const totalCollections = collections.length;
   const completedSessions = collections.reduce((sum, collection) => {
-    return sum + collection.sessions.filter(session => session.status === 'completed').length;
+    // Handle collection objects with sessions (series)
+    if (collection.sessions && Array.isArray(collection.sessions)) {
+      return sum + collection.sessions.filter(session => session.status === 'completed').length;
+    } else {
+      // Handle individual session objects
+      return sum + (collection.status === 'completed' ? 1 : 0);
+    }
   }, 0);
 
   return {
@@ -36,9 +50,23 @@ export const getSessionDependencyStatus = (session, collections) => {
     return 'available';
   }
 
+  // Handle undefined or null collections
+  if (!collections || !Array.isArray(collections)) {
+    return 'available';
+  }
+
+  // Flatten all sessions from collections to check dependencies
+  const allSessions = collections.flatMap(collection => {
+    if (collection.sessions && Array.isArray(collection.sessions)) {
+      return collection.sessions;
+    } else {
+      return [collection];
+    }
+  });
+
   // Check if all dependencies are completed
   const allDependenciesCompleted = session.dependencies.every(depId => {
-    const depSession = collections.flatMap(c => c.sessions).find(s => s.id === depId);
+    const depSession = allSessions.find(s => s.id === depId);
     return depSession && depSession.status === 'completed';
   });
 
@@ -46,32 +74,79 @@ export const getSessionDependencyStatus = (session, collections) => {
 };
 
 export const getSeriesProgress = (seriesId, collections) => {
+  // Handle undefined or null collections
+  if (!collections || !Array.isArray(collections)) {
+    return { completed: 0, total: 0 };
+  }
+
   const collection = collections.find(c => c.id === seriesId);
   if (!collection) return { completed: 0, total: 0 };
 
-  const total = collection.sessions.length;
-  const completed = collection.sessions.filter(session => session.status === 'completed').length;
-
-  return { completed, total };
+  // Handle collection objects with sessions
+  if (collection.sessions && Array.isArray(collection.sessions)) {
+    const total = collection.sessions.length;
+    const completed = collection.sessions.filter(session => session.status === 'completed').length;
+    return { completed, total };
+  } else {
+    // Handle individual session objects
+    return { completed: collection.status === 'completed' ? 1 : 0, total: 1 };
+  }
 };
 
 export const getSeriesSessions = (seriesId, collections) => {
+  // Handle undefined or null collections
+  if (!collections || !Array.isArray(collections)) {
+    return [];
+  }
+
   const collection = collections.find(c => c.id === seriesId);
-  return collection ? collection.sessions : [];
+  if (!collection) return [];
+
+  // Handle collection objects with sessions
+  if (collection.sessions && Array.isArray(collection.sessions)) {
+    return collection.sessions;
+  } else {
+    // Handle individual session objects
+    return [collection];
+  }
 };
 
 export const getAvailableSessions = (collections) => {
-  return collections.flatMap(collection => 
-    collection.sessions.filter(session => 
-      getSessionDependencyStatus(session, collections) === 'available'
-    )
+  // Handle undefined or null collections
+  if (!collections || !Array.isArray(collections)) {
+    return [];
+  }
+
+  // Flatten all sessions from collections
+  const allSessions = collections.flatMap(collection => {
+    if (collection.sessions && Array.isArray(collection.sessions)) {
+      return collection.sessions;
+    } else {
+      return [collection];
+    }
+  });
+
+  return allSessions.filter(session => 
+    getSessionDependencyStatus(session, collections) === 'available'
   );
 };
 
 export const getLockedSessions = (collections) => {
-  return collections.flatMap(collection => 
-    collection.sessions.filter(session => 
-      getSessionDependencyStatus(session, collections) === 'locked'
-    )
+  // Handle undefined or null collections
+  if (!collections || !Array.isArray(collections)) {
+    return [];
+  }
+
+  // Flatten all sessions from collections
+  const allSessions = collections.flatMap(collection => {
+    if (collection.sessions && Array.isArray(collection.sessions)) {
+      return collection.sessions;
+    } else {
+      return [collection];
+    }
+  });
+
+  return allSessions.filter(session => 
+    getSessionDependencyStatus(session, collections) === 'locked'
   );
 }; 

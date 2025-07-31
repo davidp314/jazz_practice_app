@@ -56,11 +56,12 @@ const JazzGuitarTracker = () => {
   const { 
     session: currentSession, 
     activeTask, 
-    timeRemaining, 
     isTimerRunning, 
     taskTimeSpent, 
+    taskTimers,
     sessionStarted,
     startSession,
+    selectTask,
     startTimer,
     pauseTimer,
     resumeTimer,
@@ -68,9 +69,12 @@ const JazzGuitarTracker = () => {
     updateTask,
     getSessionElapsedTime,
     getTaskElapsedTime,
+    getTaskRemainingTime,
+    getActiveTaskRemainingTime,
     getSessionProgress,
     getRemainingTaskTime,
-    getCappedTotalTimeSpent
+    getCappedTotalTimeSpent,
+    getTotalTaskTimeSpent
   } = usePracticeSession();
 
   // Migration function to handle the new comping step
@@ -210,8 +214,9 @@ const JazzGuitarTracker = () => {
   const handleImportCollection = async (event) => {
     const session = await importCollection(event);
     if (session) {
-      // Add to collections or handle as needed
-      console.log('Imported collection:', session);
+      // Add the imported session to collections
+      addCollection(session);
+      alert(`Successfully imported "${session.name}"`);
     }
   };
 
@@ -222,9 +227,20 @@ const JazzGuitarTracker = () => {
   };
 
   const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    // Handle NaN, undefined, or null values
+    if (isNaN(seconds) || seconds === undefined || seconds === null) {
+      return '0:00';
+    }
+    
+    // Ensure seconds is a number and handle negative values
+    const safeSeconds = Math.floor(Number(seconds));
+    const absSeconds = Math.abs(safeSeconds);
+    const mins = Math.floor(absSeconds / 60);
+    const secs = absSeconds % 60;
+    const timeString = `${mins}:${secs.toString().padStart(2, '0')}`;
+    
+    // Add negative sign for negative values
+    return safeSeconds < 0 ? `-${timeString}` : timeString;
   };
 
   const resetImportStates = () => {
@@ -306,7 +322,7 @@ const JazzGuitarTracker = () => {
       id: Date.now().toString(),
       date: new Date().toISOString(),
       tasks,
-      totalTime: tasks.reduce((sum, task) => sum + task.timeAllocated, 0),
+      totalTime: tasks.reduce((sum, task) => sum + (task.timeAllocated || 0), 0),
       completed: false
     };
     
@@ -430,8 +446,9 @@ const JazzGuitarTracker = () => {
         <PracticeSession 
           session={currentSession}
           activeTask={activeTask}
-          timeRemaining={timeRemaining}
+          taskTimers={taskTimers}
           isTimerRunning={isTimerRunning}
+          onSelectTask={selectTask}
           onStartTimer={startTimer}
           onPauseTimer={pauseTimer}
           onResumeTimer={resumeTimer}
@@ -442,9 +459,12 @@ const JazzGuitarTracker = () => {
           toggleDarkMode={toggleDarkMode}
           getSessionElapsedTime={getSessionElapsedTime}
           getTaskElapsedTime={getTaskElapsedTime}
+          getTaskRemainingTime={getTaskRemainingTime}
+          getActiveTaskRemainingTime={getActiveTaskRemainingTime}
           getSessionProgress={getSessionProgress}
           getRemainingTaskTime={getRemainingTaskTime}
           getCappedTotalTimeSpent={getCappedTotalTimeSpent}
+          getTotalTaskTimeSpent={getTotalTaskTimeSpent}
           taskTimeSpent={taskTimeSpent}
           sessionStarted={sessionStarted}
         />
