@@ -1,0 +1,32 @@
+{
+  "type": "practice_session",
+  "session": {
+    "name": "Practice Session 7/31/2025",
+    "tasks": [
+      {
+        "id": "17539998512460.038523351441194786",
+        "name": "Autumn Leaves",
+        "type": "standard",
+        "timeAllocated": 1,
+        "standardId": "1",
+        "focusStep": null,
+        "practiceNote": "",
+        "sessionNote": ""
+      },
+      {
+        "id": "17539998512460.4908881281911134",
+        "name": "Sight Reading",
+        "type": "other_work",
+        "timeAllocated": 2,
+        "otherWorkId": "1",
+        "practiceNote": "",
+        "sessionNote": ""
+      }
+    ],
+    "totalTime": 3,
+    "sessionFocus": "",
+    "completed": false
+  },
+  "exportDate": "2025-07-31T22:10:51.246Z",
+  "version": "1.0"
+}

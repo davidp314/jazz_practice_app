@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { X, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, ChevronDown, Download, Upload } from 'lucide-react';
 import DarkModeToggle from "./DarkModeToggle";
 import { TASK_TYPES, STANDARD_STEPS } from "../constants";
+import { exportIndividualSession, importIndividualSession } from "../utils/importExport";
 
 const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, onCancel, getRepertoireRotation, isDarkMode, toggleDarkMode }) => {
   const [sessionTasks, setSessionTasks] = useState([]);
@@ -19,6 +20,11 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
   const [showRepertoireChoice, setShowRepertoireChoice] = useState(false);
   const [lastSessionTemplate, setLastSessionTemplate] = useState(null);
   const [repertoireChoices, setRepertoireChoices] = useState({});
+  const [sessionName, setSessionName] = useState('');
+  const [sessionFocus, setSessionFocus] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  
+  const fileInputRef = useRef(null);
 
   const activeStandards = standards.filter(s => s.active);
   const activeOtherWork = otherWork.filter(w => w.active);
@@ -274,6 +280,60 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
     setRepertoireChoices({});
   };
 
+  const handleSaveTemplate = () => {
+    if (sessionTasks.length === 0) {
+      alert('Please add at least one task before saving a template.');
+      return;
+    }
+
+    const template = {
+      name: sessionName || `Practice Session ${new Date().toLocaleDateString()}`,
+      tasks: sessionTasks.map(task => ({
+        ...task,
+        id: Date.now().toString() + Math.random() // Generate new IDs for the template
+      })),
+      totalTime: sessionTasks.reduce((sum, task) => sum + task.timeAllocated, 0),
+      sessionFocus: sessionFocus,
+      // No date field - this makes it a template
+      completed: false
+    };
+
+    exportIndividualSession(template);
+  };
+
+  const handleImportTemplate = async (event) => {
+    setIsImporting(true);
+    try {
+      const importedSession = await importIndividualSession(event);
+      if (importedSession) {
+        // Generate new IDs for all tasks to avoid conflicts
+        const newTasks = importedSession.tasks.map(task => ({
+          ...task,
+          id: Date.now().toString() + Math.random()
+        }));
+        
+        setSessionTasks(newTasks);
+        setSessionName(importedSession.name || '');
+        setSessionFocus(importedSession.sessionFocus || '');
+        
+        // Clear the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    } catch (error) {
+      console.error('Error importing template:', error);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const triggerImport = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-6 min-h-screen transition-colors duration-300">
       <div className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
@@ -298,6 +358,48 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
             >
               Cancel
             </button>
+          </div>
+        </div>
+
+        {/* Session Name and Focus */}
+        <div className="mb-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className={`block text-sm font-medium mb-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              }`}>
+                Session Name (optional)
+              </label>
+              <input
+                type="text"
+                value={sessionName}
+                onChange={(e) => setSessionName(e.target.value)}
+                placeholder="e.g., Jazz Standards Focus, Technique Practice"
+                className={`w-full p-3 border rounded-lg transition-colors duration-300 ${
+                  isDarkMode 
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                    : 'bg-white border-gray-300 text-gray-800 placeholder-gray-500'
+                }`}
+              />
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-2 transition-colors duration-300 ${
+                isDarkMode ? 'text-gray-300' : 'text-gray-700'
+              }`}>
+                Session Focus (optional)
+              </label>
+              <input
+                type="text"
+                value={sessionFocus}
+                onChange={(e) => setSessionFocus(e.target.value)}
+                placeholder="e.g., Voice leading, Rhythm, Technique"
+                className={`w-full p-3 border rounded-lg transition-colors duration-300 ${
+                  isDarkMode 
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                    : 'bg-white border-gray-300 text-gray-800 placeholder-gray-500'
+                }`}
+              />
+            </div>
           </div>
         </div>
 
@@ -810,15 +912,61 @@ const SessionSetup = ({ standards, otherWork, practiceHistory, onCreateSession, 
           )}
         </div>
 
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={handleSaveTemplate}
+            disabled={sessionTasks.length === 0}
+            className={`px-6 py-3 rounded-lg font-semibold transition-colors duration-200 ${
+              isDarkMode 
+                ? 'bg-purple-700 text-white hover:bg-purple-600 disabled:bg-gray-600 disabled:text-gray-400' 
+                : 'bg-purple-600 text-white hover:bg-purple-700 disabled:bg-gray-300'
+            }`}
+          >
+            <Download size={16} className="mr-2" />
+            Save Template
+          </button>
+          <button
+            onClick={triggerImport}
+            disabled={isImporting}
+            className={`px-6 py-3 rounded-lg font-semibold transition-colors duration-200 ${
+              isDarkMode 
+                ? 'bg-blue-700 text-white hover:bg-blue-600 disabled:bg-gray-600 disabled:text-gray-400' 
+                : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300'
+            }`}
+          >
+            {isImporting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Importing...
+              </>
+            ) : (
+              <>
+                <Upload size={16} className="mr-2" />
+                Import Template
+              </>
+            )}
+          </button>
           <button
             onClick={handleCreateSession}
             disabled={sessionTasks.length === 0}
-            className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-300 font-semibold transition-colors duration-200"
+            className={`px-8 py-3 rounded-lg font-semibold transition-colors duration-200 ${
+              isDarkMode 
+                ? 'bg-green-700 text-white hover:bg-green-600 disabled:bg-gray-600 disabled:text-gray-400' 
+                : 'bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-300'
+            }`}
           >
             Start Practice Session
           </button>
         </div>
+
+        {/* Hidden file input for template import */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          onChange={handleImportTemplate}
+          style={{ display: 'none' }}
+        />
       </div>
 
       {/* Repertoire Choice Modal */}

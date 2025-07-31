@@ -113,7 +113,9 @@ const PracticeSession = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 min-h-screen transition-colors duration-300">
+    <div className={`max-w-4xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
+      isDarkMode ? 'bg-gray-900' : 'bg-white'
+    }`}>
       <div className={`rounded-lg shadow-lg p-6 transition-colors duration-300 ${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>

@@ -109,7 +109,17 @@ const JazzGuitarTracker = () => {
     const savedDarkMode = localStorage.getItem('darkMode');
     
     if (savedDarkMode !== null) {
-      setIsDarkMode(JSON.parse(savedDarkMode));
+      const darkMode = JSON.parse(savedDarkMode);
+      setIsDarkMode(darkMode);
+      
+      // Apply dark mode to document body on initial load
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.body.classList.remove('dark');
+      }
     }
     
     if (savedStandards && JSON.parse(savedStandards).length > 0) {
@@ -180,6 +190,15 @@ const JazzGuitarTracker = () => {
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    
+    // Apply dark mode to document body
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.classList.remove('dark');
+    }
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {
@@ -532,7 +551,9 @@ const JazzGuitarTracker = () => {
   const filteredOtherWork = getFilteredOtherWork();
 
   return (
-    <div className="max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300">
+    <div className={`max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
+      isDarkMode ? 'bg-gray-900' : 'bg-white'
+    }`}>
       <div className={`rounded-lg shadow-lg p-6 mb-6 transition-colors duration-300 ${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>

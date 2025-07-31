@@ -116,3 +116,62 @@ export const importCollection = async (event) => {
     return null;
   }
 }; 
+
+export const exportIndividualSession = (session) => {
+  const data = {
+    type: 'practice_session',
+    session,
+    exportDate: new Date().toISOString(),
+    version: '1.0'
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  
+  // Generate filename based on whether it's a template or completed session
+  const isTemplate = !session.date;
+  const sessionName = session.name || 'practice-session';
+  const dateStr = session.date ? session.date.split('T')[0] : new Date().toISOString().split('T')[0];
+  const filename = isTemplate 
+    ? `practice-session-${sessionName.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-template.json`
+    : `practice-session-${sessionName.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${dateStr}.json`;
+  
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+export const importIndividualSession = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return null;
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    
+    // Handle the new unified format
+    if (data.type === 'practice_session' && data.session) {
+      return data.session;
+    }
+    
+    // Handle legacy format (just a session object)
+    if (data.date && data.tasks && Array.isArray(data.tasks)) {
+      return data;
+    }
+    
+    // Handle template format (session without date)
+    if (data.tasks && Array.isArray(data.tasks) && !data.date) {
+      return data;
+    }
+    
+    throw new Error('Invalid practice session format');
+  } catch (error) {
+    console.error('Error importing practice session:', error);
+    alert('Error importing practice session. Please check the file format.');
+    return null;
+  }
+}; 

@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Dark mode background styling */
+html.dark {
+  background-color: #111827; /* gray-900 - darker background like the old version */
+}
+
+body.dark {
+  background-color: #111827; /* gray-900 - darker background like the old version */
+}
+
+html {
+  background-color: #ffffff;
+}
+
+body {
+  background-color: #ffffff;
+}
