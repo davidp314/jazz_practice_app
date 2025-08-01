@@ -57,18 +57,32 @@ const StandardCard = ({ standard, isDarkMode }) => {
 
       {/* Steps Grid */}
       <div className="grid grid-cols-4 gap-2 mt-3">
-        {STANDARD_STEPS.map((step, index) => (
-          <div
-            key={index}
-            className={`text-center p-2 rounded text-xs transition-colors duration-300 ${
-              standard.steps[index]
-                ? (isDarkMode ? 'bg-green-700 text-green-200' : 'bg-green-200 text-green-800')
-                : (isDarkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-100 text-gray-600')
-            }`}
-          >
-            {index + 1}
-          </div>
-        ))}
+        {STANDARD_STEPS.map((step, index) => {
+          // Create abbreviated step names for display
+          const abbreviatedStep = step
+            .replace('Play through with staple chords', 'Staple')
+            .replace('Learn shell chords', 'Shell')
+            .replace('Learn scales for each chord', 'Scales')
+            .replace('Learn arpeggios for each chord', 'Arpeggios')
+            .replace('Target the 3rds', '3rds')
+            .replace('Comping', 'Comping')
+            .replace('Practice improv', 'Improv')
+            .replace('Post performance video', 'Video');
+          
+          return (
+            <div
+              key={index}
+              className={`text-center p-2 rounded text-xs transition-colors duration-300 cursor-help ${
+                standard.steps[index]
+                  ? (isDarkMode ? 'bg-green-700 text-green-200' : 'bg-green-200 text-green-800')
+                  : (isDarkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-100 text-gray-600')
+              }`}
+              title={step}
+            >
+              {abbreviatedStep}
+            </div>
+          );
+        })}
       </div>
 
       {standard.lastWorkedOn && (
