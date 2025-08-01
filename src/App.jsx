@@ -126,23 +126,107 @@ const JazzGuitarTracker = () => {
       const parsedStandards = JSON.parse(savedStandards);
       setStandards(migrateStandardsData(parsedStandards));
     } else {
-      // Initialize with sample data
+      // Initialize with rich sample data
       const sampleStandards = [
         {
           id: '1',
           name: 'Autumn Leaves',
-          active: true,
+          type: 'standard',
+          steps: [true, true, true, true, true, true, false, false],
           completed: false,
-          steps: [false, false, false, false, false, false, false, false],
-          lastWorkedOn: null
+          active: true,
+          notes: 'Almost ready for performance! Need to work on improvisation over the bridge section. Shell chords are solid.',
+          lastWorkedOn: new Date('2025-07-10T14:30:00.000Z')
         },
         {
           id: '2',
-          name: 'All of Me',
+          name: 'All The Things You Are',
+          type: 'standard',
+          steps: [true, true, true, true, true, true, true, true],
+          completed: true,
           active: true,
+          notes: 'Completed and performance-ready! Great for demonstrating ii-V-I progressions. Posted video June 15th.',
+          lastWorkedOn: new Date('2025-07-08T16:45:00.000Z')
+        },
+        {
+          id: '3',
+          name: 'Blue Bossa',
+          type: 'standard',
+          steps: [true, true, true, true, true, true, true, true],
+          completed: true,
+          active: true,
+          notes: 'Perfect bossa nova example. Keep in rotation for Latin gigs. Students love this one.',
+          lastWorkedOn: new Date('2025-07-05T10:20:00.000Z')
+        },
+        {
+          id: '4',
+          name: 'Stella By Starlight',
+          type: 'standard',
+          steps: [true, true, false, false, false, false, false, false],
           completed: false,
-          steps: [false, false, false, false, false, false, false, false],
-          lastWorkedOn: null
+          active: true,
+          notes: 'Complex harmony - taking time with this one. Need to really understand the chord relationships before moving forward.',
+          lastWorkedOn: new Date('2025-07-09T19:15:00.000Z')
+        },
+        {
+          id: '5',
+          name: 'Take Five',
+          type: 'standard',
+          steps: [true, true, true, true, false, false, false, false],
+          completed: false,
+          active: true,
+          notes: '5/4 time signature is challenging but getting more comfortable. Great for teaching odd meters.',
+          lastWorkedOn: new Date('2025-07-07T13:45:00.000Z')
+        },
+        {
+          id: '6',
+          name: 'Body and Soul',
+          type: 'standard',
+          steps: [true, true, true, false, false, false, false, false],
+          completed: false,
+          active: false,
+          notes: 'Put on hold to focus on other priorities. Will return to this next month.',
+          lastWorkedOn: new Date('2025-06-20T11:30:00.000Z')
+        },
+        {
+          id: '7',
+          name: 'Girl from Ipanema',
+          type: 'standard',
+          steps: [true, true, true, true, true, true, true, true],
+          completed: true,
+          active: true,
+          notes: 'Essential bossa nova tune. Perfect for wedding gigs and teaching basic Latin feel.',
+          lastWorkedOn: new Date('2025-07-06T15:20:00.000Z')
+        },
+        {
+          id: '8',
+          name: 'Fly Me to the Moon',
+          type: 'standard',
+          steps: [true, true, true, true, true, false, false, false],
+          completed: false,
+          active: true,
+          notes: 'Great beginner standard. Working through different key centers and comping patterns.',
+          lastWorkedOn: new Date('2025-07-11T09:30:00.000Z')
+        },
+        {
+          id: '9',
+          name: 'Summertime',
+          type: 'standard',
+          steps: [true, false, false, false, false, false, false, false],
+          completed: false,
+          active: true,
+          notes: 'Just started - love the blues progression. Will be great for exploring different jazz styles.',
+          lastWorkedOn: new Date('2025-07-11T11:15:00.000Z')
+        },
+        {
+          id: '10',
+          name: 'Cherokee',
+          type: 'standard',
+          steps: [true, true, true, true, true, true, true, true],
+          completed: true,
+          active: false,
+          notes: 'Advanced standard completed last year. Occasionally review for technique maintenance.',
+          lastWorkedOn: new Date('2025-05-15T14:00:00.000Z')
         }
       ];
       setStandards(sampleStandards);
@@ -154,17 +238,93 @@ const JazzGuitarTracker = () => {
       const sampleOtherWork = [
         {
           id: '1',
-          name: 'Sight Reading',
-          description: 'Practice reading new music',
+          name: 'Galbraith Etude #5',
+          type: 'other_work',
+          description: 'Working on smooth voice leading and finger independence. Focus on measures 16-24.',
+          completed: false,
           active: true,
-          completed: false
+          lastWorkedOn: new Date('2025-07-10T08:45:00.000Z')
         },
         {
           id: '2',
-          name: 'Ear Training',
-          description: 'Interval recognition and chord identification',
+          name: 'Melodic Minor Scale System',
+          type: 'other_work',
+          description: 'Berklee fingering patterns - all positions across the neck. Currently on position 4.',
+          completed: false,
           active: true,
-          completed: false
+          lastWorkedOn: new Date('2025-07-09T07:30:00.000Z')
+        },
+        {
+          id: '3',
+          name: 'Pat Martino - Sunny Transcription',
+          type: 'other_work',
+          description: 'Learning Pat\'s solo note-for-note. Amazing use of octaves and chromatic approach tones.',
+          completed: false,
+          active: true,
+          lastWorkedOn: new Date('2025-07-08T20:15:00.000Z')
+        },
+        {
+          id: '4',
+          name: 'ii-V-I Licks in All Keys',
+          type: 'other_work',
+          description: 'Building comprehensive vocabulary. Completed C, F, Bb, Eb, Ab. Working on D major next.',
+          completed: false,
+          active: true,
+          lastWorkedOn: new Date('2025-07-11T10:00:00.000Z')
+        },
+        {
+          id: '5',
+          name: 'Chord Melody Arrangement - Yesterday',
+          type: 'other_work',
+          description: 'Solo guitar arrangement for wedding gigs. Working on smooth bass lines.',
+          completed: false,
+          active: true,
+          lastWorkedOn: new Date('2025-07-07T18:30:00.000Z')
+        },
+        {
+          id: '6',
+          name: 'Daily Chromatic Exercises',
+          type: 'other_work',
+          description: 'Spider exercises 1-4 for warm-up routine. Essential for maintaining finger strength.',
+          completed: true,
+          active: true,
+          lastWorkedOn: new Date('2025-07-11T07:00:00.000Z')
+        },
+        {
+          id: '7',
+          name: 'Altered Dominant Substitutions',
+          type: 'other_work',
+          description: 'Working on tritone substitutions and altered scales. Theory and practical application.',
+          completed: false,
+          active: true,
+          lastWorkedOn: new Date('2025-07-06T21:45:00.000Z')
+        },
+        {
+          id: '8',
+          name: 'Wes Montgomery Octave Technique',
+          type: 'other_work',
+          description: 'Learning the thumb technique and octave patterns from \'Four on Six\'.',
+          completed: false,
+          active: false,
+          lastWorkedOn: new Date('2025-06-25T16:20:00.000Z')
+        },
+        {
+          id: '9',
+          name: 'Brazilian Comping Patterns',
+          type: 'other_work',
+          description: 'Bossa nova and samba rhythms. Essential for Latin jazz gigs.',
+          completed: true,
+          active: true,
+          lastWorkedOn: new Date('2025-07-05T17:00:00.000Z')
+        },
+        {
+          id: '10',
+          name: 'Jazz Chord Voicings - Drop 2',
+          type: 'other_work',
+          description: 'Systematic study of drop 2 voicings across all string sets. Currently on string set 2-3-4-5.',
+          completed: false,
+          active: true,
+          lastWorkedOn: new Date('2025-07-08T12:30:00.000Z')
         }
       ];
       setOtherWork(sampleOtherWork);
@@ -172,6 +332,192 @@ const JazzGuitarTracker = () => {
     
     if (savedHistory) {
       setPracticeHistory(JSON.parse(savedHistory));
+    } else {
+      // Initialize with sample practice history
+      const sampleHistory = [
+        {
+          id: 'session_1',
+          date: new Date('2025-07-11T09:00:00.000Z'),
+          tasks: [
+            {
+              id: 'task1',
+              name: 'Daily Chromatic Exercises',
+              type: 'other_work',
+              timeAllocated: 10
+            },
+            {
+              id: 'task2',
+              name: 'Autumn Leaves',
+              type: 'standard',
+              timeAllocated: 25
+            },
+            {
+              id: 'task3',
+              name: 'ii-V-I Licks in All Keys',
+              type: 'other_work',
+              timeAllocated: 15
+            },
+            {
+              id: 'task4',
+              name: 'Fly Me to the Moon',
+              type: 'standard',
+              timeAllocated: 20
+            },
+            {
+              id: 'task5',
+              name: 'All The Things You Are (Repertoire)',
+              type: 'standard',
+              timeAllocated: 10
+            }
+          ],
+          totalTime: 80,
+          completed: true,
+          endTime: new Date('2025-07-11T10:20:00.000Z'),
+          taskTimeSpent: {
+            task1: 720,
+            task2: 1680,
+            task3: 900,
+            task4: 1200,
+            task5: 600
+          }
+        },
+        {
+          id: 'session_2',
+          date: new Date('2025-07-10T14:00:00.000Z'),
+          tasks: [
+            {
+              id: 'task6',
+              name: 'Stella By Starlight',
+              type: 'standard',
+              timeAllocated: 30
+            },
+            {
+              id: 'task7',
+              name: 'Galbraith Etude #5',
+              type: 'other_work',
+              timeAllocated: 20
+            },
+            {
+              id: 'task8',
+              name: 'Scale practice warmup',
+              type: 'one_off',
+              timeAllocated: 10
+            }
+          ],
+          totalTime: 60,
+          completed: true,
+          endTime: new Date('2025-07-10T15:00:00.000Z'),
+          taskTimeSpent: {
+            task6: 1950,
+            task7: 1200,
+            task8: 450
+          }
+        },
+        {
+          id: 'session_3',
+          date: new Date('2025-07-09T19:00:00.000Z'),
+          tasks: [
+            {
+              id: 'task9',
+              name: 'Melodic Minor Scale System',
+              type: 'other_work',
+              timeAllocated: 15
+            },
+            {
+              id: 'task10',
+              name: 'Take Five',
+              type: 'standard',
+              timeAllocated: 25
+            },
+            {
+              id: 'task11',
+              name: 'Pat Martino - Sunny Transcription',
+              type: 'other_work',
+              timeAllocated: 20
+            },
+            {
+              id: 'task12',
+              name: 'Blue Bossa (Repertoire)',
+              type: 'standard',
+              timeAllocated: 15
+            }
+          ],
+          totalTime: 75,
+          completed: true,
+          endTime: new Date('2025-07-09T20:15:00.000Z'),
+          taskTimeSpent: {
+            task9: 900,
+            task10: 1620,
+            task11: 1200,
+            task12: 780
+          }
+        },
+        {
+          id: 'session_4',
+          date: new Date('2025-07-08T16:30:00.000Z'),
+          tasks: [
+            {
+              id: 'task13',
+              name: 'Jazz Chord Voicings - Drop 2',
+              type: 'other_work',
+              timeAllocated: 20
+            },
+            {
+              id: 'task14',
+              name: 'Autumn Leaves',
+              type: 'standard',
+              timeAllocated: 30
+            },
+            {
+              id: 'task15',
+              name: 'Metronome practice',
+              type: 'one_off',
+              timeAllocated: 10
+            }
+          ],
+          totalTime: 60,
+          completed: true,
+          endTime: new Date('2025-07-08T17:30:00.000Z'),
+          taskTimeSpent: {
+            task13: 1200,
+            task14: 1980,
+            task15: 420
+          }
+        },
+        {
+          id: 'session_5',
+          date: new Date('2025-07-07T13:15:00.000Z'),
+          tasks: [
+            {
+              id: 'task16',
+              name: 'Chord Melody Arrangement - Yesterday',
+              type: 'other_work',
+              timeAllocated: 25
+            },
+            {
+              id: 'task17',
+              name: 'Take Five',
+              type: 'standard',
+              timeAllocated: 20
+            },
+            {
+              id: 'task18',
+              name: 'Girl from Ipanema (Repertoire)',
+              type: 'standard',
+              timeAllocated: 10
+            }
+          ],
+          totalTime: 55,
+          completed: true,
+          endTime: new Date('2025-07-07T14:10:00.000Z'),
+          taskTimeSpent: {
+            task16: 1500,
+            task17: 1320,
+            task18: 480
+          }
+        }
+      ];
+      setPracticeHistory(sampleHistory);
     }
   }, []);
 
