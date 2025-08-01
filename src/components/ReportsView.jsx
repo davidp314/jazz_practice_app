@@ -12,6 +12,7 @@ import {
   generateConsistencyData,
   generateStreakData
 } from "../utils/chartData";
+import { generateAndDownloadReport } from "../utils/reportGenerator";
 
 const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, toggleDarkMode, standards, otherWork }) => {
   const weeklyStats = getWeeklyStats();
@@ -45,6 +46,20 @@ const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, togg
             isDarkMode ? 'text-white' : 'text-gray-800'
           }`}>Practice Reports</h1>
           <div className="flex gap-3 items-center">
+            <button
+              onClick={() => {
+                if (window.confirm('Would you like to download a practice report?')) {
+                  generateAndDownloadReport(practiceHistory, standards, otherWork);
+                }
+              }}
+              className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
+                isDarkMode 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+            >
+              📄 Download Report
+            </button>
             <DarkModeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} square />
             <button
               onClick={onBack}
