@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import DarkModeToggle from "./DarkModeToggle";
 import CollectionCard from "./CollectionCard";
@@ -23,14 +23,27 @@ const CollectionsView = ({
   getLockedSessions
 }) => {
   const localCollectionFileInputRef = useRef(null);
+  const isImportingRef = useRef(isImporting);
+  useEffect(() => { isImportingRef.current = isImporting; }, [isImporting]);
   
   const stats = getCollectionStats();
   const availableSessions = getAvailableSessions();
   const lockedSessions = getLockedSessions();
 
   const handleImportClick = () => {
+    setIsImporting(true);
     if (localCollectionFileInputRef.current) {
       localCollectionFileInputRef.current.click();
+      // Timeout fallback for cancel
+      setTimeout(() => {
+        if (
+          isImportingRef.current &&
+          localCollectionFileInputRef.current &&
+          !localCollectionFileInputRef.current.files.length
+        ) {
+          setIsImporting(false);
+        }
+      }, 3000);
     }
   };
 
@@ -39,6 +52,7 @@ const CollectionsView = ({
     if (file) {
       onImportSession(event);
     }
+    setIsImporting(false); // always reset after file dialog closes
   };
 
   const localTriggerImport = () => {
@@ -137,13 +151,23 @@ const CollectionsView = ({
             </p>
             <button
               onClick={handleImportClick}
+              disabled={isImporting}
               className={`px-4 py-2 rounded-lg transition-colors duration-200 ${
-                isDarkMode
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                isImporting
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : isDarkMode
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
             >
-              Choose File
+              {isImporting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-2"></div>
+                  Importing...
+                </>
+              ) : (
+                'Choose File'
+              )}
             </button>
             <input
               ref={localCollectionFileInputRef}

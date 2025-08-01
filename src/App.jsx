@@ -125,6 +125,26 @@ const JazzGuitarTracker = () => {
     return result;
   };
 
+  // Monitor loading state changes for debugging
+  useEffect(() => {
+    console.log('isMainImporting changed to:', isMainImporting);
+  }, [isMainImporting]);
+
+  // Handle file picker cancellation with timeout
+  useEffect(() => {
+    if (isMainImporting) {
+      const timeoutId = setTimeout(() => {
+        // If still in loading state after 3 seconds, reset it
+        if (isMainImporting) {
+          console.log('Timeout reached, resetting loading state');
+          setIsMainImporting(false);
+        }
+      }, 3000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isMainImporting]);
+
   // Load data from localStorage on component mount
   useEffect(() => {
     const savedStandards = localStorage.getItem('jazzStandards');
@@ -565,6 +585,14 @@ const JazzGuitarTracker = () => {
   };
 
   const handleImportData = async (event) => {
+    console.log('handleImportData called', event.target.files);
+    // Check if there's actually a file selected
+    if (!event.target.files || event.target.files.length === 0) {
+      console.log('No file selected, resetting loading state');
+      setIsMainImporting(false);
+      return;
+    }
+    
     const data = await importData(event);
     if (data) {
       setStandards(migrateStandardsData(data.standards || []));
@@ -574,11 +602,14 @@ const JazzGuitarTracker = () => {
       if (data.streakSettings) {
         updateStreakSettings(data.streakSettings);
       }
-      setIsMainImporting(false);
     }
+    // Always reset the loading state, whether import was successful or cancelled
+    console.log('Resetting loading state');
+    setIsMainImporting(false);
   };
 
   const triggerImport = () => {
+    console.log('triggerImport called, setting loading state to true');
     setIsMainImporting(true);
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -590,12 +621,20 @@ const JazzGuitarTracker = () => {
   };
 
   const handleImportCollection = async (event) => {
+    // Check if there's actually a file selected
+    if (!event.target.files || event.target.files.length === 0) {
+      setIsImporting(false);
+      return;
+    }
+    
     const session = await importCollection(event);
     if (session) {
       // Add the imported session to collections
       addCollection(session);
       alert(`Successfully imported "${session.name}"`);
     }
+    // Always reset the loading state, whether import was successful or cancelled
+    setIsImporting(false);
   };
 
   const triggerCollectionImport = () => {
@@ -1046,6 +1085,11 @@ const JazzGuitarTracker = () => {
               type="file"
               accept=".json"
               onChange={handleImportData}
+              onClick={(e) => {
+                console.log('File input clicked');
+                // Reset the value so the same file can be selected again
+                e.target.value = '';
+              }}
               style={{ display: 'none' }}
             />
           </div>
