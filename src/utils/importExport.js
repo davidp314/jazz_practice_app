@@ -1,9 +1,10 @@
-export const exportData = (standards, otherWork, practiceHistory, collections) => {
+export const exportData = (standards, otherWork, practiceHistory, collections, streakSettings) => {
   const data = {
     standards,
     otherWork,
     practiceHistory,
     collections,
+    streakSettings,
     exportDate: new Date().toISOString(),
     version: '1.0'
   };
@@ -30,6 +31,15 @@ export const importData = async (event) => {
     // Validate the imported data structure
     if (!data.standards || !data.otherWork || !data.practiceHistory) {
       throw new Error('Invalid data format');
+    }
+    
+    // Ensure streakSettings exists (for backward compatibility)
+    if (!data.streakSettings) {
+      data.streakSettings = {
+        enabled: false,
+        dailyStreak: { enabled: false, goal: 7, graceDays: 2, graceDaysUsed: 0 },
+        weeklyStreak: { enabled: false, goal: 5, graceWeeks: 1, graceWeeksUsed: 0 }
+      };
     }
     
     return data;

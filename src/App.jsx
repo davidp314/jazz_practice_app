@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, ChevronDown, ChevronUp, Eye, EyeOff, Download, Upload } from 'lucide-react';
+import { Play, Pause, Plus, Clock, Check, X, BarChart3, FileText, ChevronDown, ChevronUp, Eye, EyeOff, Download, Upload, Settings as SettingsIcon } from 'lucide-react';
 import DarkModeToggle from "./components/DarkModeToggle";
 import FilterButtons from "./components/FilterButtons";
 import SectionSummary from "./components/SectionSummary";
@@ -17,11 +17,15 @@ import ReportsView from "./components/ReportsView";
 import SessionSummaryModal from "./components/SessionSummaryModal";
 import CollectionsView from "./components/CollectionsView";
 import CollectionCard from "./components/CollectionCard";
+import Settings from "./components/Settings";
 import { TASK_TYPES, STANDARD_STEPS, SESSION_STATUS, COLLECTION_TYPES, SERIES_STATUS, DEPENDENCY_STATUS } from "./constants";
 import { exportData, importData, exportCollection, importCollection } from "./utils/importExport";
 import { getWeeklyStats, getCollectionStats, getSessionDependencyStatus, getSeriesProgress, getSeriesSessions, getAvailableSessions, getLockedSessions } from "./utils/stats";
 import { useCollections } from "./hooks/useCollections";
 import { usePracticeSession } from "./hooks/usePracticeSession";
+import { useStreak } from "./hooks/useStreak";
+import StreakDisplay from "./components/StreakDisplay";
+import CelebrationModal from "./components/CelebrationModal";
 
 const JazzGuitarTracker = () => {
   // State management
@@ -38,11 +42,18 @@ const JazzGuitarTracker = () => {
   const [otherWorkExpanded, setOtherWorkExpanded] = useState(false);
   const [view, setView] = useState('overview');
   const [practiceHistory, setPracticeHistory] = useState([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode !== null) {
+      return JSON.parse(savedDarkMode);
+    }
+    return false;
+  });
   const [showSessionSummary, setShowSessionSummary] = useState(false);
   const [sessionSummaryData, setSessionSummaryData] = useState(null);
   const [isImporting, setIsImporting] = useState(false);
   const [isMainImporting, setIsMainImporting] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   
   // Collections state management
   const [showCollections, setShowCollections] = useState(false);
@@ -76,6 +87,17 @@ const JazzGuitarTracker = () => {
     getCappedTotalTimeSpent,
     getTotalTaskTimeSpent
   } = usePracticeSession();
+  const {
+    streakSettings,
+    streakData,
+    showCelebration,
+    achievement,
+    updateStreakSettings,
+    toggleStreakEnabled,
+    updateDailyStreakSettings,
+    updateWeeklyStreakSettings,
+    closeCelebration
+  } = useStreak(practiceHistory);
 
   // Migration function to handle the new comping step
   const migrateStandardsData = (standardsData) => {
@@ -106,21 +128,6 @@ const JazzGuitarTracker = () => {
     const savedStandards = localStorage.getItem('jazzStandards');
     const savedOtherWork = localStorage.getItem('otherWork');
     const savedHistory = localStorage.getItem('practiceHistory');
-    const savedDarkMode = localStorage.getItem('darkMode');
-    
-    if (savedDarkMode !== null) {
-      const darkMode = JSON.parse(savedDarkMode);
-      setIsDarkMode(darkMode);
-      
-      // Apply dark mode to document body on initial load
-      if (darkMode) {
-        document.documentElement.classList.add('dark');
-        document.body.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        document.body.classList.remove('dark');
-      }
-    }
     
     if (savedStandards && JSON.parse(savedStandards).length > 0) {
       const parsedStandards = JSON.parse(savedStandards);
@@ -552,7 +559,7 @@ const JazzGuitarTracker = () => {
   };
 
   const handleExportData = () => {
-    exportData(standards, otherWork, practiceHistory, collections);
+    exportData(standards, otherWork, practiceHistory, collections, streakSettings);
   };
 
   const handleImportData = async (event) => {
@@ -561,6 +568,10 @@ const JazzGuitarTracker = () => {
       setStandards(migrateStandardsData(data.standards || []));
       setOtherWork(data.otherWork || []);
       setPracticeHistory(data.practiceHistory || []);
+      // Import streak settings if available
+      if (data.streakSettings) {
+        updateStreakSettings(data.streakSettings);
+      }
       setIsMainImporting(false);
     }
   };
@@ -805,34 +816,37 @@ const JazzGuitarTracker = () => {
     />;
   }
 
-  if (view === 'session' && currentSession) {
+  // Session view - handle both active session and session summary modal
+  if (view === 'session' && (currentSession || showSessionSummary)) {
     return (
       <>
-        <PracticeSession 
-          session={currentSession}
-          activeTask={activeTask}
-          taskTimers={taskTimers}
-          isTimerRunning={isTimerRunning}
-          onSelectTask={selectTask}
-          onStartTimer={startTimer}
-          onPauseTimer={pauseTimer}
-          onResumeTimer={resumeTimer}
-          onEndSession={handleEndSession}
-          onUpdateTask={updateTask}
-          formatTime={formatTime}
-          isDarkMode={isDarkMode}
-          toggleDarkMode={toggleDarkMode}
-          getSessionElapsedTime={getSessionElapsedTime}
-          getTaskElapsedTime={getTaskElapsedTime}
-          getTaskRemainingTime={getTaskRemainingTime}
-          getActiveTaskRemainingTime={getActiveTaskRemainingTime}
-          getSessionProgress={getSessionProgress}
-          getRemainingTaskTime={getRemainingTaskTime}
-          getCappedTotalTimeSpent={getCappedTotalTimeSpent}
-          getTotalTaskTimeSpent={getTotalTaskTimeSpent}
-          taskTimeSpent={taskTimeSpent}
-          sessionStarted={sessionStarted}
-        />
+        {currentSession && (
+          <PracticeSession 
+            session={currentSession}
+            activeTask={activeTask}
+            taskTimers={taskTimers}
+            isTimerRunning={isTimerRunning}
+            onSelectTask={selectTask}
+            onStartTimer={startTimer}
+            onPauseTimer={pauseTimer}
+            onResumeTimer={resumeTimer}
+            onEndSession={handleEndSession}
+            onUpdateTask={updateTask}
+            formatTime={formatTime}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
+            getSessionElapsedTime={getSessionElapsedTime}
+            getTaskElapsedTime={getTaskElapsedTime}
+            getTaskRemainingTime={getTaskRemainingTime}
+            getActiveTaskRemainingTime={getActiveTaskRemainingTime}
+            getSessionProgress={getSessionProgress}
+            getRemainingTaskTime={getRemainingTaskTime}
+            getCappedTotalTimeSpent={getCappedTotalTimeSpent}
+            getTotalTaskTimeSpent={getTotalTaskTimeSpent}
+            taskTimeSpent={taskTimeSpent}
+            sessionStarted={sessionStarted}
+          />
+        )}
         {showSessionSummary && (
           <SessionSummaryModal
             isOpen={showSessionSummary}
@@ -908,7 +922,18 @@ const JazzGuitarTracker = () => {
             isDarkMode ? 'text-white' : 'text-gray-800'
           }`}>Jazz Guitar Practice Tracker</h1>
           <div className="flex gap-2 items-center">
-            <DarkModeToggle isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} square />
+            {/* Settings Button */}
+            <button
+              onClick={() => setShowSettings(true)}
+              className={`flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 ${
+                isDarkMode
+                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              title="Settings"
+            >
+              <SettingsIcon size={18} />
+            </button>
             
             <div className="flex gap-1 ml-2">
               <button
@@ -1003,13 +1028,18 @@ const JazzGuitarTracker = () => {
           }`}>
             <h3 className={`font-semibold transition-colors duration-300 ${
               isDarkMode ? 'text-blue-300' : 'text-blue-800'
-            }`}>This Week</h3>
+            }`}>Practice Activity</h3>
             <p className={`text-2xl font-bold transition-colors duration-300 ${
               isDarkMode ? 'text-blue-400' : 'text-blue-600'
             }`}>{weeklyStats.sessions} sessions</p>
             <p className={`text-sm transition-colors duration-300 ${
               isDarkMode ? 'text-blue-400' : 'text-blue-600'
             }`}>{weeklyStats.totalTime} minutes total</p>
+            <StreakDisplay 
+              streakData={streakData}
+              streakSettings={streakSettings}
+              isDarkMode={isDarkMode}
+            />
           </div>
           <div className={`p-4 rounded-lg transition-colors duration-300 ${
             isDarkMode ? 'bg-green-900/50 border border-green-700' : 'bg-green-50'
@@ -1250,6 +1280,27 @@ const JazzGuitarTracker = () => {
           </>
         )}
       </div>
+
+      {/* Settings Modal */}
+      <Settings 
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        isDarkMode={isDarkMode}
+        toggleDarkMode={toggleDarkMode}
+        streakSettings={streakSettings}
+        updateStreakSettings={updateStreakSettings}
+        toggleStreakEnabled={toggleStreakEnabled}
+        updateDailyStreakSettings={updateDailyStreakSettings}
+        updateWeeklyStreakSettings={updateWeeklyStreakSettings}
+      />
+
+      {/* Celebration Modal */}
+      <CelebrationModal
+        isOpen={showCelebration}
+        onClose={closeCelebration}
+        achievement={achievement}
+        isDarkMode={isDarkMode}
+      />
     </div>
   );
 };
