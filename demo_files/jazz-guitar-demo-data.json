@@ -438,6 +438,262 @@
         "dt23": 780,
         "dt24": 600
       }
+    },
+    {
+      "id": "demo_session_8",
+      "date": "2025-07-04T14:00:00.000Z",
+      "tasks": [
+        {
+          "id": "dt25",
+          "name": "Stella By Starlight",
+          "type": "standard",
+          "timeAllocated": 30
+        },
+        {
+          "id": "dt26",
+          "name": "Scale practice warmup",
+          "type": "one_off",
+          "timeAllocated": 15
+        },
+        {
+          "id": "dt27",
+          "name": "Blue Bossa (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-07-04T15:00:00.000Z",
+      "taskTimeSpent": {
+        "dt25": 1800,
+        "dt26": 900,
+        "dt27": 900
+      }
+    },
+    {
+      "id": "demo_session_9",
+      "date": "2025-07-03T19:30:00.000Z",
+      "tasks": [
+        {
+          "id": "dt28",
+          "name": "Take Five",
+          "type": "standard",
+          "timeAllocated": 25
+        },
+        {
+          "id": "dt29",
+          "name": "ii-V-I Licks in All Keys",
+          "type": "other_work",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt30",
+          "name": "Theory review session",
+          "type": "one_off",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-07-03T20:30:00.000Z",
+      "taskTimeSpent": {
+        "dt28": 1500,
+        "dt29": 1200,
+        "dt30": 900
+      }
+    },
+    {
+      "id": "demo_session_10",
+      "date": "2025-07-02T16:45:00.000Z",
+      "tasks": [
+        {
+          "id": "dt31",
+          "name": "Autumn Leaves",
+          "type": "standard",
+          "timeAllocated": 35
+        },
+        {
+          "id": "dt32",
+          "name": "Daily Chromatic Exercises",
+          "type": "other_work",
+          "timeAllocated": 10
+        },
+        {
+          "id": "dt33",
+          "name": "Cherokee (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-07-02T17:45:00.000Z",
+      "taskTimeSpent": {
+        "dt31": 2100,
+        "dt32": 600,
+        "dt33": 900
+      }
+    },
+    {
+      "id": "demo_session_11",
+      "date": "2025-07-01T10:15:00.000Z",
+      "tasks": [
+        {
+          "id": "dt34",
+          "name": "Summertime",
+          "type": "standard",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt35",
+          "name": "Melodic Minor Scale System",
+          "type": "other_work",
+          "timeAllocated": 25
+        },
+        {
+          "id": "dt36",
+          "name": "Metronome practice",
+          "type": "one_off",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-07-01T11:15:00.000Z",
+      "taskTimeSpent": {
+        "dt34": 1200,
+        "dt35": 1500,
+        "dt36": 900
+      }
+    },
+    {
+      "id": "demo_session_12",
+      "date": "2025-06-30T20:00:00.000Z",
+      "tasks": [
+        {
+          "id": "dt37",
+          "name": "Fly Me to the Moon",
+          "type": "standard",
+          "timeAllocated": 30
+        },
+        {
+          "id": "dt38",
+          "name": "Jazz Chord Voicings - Drop 2",
+          "type": "other_work",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt39",
+          "name": "All The Things You Are (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-06-30T21:00:00.000Z",
+      "taskTimeSpent": {
+        "dt37": 1800,
+        "dt38": 1200,
+        "dt39": 600
+      }
+    },
+    {
+      "id": "demo_session_13",
+      "date": "2025-06-29T14:30:00.000Z",
+      "tasks": [
+        {
+          "id": "dt40",
+          "name": "Stella By Starlight",
+          "type": "standard",
+          "timeAllocated": 25
+        },
+        {
+          "id": "dt41",
+          "name": "Pat Martino - Sunny Transcription",
+          "type": "other_work",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt42",
+          "name": "Scale practice warmup",
+          "type": "one_off",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-06-29T15:30:00.000Z",
+      "taskTimeSpent": {
+        "dt40": 1500,
+        "dt41": 1200,
+        "dt42": 900
+      }
+    },
+    {
+      "id": "demo_session_14",
+      "date": "2025-06-28T09:00:00.000Z",
+      "tasks": [
+        {
+          "id": "dt43",
+          "name": "Take Five",
+          "type": "standard",
+          "timeAllocated": 30
+        },
+        {
+          "id": "dt44",
+          "name": "ii-V-I Licks in All Keys",
+          "type": "other_work",
+          "timeAllocated": 20
+        },
+        {
+          "id": "dt45",
+          "name": "Blue Bossa (Repertoire)",
+          "type": "standard",
+          "timeAllocated": 10
+        }
+      ],
+      "totalTime": 60,
+      "completed": true,
+      "endTime": "2025-06-28T10:00:00.000Z",
+      "taskTimeSpent": {
+        "dt43": 1800,
+        "dt44": 1200,
+        "dt45": 600
+      }
+    },
+    {
+      "id": "demo_session_15",
+      "date": "2025-06-27T18:45:00.000Z",
+      "tasks": [
+        {
+          "id": "dt46",
+          "name": "Autumn Leaves",
+          "type": "standard",
+          "timeAllocated": 25
+        },
+        {
+          "id": "dt47",
+          "name": "Daily Chromatic Exercises",
+          "type": "other_work",
+          "timeAllocated": 10
+        },
+        {
+          "id": "dt48",
+          "name": "Theory review session",
+          "type": "one_off",
+          "timeAllocated": 15
+        }
+      ],
+      "totalTime": 50,
+      "completed": true,
+      "endTime": "2025-06-27T19:35:00.000Z",
+      "taskTimeSpent": {
+        "dt46": 1500,
+        "dt47": 600,
+        "dt48": 900
+      }
     }
   ],
   "exportDate": "2025-07-11T18:30:00.000Z",

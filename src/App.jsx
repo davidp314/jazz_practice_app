@@ -14,6 +14,7 @@ import OtherWorkCard from "./components/OtherWorkCard";
 import SessionSetup from "./components/SessionSetup";
 import PracticeSession from "./components/PracticeSession";
 import ReportsView from "./components/ReportsView";
+import TeacherReport from "./components/TeacherReport";
 import SessionSummaryModal from "./components/SessionSummaryModal";
 import CollectionsView from "./components/CollectionsView";
 import CollectionCard from "./components/CollectionCard";
@@ -42,6 +43,7 @@ const JazzGuitarTracker = () => {
   const [otherWorkExpanded, setOtherWorkExpanded] = useState(false);
   const [view, setView] = useState('overview');
   const [practiceHistory, setPracticeHistory] = useState([]);
+  const [showTeacherReport, setShowTeacherReport] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedDarkMode = localStorage.getItem('darkMode');
     if (savedDarkMode !== null) {
@@ -874,6 +876,20 @@ const JazzGuitarTracker = () => {
           />;
         }
 
+        if (showTeacherReport) {
+          return <TeacherReport
+            practiceHistory={practiceHistory}
+            standards={standards}
+            otherWork={otherWork}
+            onBack={() => setShowTeacherReport(false)}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
+            studentName="Ed Bickner"
+            teacherName="Prof. Michael Rodriguez"
+            reportPeriod="July 2025"
+          />;
+        }
+
   if (showCollections) {
     return <CollectionsView 
       collections={collections}
@@ -986,6 +1002,18 @@ const JazzGuitarTracker = () => {
               >
                 <BarChart3 size={16} />
                 Reports
+              </button>
+              
+              <button
+                onClick={() => setShowTeacherReport(true)}
+                className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  isDarkMode 
+                    ? 'bg-gray-700 text-white hover:bg-gray-600 border border-gray-600' 
+                    : 'bg-white text-slate-700 hover:bg-gray-100 border border-slate-200 shadow-sm'
+                }`}
+              >
+                <FileText size={16} />
+                Teacher Report
               </button>
               
               <button

@@ -18,3 +18,258 @@ html {
 body {
   background-color: #ffffff;
 }
+
+/* Print styles for TeacherReport PDF export */
+@media print {
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  /* Reset background colors for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Hide elements that shouldn't be printed */
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure proper page setup */
+  @page {
+    size: A4;
+    margin: 1in;
+  }
+  
+  /* TeacherReport specific print styles */
+  .teacher-report-print {
+    background: white !important;
+    color: black !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+  
+  .teacher-report-print * {
+    background: white !important;
+    color: black !important;
+    border-color: #e5e7eb !important;
+  }
+  
+  /* Header styling for print */
+  .teacher-report-print .report-header {
+    border-bottom: 2px solid #374151 !important;
+    padding-bottom: 1rem !important;
+    margin-bottom: 2rem !important;
+    page-break-after: avoid !important;
+  }
+  
+  .teacher-report-print .report-header h1 {
+    color: #111827 !important;
+    font-size: 2rem !important;
+    font-weight: bold !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .teacher-report-print .report-header .report-meta {
+    color: #6b7280 !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Tab navigation - show all content for print */
+  .teacher-report-print .tab-navigation {
+    display: none !important;
+  }
+  
+  .teacher-report-print .tab-content {
+    display: block !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .teacher-report-print .tab-content:not(:first-child) {
+    page-break-before: always !important;
+  }
+  
+  /* Metrics cards for print */
+  .teacher-report-print .metric-card {
+    border: 1px solid #d1d5db !important;
+    background: #f9fafb !important;
+    padding: 1rem !important;
+    border-radius: 0.5rem !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .teacher-report-print .metric-card h3 {
+    color: #111827 !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .teacher-report-print .metric-value {
+    color: #1f2937 !important;
+    font-size: 1.5rem !important;
+    font-weight: bold !important;
+  }
+  
+  .teacher-report-print .metric-label {
+    color: #6b7280 !important;
+    font-size: 0.75rem !important;
+  }
+  
+  /* Charts for print */
+  .teacher-report-print .chart-container {
+    border: 1px solid #d1d5db !important;
+    background: white !important;
+    padding: 1rem !important;
+    border-radius: 0.5rem !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .teacher-report-print .chart-container h3 {
+    color: #111827 !important;
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Progress bars for print */
+  .teacher-report-print .progress-bar {
+    background: #e5e7eb !important;
+    border-radius: 0.25rem !important;
+    height: 1rem !important;
+    overflow: hidden !important;
+  }
+  
+  .teacher-report-print .progress-fill {
+    background: #3b82f6 !important;
+    height: 100% !important;
+    border-radius: 0.25rem !important;
+  }
+  
+  /* Recommendations for print */
+  .teacher-report-print .recommendation-card {
+    border-left: 4px solid #d1d5db !important;
+    background: #f9fafb !important;
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .teacher-report-print .recommendation-priority {
+    color: #dc2626 !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+  }
+  
+  .teacher-report-print .recommendation-category {
+    background: #e5e7eb !important;
+    color: #374151 !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .teacher-report-print .recommendation-title {
+    color: #111827 !important;
+    font-weight: 600 !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  .teacher-report-print .recommendation-description {
+    color: #374151 !important;
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* Practice patterns for print */
+  .teacher-report-print .pattern-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0.5rem 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  .teacher-report-print .pattern-item:last-child {
+    border-bottom: none !important;
+  }
+  
+  .teacher-report-print .pattern-label {
+    color: #374151 !important;
+  }
+  
+  .teacher-report-print .pattern-value {
+    color: #111827 !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Section headers for print */
+  .teacher-report-print .section-header {
+    color: #111827 !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    margin: 1.5rem 0 1rem 0 !important;
+    padding-bottom: 0.5rem !important;
+    border-bottom: 2px solid #e5e7eb !important;
+  }
+  
+  /* Grid layouts for print */
+  .teacher-report-print .grid {
+    display: grid !important;
+    gap: 1rem !important;
+  }
+  
+  .teacher-report-print .grid-cols-1 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .teacher-report-print .grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .teacher-report-print .grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  
+  .teacher-report-print .grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  
+  /* Responsive grid for print */
+  @media print and (max-width: 8.5in) {
+    .teacher-report-print .grid-cols-2,
+    .teacher-report-print .grid-cols-3,
+    .teacher-report-print .grid-cols-4 {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  
+  /* Lists for print */
+  .teacher-report-print ul {
+    list-style-type: disc !important;
+    padding-left: 1.5rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  .teacher-report-print li {
+    color: #374151 !important;
+    margin-bottom: 0.25rem !important;
+  }
+  
+  /* Footer for print */
+  .teacher-report-print .report-footer {
+    margin-top: 2rem !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid #e5e7eb !important;
+    color: #6b7280 !important;
+    font-size: 0.75rem !important;
+    text-align: center !important;
+  }
+}
