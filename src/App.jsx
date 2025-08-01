@@ -862,15 +862,17 @@ const JazzGuitarTracker = () => {
     );
   }
 
-  if (view === 'reports') {
-    return <ReportsView 
-      practiceHistory={practiceHistory}
-      onBack={() => setView('overview')}
-      getWeeklyStats={() => getWeeklyStats(practiceHistory)}
-      isDarkMode={isDarkMode}
-      toggleDarkMode={toggleDarkMode}
-    />;
-  }
+          if (view === 'reports') {
+          return <ReportsView
+            practiceHistory={practiceHistory}
+            onBack={() => setView('overview')}
+            getWeeklyStats={() => getWeeklyStats(practiceHistory)}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
+            standards={standards}
+            otherWork={otherWork}
+          />;
+        }
 
   if (showCollections) {
     return <CollectionsView 
@@ -1022,19 +1024,31 @@ const JazzGuitarTracker = () => {
         </div>
 
         {/* Weekly Stats Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div className={`p-4 rounded-lg transition-colors duration-300 ${
             isDarkMode ? 'bg-blue-900/50 border border-blue-700' : 'bg-blue-50'
           }`}>
             <h3 className={`font-semibold transition-colors duration-300 ${
               isDarkMode ? 'text-blue-300' : 'text-blue-800'
             }`}>Practice Activity</h3>
-            <p className={`text-2xl font-bold transition-colors duration-300 ${
-              isDarkMode ? 'text-blue-400' : 'text-blue-600'
-            }`}>{weeklyStats.sessions} sessions</p>
-            <p className={`text-sm transition-colors duration-300 ${
-              isDarkMode ? 'text-blue-400' : 'text-blue-600'
-            }`}>{weeklyStats.totalTime} minutes total</p>
+            <div className="grid grid-cols-2 gap-4 mb-3">
+              <div>
+                <p className={`text-2xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                }`}>{weeklyStats.sessions} sessions</p>
+                <p className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                }`}>{weeklyStats.totalTime} minutes total</p>
+              </div>
+              <div>
+                <p className={`text-2xl font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                }`}>{weeklyStats.averageTime} min</p>
+                <p className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                }`}>average session</p>
+              </div>
+            </div>
             <StreakDisplay 
               streakData={streakData}
               streakSettings={streakSettings}
@@ -1046,35 +1060,30 @@ const JazzGuitarTracker = () => {
           }`}>
             <h3 className={`font-semibold transition-colors duration-300 ${
               isDarkMode ? 'text-green-300' : 'text-green-800'
-            }`}>Average Session</h3>
-            <p className={`text-2xl font-bold transition-colors duration-300 ${
-              isDarkMode ? 'text-green-400' : 'text-green-600'
-            }`}>{weeklyStats.averageTime} min</p>
-          </div>
-          <div className={`p-4 rounded-lg transition-colors duration-300 ${
-            isDarkMode ? 'bg-orange-900/50 border border-orange-700' : 'bg-orange-50'
-          }`}>
-            <h3 className={`font-semibold transition-colors duration-300 ${
-              isDarkMode ? 'text-orange-300' : 'text-orange-800'
-            }`}>Next Repertoire</h3>
-            <p className={`text-lg font-bold transition-colors duration-300 ${
-              isDarkMode ? 'text-orange-400' : 'text-orange-600'
-            }`}>
-              {nextRepertoire ? nextRepertoire.name : 'None active'}
-            </p>
-          </div>
-          <div className={`p-4 rounded-lg transition-colors duration-300 ${
-            isDarkMode ? 'bg-purple-900/50 border border-purple-700' : 'bg-purple-50'
-          }`}>
-            <h3 className={`font-semibold transition-colors duration-300 ${
-              isDarkMode ? 'text-purple-300' : 'text-purple-800'
-            }`}>Active Tasks</h3>
-            <p className={`text-2xl font-bold transition-colors duration-300 ${
-              isDarkMode ? 'text-purple-400' : 'text-purple-600'
-            }`}>{activeStandards.length + activeOtherWork.length}</p>
-            <p className={`text-sm transition-colors duration-300 ${
-              isDarkMode ? 'text-purple-400' : 'text-purple-600'
-            }`}>standards + other work</p>
+            }`}>Quick Stats</h3>
+            <div className="space-y-3">
+              <div>
+                <p className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-green-400' : 'text-green-600'
+                }`}>Next Repertoire</p>
+                <p className={`text-lg font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-green-400' : 'text-green-600'
+                }`}>
+                  {nextRepertoire ? nextRepertoire.name : 'None active'}
+                </p>
+              </div>
+              <div>
+                <p className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-green-400' : 'text-green-600'
+                }`}>Active Tasks</p>
+                <p className={`text-lg font-bold transition-colors duration-300 ${
+                  isDarkMode ? 'text-green-400' : 'text-green-600'
+                }`}>{activeStandards.length + activeOtherWork.length}</p>
+                <p className={`text-xs transition-colors duration-300 ${
+                  isDarkMode ? 'text-green-400' : 'text-green-600'
+                }`}>standards + other work</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

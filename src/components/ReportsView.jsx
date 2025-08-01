@@ -1,7 +1,19 @@
 import React from 'react';
 import DarkModeToggle from "./DarkModeToggle";
+import PracticeCalendar from "./charts/PracticeCalendar";
+import TaskDistributionChart from "./charts/TaskDistributionChart";
+import ProgressBarChart from "./charts/ProgressBarChart";
+import WeeklyTrendChart from "./charts/WeeklyTrendChart";
+import { 
+  generatePracticeCalendarData, 
+  generateTaskDistributionData, 
+  generateStandardsProgressData, 
+  generateWeeklyTrendData,
+  generateConsistencyData,
+  generateStreakData
+} from "../utils/chartData";
 
-const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, toggleDarkMode }) => {
+const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, toggleDarkMode, standards, otherWork }) => {
   const weeklyStats = getWeeklyStats();
   
   const last30Days = practiceHistory.filter(session => {
@@ -12,6 +24,14 @@ const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, togg
   });
 
   const monthlyTotal = last30Days.reduce((sum, session) => sum + session.totalTime, 0);
+
+  // Generate chart data
+  const calendarData = generatePracticeCalendarData(practiceHistory, 30);
+  const taskDistributionData = generateTaskDistributionData(practiceHistory, standards || [], otherWork || []);
+  const standardsProgressData = generateStandardsProgressData(standards || []);
+  const weeklyTrendData = generateWeeklyTrendData(practiceHistory, 8);
+  const consistencyData = generateConsistencyData(practiceHistory, 30);
+  const streakData = generateStreakData(practiceHistory);
 
   return (
     <div className={`max-w-6xl mx-auto p-6 min-h-screen transition-colors duration-300 ${
@@ -141,6 +161,88 @@ const ReportsView = ({ practiceHistory, onBack, getWeeklyStats, isDarkMode, togg
                 <span className={`font-semibold transition-colors duration-300 ${
                   isDarkMode ? 'text-white' : 'text-gray-800'
                 }`}>{practiceHistory.length > 0 ? Math.round(practiceHistory.reduce((sum, session) => sum + session.totalTime, 0) / practiceHistory.length) : 0} min</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Visualizations */}
+        <div className="mt-8">
+          <h3 className={`text-xl font-semibold mb-6 transition-colors duration-300 ${
+            isDarkMode ? 'text-white' : 'text-gray-800'
+          }`}>Practice Analytics</h3>
+          
+          {/* First row of charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <PracticeCalendar data={calendarData} isDarkMode={isDarkMode} />
+            <TaskDistributionChart data={taskDistributionData} isDarkMode={isDarkMode} />
+          </div>
+          
+          {/* Second row of charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <WeeklyTrendChart data={weeklyTrendData} isDarkMode={isDarkMode} />
+            <ProgressBarChart data={standardsProgressData} isDarkMode={isDarkMode} />
+          </div>
+          
+          {/* Consistency and Streak Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className={`p-6 rounded-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
+            }`}>
+              <h4 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-800'
+              }`}>Practice Consistency</h4>
+              <div className="text-center">
+                <div className={`text-3xl font-bold mb-2 transition-colors duration-300 ${
+                  isDarkMode ? 'text-green-400' : 'text-green-600'
+                }`}>
+                  {consistencyData.consistencyRate}%
+                </div>
+                <div className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  {consistencyData.practiceDays} of {consistencyData.totalDays} days
+                </div>
+              </div>
+            </div>
+            
+            <div className={`p-6 rounded-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
+            }`}>
+              <h4 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-800'
+              }`}>Current Streak</h4>
+              <div className="text-center">
+                <div className={`text-3xl font-bold mb-2 transition-colors duration-300 ${
+                  isDarkMode ? 'text-blue-400' : 'text-blue-600'
+                }`}>
+                  {streakData.currentStreak}
+                </div>
+                <div className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  days
+                </div>
+              </div>
+            </div>
+            
+            <div className={`p-6 rounded-lg border transition-colors duration-300 ${
+              isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'
+            }`}>
+              <h4 className={`text-lg font-semibold mb-4 transition-colors duration-300 ${
+                isDarkMode ? 'text-white' : 'text-gray-800'
+              }`}>Longest Streak</h4>
+              <div className="text-center">
+                <div className={`text-3xl font-bold mb-2 transition-colors duration-300 ${
+                  isDarkMode ? 'text-purple-400' : 'text-purple-600'
+                }`}>
+                  {streakData.longestStreak}
+                </div>
+                <div className={`text-sm transition-colors duration-300 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  days
+                </div>
               </div>
             </div>
           </div>
