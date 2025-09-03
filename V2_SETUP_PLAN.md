@@ -60,7 +60,7 @@ npm install
 ```bash
 # Terminal 1: Run V1 (if needed for reference)
 cd jazz-guitar-tracker-v1
-npm run dev  # Runs on port 5173
+npm run dev  # Runs on port 3000
 
 # Terminal 2: Run V2 during development
 cd jazz-guitar-tracker-v2  
@@ -121,9 +121,9 @@ jazz-guitar-tracker-v2/
 
 To avoid conflicts when running both apps:
 
-### V1 Port (Default)
-- Vite usually runs on `http://localhost:5173`
-- Keep V1 on its default port
+### V1 Port (Configured)
+- V1 now runs on `http://localhost:3000`
+- Configured in startup script
 
 ### V2 Port (Configured)
 If needed, configure V2 to use a different port in `vite.config.ts`:
@@ -207,8 +207,8 @@ npm run lint     # Check code quality
 npm run test     # Run tests (once set up)
 
 # Run both apps simultaneously
-cd jazz-guitar-tracker-v1 && npm run dev &  # V1 in background
-cd jazz-guitar-tracker-v2 && npm run dev    # V2 in foreground
+cd jazz-guitar-tracker-v1 && npm run dev &  # V1 on port 3000 in background
+cd jazz-guitar-tracker-v2 && npm run dev    # V2 on port 5174 in foreground
 ```
 
 This setup ensures a smooth, risk-free transition to the improved V2 architecture while maintaining full access to your current working app!

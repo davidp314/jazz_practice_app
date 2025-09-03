@@ -24,7 +24,7 @@ sleep 2
 
 # Start the development server
 echo "🌐 Starting development server..."
-echo "📍 Server will be available at: http://localhost:5173"
+echo "📍 Server will be available at: http://localhost:3000"
 echo "🔄 Hot reload is enabled - changes will auto-refresh"
 echo ""
 echo "🎉 Jazz Guitar Practice Tracker is starting up!"
@@ -32,5 +32,5 @@ echo "Press Ctrl+C to stop the server"
 echo ""
 
 # Start the dev server
-npm run dev
+npm run dev -- --port 3000
 
